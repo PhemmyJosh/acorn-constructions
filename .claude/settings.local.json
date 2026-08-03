@@ -2,7 +2,18 @@
   "permissions": {
     "allow": [
       "Bash(gh auth *)",
-      "Bash(npx --yes create-next-app@latest . --typescript --eslint --tailwind --app --src-dir --import-alias \"@/*\" --use-npm --no-turbopack)"
+      "Bash(npx --yes create-next-app@latest . --typescript --eslint --tailwind --app --src-dir --import-alias \"@/*\" --use-npm --no-turbopack)",
+      "Bash(gh repo *)",
+      "Bash(npm run *)",
+      "Bash(npm install *)",
+      "Bash(npm audit *)",
+      "Bash(npx tsc *)",
+      "Bash(node -e \"const pkg=require\\('./node_modules/lucide-react/package.json'\\); console.log\\(pkg.version\\)\")",
+      "Bash(node -e \"const icons=require\\('./node_modules/lucide-react/dist/lucide-react.cjs.js'\\); console.log\\(Object.keys\\(icons\\).filter\\(k=>/facebook|instagram/i.test\\(k\\)\\)\\)\")",
+      "Bash(npx eslint *)",
+      "Bash(curl -s -o /tmp/home.html -w \"%{http_code}\\\\n\" http://localhost:3001/)",
+      "Read(//tmp/**)",
+      "Bash(git add *)"
     ]
   }
 }
