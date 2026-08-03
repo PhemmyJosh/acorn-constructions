@@ -13,7 +13,10 @@
       "Bash(npx eslint *)",
       "Bash(curl -s -o /tmp/home.html -w \"%{http_code}\\\\n\" http://localhost:3001/)",
       "Read(//tmp/**)",
-      "Bash(git add *)"
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)",
+      "Bash(curl -s -o /tmp/about.html -w \"%{http_code}\\\\n\" http://localhost:3001/about)"
     ]
   }
 }
