@@ -6,9 +6,9 @@ import FinalCta from "@/components/home/FinalCta";
 import { projects } from "@/data/projects";
 
 export const metadata: Metadata = {
-  title: "Projects | Acorn Constructions",
+  title: "Projects | Acorn Construction",
   description:
-    "Browse a selection of Acorn Constructions' residential, commercial, and specialty projects.",
+    "Browse a selection of Acorn Construction's residential, light commercial, and post frame projects across Alberta and Saskatchewan.",
 };
 
 export default function ProjectsPage() {

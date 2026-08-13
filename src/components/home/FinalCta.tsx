@@ -11,8 +11,7 @@ export default function FinalCta() {
           Ready to Build Your Vision?
         </h2>
         <p className="max-w-xl text-base leading-relaxed text-amber-50 sm:text-lg">
-          Tell us about your project and we&apos;ll follow up with a clear,
-          no-pressure estimate.
+          &ldquo;{company.tagline}&rdquo;
         </p>
         <div className="mt-2 flex flex-col gap-4 sm:flex-row sm:items-center">
           <Link
@@ -21,6 +20,7 @@ export default function FinalCta() {
           >
             Get a Quote
           </Link>
+          {/* PLACEHOLDER — phone number needed from client */}
           <a
             href={company.phoneHref}
             className="flex items-center justify-center gap-2 text-lg font-semibold text-white"

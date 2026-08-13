@@ -18,7 +18,10 @@
       "Bash(git push *)",
       "Bash(curl -s -o /tmp/about.html -w \"%{http_code}\\\\n\" http://localhost:3001/about)",
       "Bash(curl -s -o /tmp/projects.html -w \"%{http_code}\\\\n\" http://localhost:3001/projects)",
-      "Bash(curl -s -o /tmp/contact.html -w \"%{http_code}\\\\n\" http://localhost:3001/contact)"
+      "Bash(curl -s -o /tmp/contact.html -w \"%{http_code}\\\\n\" http://localhost:3001/contact)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://localhost:3001/)",
+      "Bash(curl -s http://localhost:3000/ -o /tmp/home2.html)",
+      "Bash(curl -s http://localhost:3000/about -o /tmp/about2.html)"
     ]
   }
 }

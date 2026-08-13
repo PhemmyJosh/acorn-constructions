@@ -22,11 +22,11 @@ export async function generateMetadata({ params }: ServicePageProps): Promise<Me
   const service = getServiceBySlug(slug);
 
   if (!service) {
-    return { title: "Service Not Found | Acorn Constructions" };
+    return { title: "Service Not Found | Acorn Construction" };
   }
 
   return {
-    title: `${service.title} | Acorn Constructions`,
+    title: `${service.title} | Acorn Construction`,
     description: service.shortDescription,
   };
 }

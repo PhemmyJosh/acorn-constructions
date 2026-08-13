@@ -16,9 +16,9 @@ const oswald = Oswald({
 });
 
 export const metadata: Metadata = {
-  title: "Acorn Constructions | Residential & Commercial Builders",
+  title: "Acorn Construction | Residential, Commercial & Post Frame Builders",
   description:
-    "Acorn Constructions is a licensed and insured general contractor delivering residential, commercial, and specialty construction projects built to last.",
+    "Acorn Construction Ltd. is a Lloydminster, Alberta-based builder delivering residential, light commercial, and post frame construction across Alberta and Saskatchewan since 2011.",
 };
 
 export default function RootLayout({

@@ -1,19 +1,30 @@
 import Section from "@/components/ui/Section";
 import SectionHeading from "@/components/ui/SectionHeading";
-import { valueProps } from "@/data/valueProps";
+import { coreValues } from "@/data/coreValues";
 
-export default function WhyChooseUs() {
+interface CoreValuesProps {
+  eyebrow?: string;
+  title?: string;
+  description?: string;
+}
+
+export default function CoreValues({
+  eyebrow = "Our Core Values",
+  title = "Live the values, build the company",
+  description,
+}: CoreValuesProps) {
   return (
     <Section tone="dark">
       <SectionHeading
-        eyebrow="Why Choose Us"
-        title="Built on trust, delivered with precision"
+        eyebrow={eyebrow}
+        title={title}
+        description={description}
         tone="dark"
         align="center"
         className="mx-auto"
       />
-      <div className="mt-14 grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
-        {valueProps.map((value) => {
+      <div className="mt-14 grid gap-10 sm:grid-cols-2 lg:grid-cols-3">
+        {coreValues.map((value) => {
           const Icon = value.icon;
           return (
             <div key={value.title} className="flex flex-col items-start gap-4">

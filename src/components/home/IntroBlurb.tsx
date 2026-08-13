@@ -10,15 +10,15 @@ export default function IntroBlurb() {
           Who We Are
         </span>
         <h2 className="text-3xl font-semibold sm:text-4xl">
-          A builder that treats your project like its own.
+          From a one-man operation to multiple crews across two provinces
         </h2>
         <p className="text-base leading-relaxed text-stone-600 sm:text-lg">
-          Acorn Constructions is a licensed general contractor built on a
-          simple idea: do the work right, communicate honestly, and finish
-          what you start. For over a decade we&apos;ve partnered with
-          homeowners and business owners to plan, permit, and build projects
-          of every size, backed by an in-house team of tradespeople who take
-          the same care on a deck as they do on a ground-up commercial build.
+          Founded in 2011 by Mark Acorn, a Red Seal journeyman carpenter with
+          over two decades of wood frame construction experience, Acorn
+          Construction has grown from a one-man operation into multiple crews
+          working across Alberta and Saskatchewan. From single-family homes to
+          our largest project to date at 34,000 square feet, we bring the
+          same level of quality and attention to detail to every job.
         </p>
         <Link
           href="/about"

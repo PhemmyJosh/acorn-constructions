@@ -1,63 +1,67 @@
-import { Building2, Home, Wrench } from "lucide-react";
+import { Hammer, Layers, Warehouse } from "lucide-react";
 import { Service } from "@/types";
 
 export const services: Service[] = [
   {
-    slug: "residential-construction",
-    title: "Residential Construction",
+    slug: "residential-light-commercial-framing",
+    title: "Residential & Light Commercial Wood Frame Construction",
     shortDescription:
-      "Custom homes, additions, and full-scale renovations built around how you actually live.",
+      "Custom homes, additions, garages, shops, and light commercial framing — delivered with precision, structural integrity, and quality craftsmanship at every stage.",
     description: [
-      "From the first sketch to the final walkthrough, our residential team partners with homeowners to design and build spaces that fit real life. Whether you're starting from a bare lot or reimagining a home you already love, we manage every phase in-house so nothing gets lost between the drafting table and the job site.",
-      "We work in wood, stone, and steel with the same attention to detail, pairing modern building science with craftsmanship that's meant to last for generations.",
+      "We provide professional wood frame construction services for residential homes and light commercial buildings. From custom homes and additions to garages, shops, and small commercial structures, our team delivers precision framing, structural integrity, and quality workmanship at every stage of construction.",
     ],
-    icon: Home,
-    heroImage: "https://placehold.co/1600x900/1c1917/e7e5e4?text=Residential+Construction",
+    icon: Hammer,
+    heroImage:
+      "https://placehold.co/1600x900/1c1917/e7e5e4?text=Residential+%26+Light+Commercial+Framing",
     benefits: [
-      "Custom home design and full builds",
-      "Room additions and second-story expansions",
-      "Kitchen, bath, and whole-home renovations",
-      "In-house project management from permit to punch list",
+      "Custom home framing",
+      "Multi-family residential framing",
+      "Garages and detached structures",
+      "Additions and renovations",
+      "Light commercial framing",
+      "Structural framing and roof systems",
     ],
-    relatedCtaText: "Planning a new home or renovation?",
+    relatedCtaText: "Planning a new build, addition, or light commercial project?",
   },
   {
-    slug: "commercial-construction",
-    title: "Commercial Construction",
+    slug: "foundations",
+    title: "Foundations",
     shortDescription:
-      "Ground-up builds and tenant fit-outs delivered on schedule and on budget.",
+      "Excavation, footings, foundation walls, and slab-on-grade work engineered for strength and lasting performance.",
     description: [
-      "Acorn Constructions delivers commercial projects for owners, developers, and business operators who need a builder that treats deadlines and budgets as commitments, not estimates. We've built retail spaces, offices, restaurants, and light-industrial facilities, and we bring the same rigor to every square foot.",
-      "Our commercial crews coordinate closely with architects, engineers, and inspectors from pre-construction through closeout, so you get one point of contact and a predictable path to opening day.",
+      "A strong building starts with a solid foundation. We provide foundation construction services that create stable, durable bases for residential and light commercial projects. Our team focuses on accuracy, proper preparation, and quality concrete work to ensure long-term structural performance.",
     ],
-    icon: Building2,
-    heroImage: "https://placehold.co/1600x900/1c1917/e7e5e4?text=Commercial+Construction",
+    icon: Layers,
+    heroImage: "https://placehold.co/1600x900/1c1917/e7e5e4?text=Foundations",
     benefits: [
-      "Ground-up commercial builds",
-      "Tenant improvements and interior fit-outs",
-      "Retail, office, restaurant, and light-industrial experience",
-      "Detailed scheduling with transparent budget tracking",
+      "Excavation and site preparation",
+      "Concrete footings",
+      "Foundation walls",
+      "Slab-on-grade foundations",
+      "Foundation forming and reinforcement",
+      "New foundation construction",
     ],
-    relatedCtaText: "Have a commercial build or fit-out coming up?",
+    relatedCtaText: "Ready to break ground on a new foundation?",
   },
   {
-    slug: "specialty-services",
-    title: "Specialty Services",
+    slug: "post-frame-construction",
+    title: "Post Frame Construction",
     shortDescription:
-      "Decks, outdoor living, structural repair, and the projects that don't fit a standard mold.",
+      "Agricultural buildings, workshops, storage buildings, and custom post frame structures — cost-effective, durable, and built to last.",
     description: [
-      "Not every project is a full build, and our specialty division exists for exactly that reason. We take on decks and outdoor living spaces, structural repairs, storm and water damage restoration, and smaller scope work that still deserves a licensed, experienced crew.",
-      "Because our specialty team draws on the same tradespeople and project managers as our residential and commercial divisions, you get big-builder resources applied to a project of any size.",
+      "Post frame construction is a versatile and cost-effective building solution for agricultural, residential, commercial, and storage applications. Whether you need a shop, barn, garage, warehouse, or custom post frame building, we deliver structures designed for strength, functionality, and efficiency.",
     ],
-    icon: Wrench,
-    heroImage: "https://placehold.co/1600x900/1c1917/e7e5e4?text=Specialty+Services",
+    icon: Warehouse,
+    heroImage: "https://placehold.co/1600x900/1c1917/e7e5e4?text=Post+Frame+Construction",
     benefits: [
-      "Decks, porches, and outdoor living spaces",
-      "Structural repair and reinforcement",
-      "Storm, fire, and water damage restoration",
-      "Smaller-scope and single-trade projects",
+      "Agricultural buildings",
+      "Workshops and shops",
+      "Equipment and storage buildings",
+      "Detached garages",
+      "Commercial post frame structures",
+      "Custom post frame projects",
     ],
-    relatedCtaText: "Have a project that doesn't fit the standard mold?",
+    relatedCtaText: "Have a shop, barn, or storage building in mind?",
   },
 ];
 

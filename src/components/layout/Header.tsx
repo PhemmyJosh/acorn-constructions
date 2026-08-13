@@ -10,7 +10,7 @@ export default function Header() {
       <div className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between px-6 sm:px-8 lg:px-10">
         <Link href="/" className="flex items-center gap-2 text-white">
           <span className="text-lg font-semibold uppercase tracking-wide">
-            Acorn <span className="text-amber-500">Constructions</span>
+            Acorn <span className="text-amber-500">Construction</span>
           </span>
         </Link>
 

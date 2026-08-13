@@ -7,9 +7,9 @@ import MapPlaceholder from "@/components/contact/MapPlaceholder";
 import { company } from "@/data/company";
 
 export const metadata: Metadata = {
-  title: "Contact | Acorn Constructions",
+  title: "Contact | Acorn Construction",
   description:
-    "Get in touch with Acorn Constructions for a quote on your next residential, commercial, or specialty construction project.",
+    "Get in touch with Acorn Construction for a quote on your next residential, light commercial, or post frame construction project.",
 };
 
 export default function ContactPage() {
@@ -33,14 +33,16 @@ export default function ContactPage() {
           <div className="flex flex-col gap-8 lg:col-span-2">
             <div className="flex flex-col gap-5">
               <h2 className="text-2xl font-semibold text-stone-900">Contact Information</h2>
+              {/* PLACEHOLDER — full street address needed from client */}
               <div className="flex items-start gap-3 text-sm text-stone-600">
                 <MapPin size={18} className="mt-0.5 shrink-0 text-amber-600" />
                 <span>
-                  {company.address.line1}, {company.address.line2}
+                  {company.address.line1}
                   <br />
                   {company.address.cityStateZip}
                 </span>
               </div>
+              {/* PLACEHOLDER — phone number needed from client */}
               <a
                 href={company.phoneHref}
                 className="flex items-center gap-3 text-sm text-stone-600 transition-colors hover:text-amber-600"
@@ -48,6 +50,7 @@ export default function ContactPage() {
                 <Phone size={18} className="shrink-0 text-amber-600" />
                 {company.phoneDisplay}
               </a>
+              {/* PLACEHOLDER — email needed from client */}
               <a
                 href={`mailto:${company.email}`}
                 className="flex items-center gap-3 text-sm text-stone-600 transition-colors hover:text-amber-600"
@@ -55,6 +58,7 @@ export default function ContactPage() {
                 <Mail size={18} className="shrink-0 text-amber-600" />
                 {company.email}
               </a>
+              <p className="text-sm text-stone-500">{company.serviceAreaLine}</p>
               <div className="flex items-start gap-3 text-sm text-stone-600">
                 <Clock size={18} className="mt-0.5 shrink-0 text-amber-600" />
                 <span>
