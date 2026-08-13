@@ -38,7 +38,12 @@
       "Bash(curl -s http://localhost:3000/ -o /tmp/home_v3.html -w \"%{http_code}\\\\n\")",
       "Bash(grep -n \"^export type\\\\|^export {.*Icon,\\\\|IconProps as\\\\|Icon as\\\\b\" node_modules/@tabler/icons-react/dist/tabler-icons-react.d.ts)",
       "Bash(grep -o \"TablerIcon\\\\b\\\\|, Icon,\\\\|{ Icon,\\\\|IconProps,\\\\|IconProps }\" node_modules/@tabler/icons-react/dist/tabler-icons-react.d.ts)",
-      "Bash(curl -s http://localhost:3000/ -o /tmp/home_v4.html -w \"%{http_code}\\\\n\")"
+      "Bash(curl -s http://localhost:3000/ -o /tmp/home_v4.html -w \"%{http_code}\\\\n\")",
+      "Bash(curl -s -o /dev/null -w \"/ -> %{http_code}\\\\n\" http://localhost:3000/)",
+      "Bash(curl -s -o /dev/null -w \"/projects -> %{http_code}\\\\n\" http://localhost:3000/projects)",
+      "Bash(curl -s http://localhost:3000/projects -o /tmp/projects.html)",
+      "Bash(curl -s -o /dev/null -w \"home=%{http_code}\\\\n\" \"http://localhost:3000/\")",
+      "Bash(curl -s -o /dev/null -w \"projects=%{http_code}\\\\n\" \"http://localhost:3000/projects\")"
     ]
   }
 }

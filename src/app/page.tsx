@@ -4,6 +4,7 @@ import CategoryShowcase from "@/components/home/CategoryShowcase";
 import WhyBuildWithAcorn from "@/components/home/WhyBuildWithAcorn";
 import IntroBlurb from "@/components/home/IntroBlurb";
 import HowWeWork from "@/components/home/HowWeWork";
+import GalleryPreview from "@/components/home/GalleryPreview";
 import CoreValues from "@/components/shared/CoreValues";
 import Testimonials from "@/components/home/Testimonials";
 import FinalCta from "@/components/home/FinalCta";
@@ -17,6 +18,7 @@ export default function Home() {
       <WhyBuildWithAcorn />
       <IntroBlurb />
       <HowWeWork />
+      <GalleryPreview />
       <CoreValues />
       <Testimonials />
       <FinalCta />

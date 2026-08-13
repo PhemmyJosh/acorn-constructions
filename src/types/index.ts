@@ -23,10 +23,12 @@ export interface Testimonial {
   role: string;
 }
 
+export type ProjectCategory = "Residential" | "Foundations" | "Post Frame";
+
 export interface Project {
   id: string;
   title: string;
-  category: "Residential" | "Commercial" | "Specialty";
+  category: ProjectCategory;
   image: string;
   alt: string;
 }
