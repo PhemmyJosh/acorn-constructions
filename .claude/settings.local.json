@@ -35,7 +35,10 @@
       "Bash(curl -s -o __TRACKED_VAR__/wide_5129674.jpg 'https://images.pexels.com/photos/5129674/pexels-photo-5129674.jpeg?auto=compress&cs=tinysrgb&w=800')",
       "Bash(curl -s -o __TRACKED_VAR__/frame_8491085.jpg 'https://images.pexels.com/photos/8491085/pexels-photo-8491085.jpeg?auto=compress&cs=tinysrgb&w=800')",
       "Bash(curl -s http://localhost:3000/ -o /tmp/home_v2.html)",
-      "Bash(curl -s http://localhost:3000/ -o /tmp/home_v3.html -w \"%{http_code}\\\\n\")"
+      "Bash(curl -s http://localhost:3000/ -o /tmp/home_v3.html -w \"%{http_code}\\\\n\")",
+      "Bash(grep -n \"^export type\\\\|^export {.*Icon,\\\\|IconProps as\\\\|Icon as\\\\b\" node_modules/@tabler/icons-react/dist/tabler-icons-react.d.ts)",
+      "Bash(grep -o \"TablerIcon\\\\b\\\\|, Icon,\\\\|{ Icon,\\\\|IconProps,\\\\|IconProps }\" node_modules/@tabler/icons-react/dist/tabler-icons-react.d.ts)",
+      "Bash(curl -s http://localhost:3000/ -o /tmp/home_v4.html -w \"%{http_code}\\\\n\")"
     ]
   }
 }
