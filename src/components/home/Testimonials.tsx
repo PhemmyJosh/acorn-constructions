@@ -17,14 +17,20 @@ export default function Testimonials() {
       />
       <div className="mt-14 grid gap-8 lg:grid-cols-3">
         {testimonials.map((testimonial) => (
-          <Card key={testimonial.name} className="flex flex-col gap-6 bg-white">
+          <Card
+            key={testimonial.name}
+            className="flex flex-col gap-6 border-acorn-bronze/25 bg-white shadow-md hover:shadow-xl"
+          >
             <Quote className="text-acorn-gold" size={28} />
             <p className="text-base leading-relaxed text-acorn-charcoal/80">
               &ldquo;{testimonial.quote}&rdquo;
             </p>
-            <div className="mt-auto">
+            <div className="mt-auto border-t border-acorn-bronze/15 pt-4">
               <p className="text-sm font-semibold text-acorn-charcoal">{testimonial.name}</p>
               <p className="text-sm text-acorn-charcoal/60">{testimonial.role}</p>
+              <p className="text-xs font-semibold uppercase tracking-wider text-acorn-gold">
+                {testimonial.location}
+              </p>
             </div>
           </Card>
         ))}

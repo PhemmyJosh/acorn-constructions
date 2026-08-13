@@ -21,6 +21,7 @@ export interface Testimonial {
   quote: string;
   name: string;
   role: string;
+  location: string;
 }
 
 export type ProjectCategory = "Residential" | "Foundations" | "Post Frame";
