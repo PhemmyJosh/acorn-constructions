@@ -27,7 +27,14 @@
       "Bash(node -e \"console.log\\(require.resolve\\('sharp'\\)\\)\")",
       "Bash(node -e \"console.log\\(require.resolve\\('puppeteer'\\)\\)\")",
       "Bash(node -e \"console.log\\(require.resolve\\('playwright'\\)\\)\")",
-      "Bash(curl -s http://localhost:3000/ -o /tmp/home3.html)"
+      "Bash(curl -s http://localhost:3000/ -o /tmp/home3.html)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://localhost:3000/)",
+      "WebSearch",
+      "Bash(curl -s -o /dev/null -w \"16001335 -> %{http_code}\\\\n\" \"https://images.pexels.com/photos/16001335/pexels-photo-16001335.jpeg?auto=compress&cs=tinysrgb&w=1600\")",
+      "Bash(curl -s -o /dev/null -w \"5129674 -> %{http_code}\\\\n\" \"https://images.pexels.com/photos/5129674/pexels-photo-5129674.jpeg?auto=compress&cs=tinysrgb&w=1600\")",
+      "Bash(curl -s -o __TRACKED_VAR__/wide_5129674.jpg 'https://images.pexels.com/photos/5129674/pexels-photo-5129674.jpeg?auto=compress&cs=tinysrgb&w=800')",
+      "Bash(curl -s -o __TRACKED_VAR__/frame_8491085.jpg 'https://images.pexels.com/photos/8491085/pexels-photo-8491085.jpeg?auto=compress&cs=tinysrgb&w=800')",
+      "Bash(curl -s http://localhost:3000/ -o /tmp/home_v2.html)"
     ]
   }
 }

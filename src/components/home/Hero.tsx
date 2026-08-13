@@ -3,13 +3,14 @@ import { Phone } from "lucide-react";
 import Button from "@/components/ui/Button";
 import Container from "@/components/ui/Container";
 import { company } from "@/data/company";
+import { photos } from "@/data/photos";
 
 export default function Hero() {
   return (
     <section className="relative flex min-h-[90vh] items-center overflow-hidden bg-acorn-charcoal text-acorn-cream">
       <Image
-        src="https://placehold.co/1920x1080/262018/745b39?text=Acorn+Construction"
-        alt="Acorn Construction job site"
+        src={photos.trussInterior}
+        alt="Wood frame roof structure under construction"
         fill
         priority
         className="object-cover opacity-50"

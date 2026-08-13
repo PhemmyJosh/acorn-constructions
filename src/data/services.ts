@@ -1,5 +1,6 @@
 import { Hammer, Layers, Warehouse } from "lucide-react";
 import { Service } from "@/types";
+import { photos } from "@/data/photos";
 
 export const services: Service[] = [
   {
@@ -11,8 +12,7 @@ export const services: Service[] = [
       "We provide professional wood frame construction services for residential homes and light commercial buildings. From custom homes and additions to garages, shops, and small commercial structures, our team delivers precision framing, structural integrity, and quality workmanship at every stage of construction.",
     ],
     icon: Hammer,
-    heroImage:
-      "https://placehold.co/1600x900/1c1917/e7e5e4?text=Residential+%26+Light+Commercial+Framing",
+    heroImage: photos.residentialFraming,
     benefits: [
       "Custom home framing",
       "Multi-family residential framing",
@@ -32,7 +32,7 @@ export const services: Service[] = [
       "A strong building starts with a solid foundation. We provide foundation construction services that create stable, durable bases for residential and light commercial projects. Our team focuses on accuracy, proper preparation, and quality concrete work to ensure long-term structural performance.",
     ],
     icon: Layers,
-    heroImage: "https://placehold.co/1600x900/1c1917/e7e5e4?text=Foundations",
+    heroImage: photos.foundations,
     benefits: [
       "Excavation and site preparation",
       "Concrete footings",
@@ -52,7 +52,7 @@ export const services: Service[] = [
       "Post frame construction is a versatile and cost-effective building solution for agricultural, residential, commercial, and storage applications. Whether you need a shop, barn, garage, warehouse, or custom post frame building, we deliver structures designed for strength, functionality, and efficiency.",
     ],
     icon: Warehouse,
-    heroImage: "https://placehold.co/1600x900/1c1917/e7e5e4?text=Post+Frame+Construction",
+    heroImage: photos.postFrame,
     benefits: [
       "Agricultural buildings",
       "Workshops and shops",
