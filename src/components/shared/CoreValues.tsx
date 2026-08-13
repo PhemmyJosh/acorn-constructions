@@ -28,11 +28,11 @@ export default function CoreValues({
           const Icon = value.icon;
           return (
             <div key={value.title} className="flex flex-col items-start gap-4">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-amber-600/15 text-amber-400">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-acorn-bronze/20 text-acorn-bronze">
                 <Icon size={22} />
               </div>
-              <h3 className="text-lg font-semibold text-white">{value.title}</h3>
-              <p className="text-sm leading-relaxed text-stone-400">{value.description}</p>
+              <h3 className="text-lg font-semibold text-acorn-cream">{value.title}</h3>
+              <p className="text-sm leading-relaxed text-acorn-cream/60">{value.description}</p>
             </div>
           );
         })}

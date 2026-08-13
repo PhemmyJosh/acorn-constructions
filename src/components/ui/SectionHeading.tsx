@@ -16,8 +16,8 @@ export default function SectionHeading({
   className = "",
 }: SectionHeadingProps) {
   const alignClasses = align === "center" ? "items-center text-center mx-auto" : "items-start text-left";
-  const mutedText = tone === "dark" ? "text-stone-300" : "text-stone-600";
-  const eyebrowColor = tone === "dark" ? "text-amber-400" : "text-amber-600";
+  const mutedText = tone === "dark" ? "text-acorn-cream/70" : "text-acorn-charcoal/70";
+  const eyebrowColor = "text-acorn-gold";
 
   return (
     <div className={`flex max-w-2xl flex-col gap-4 ${alignClasses} ${className}`}>

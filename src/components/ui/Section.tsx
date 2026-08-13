@@ -1,7 +1,7 @@
 import { ReactNode } from "react";
 import Container from "./Container";
 
-type SectionTone = "light" | "dark" | "cream";
+type SectionTone = "cream" | "stone" | "dark";
 
 interface SectionProps {
   children: ReactNode;
@@ -12,15 +12,15 @@ interface SectionProps {
 }
 
 const toneClasses: Record<SectionTone, string> = {
-  light: "bg-white text-stone-900",
-  dark: "bg-slate-950 text-stone-50",
-  cream: "bg-stone-50 text-stone-900",
+  cream: "bg-acorn-cream text-acorn-charcoal",
+  stone: "bg-acorn-stone text-acorn-charcoal",
+  dark: "bg-acorn-charcoal text-acorn-cream",
 };
 
 export default function Section({
   children,
   className = "",
-  tone = "light",
+  tone = "cream",
   id,
   containerClassName = "",
 }: SectionProps) {

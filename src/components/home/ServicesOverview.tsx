@@ -5,7 +5,7 @@ import { services } from "@/data/services";
 
 export default function ServicesOverview() {
   return (
-    <Section tone="light">
+    <Section tone="stone">
       <SectionHeading
         eyebrow="What We Do"
         title="Construction services built around your project"

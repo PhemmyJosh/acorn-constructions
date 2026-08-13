@@ -20,13 +20,13 @@ export default function ServicesPage() {
         description="Framing, foundations, and post frame construction across Alberta and Saskatchewan, delivered with the same craftsmanship on every job."
       />
 
-      <Section tone="light">
+      <Section tone="cream">
         {/*
           Subcontractor scope note — Acorn typically joins projects as a
           subcontractor after excavation or foundation stage to complete the
           framing scope.
         */}
-        <p className="mb-10 max-w-3xl text-sm italic text-stone-500">
+        <p className="mb-10 max-w-3xl text-sm italic text-acorn-charcoal/60">
           Note: Acorn typically joins projects as a subcontractor after
           excavation or foundation stage to complete the framing scope.
         </p>

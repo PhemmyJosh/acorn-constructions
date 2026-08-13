@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 :root {
-  --background: #fafaf9;
-  --foreground: #1c1917;
+  --background: #f7f2ea;
+  --foreground: #262018;
 }
 
 @theme inline {
@@ -10,6 +10,14 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-inter);
   --font-heading: var(--font-oswald);
+
+  /* Acorn Construction brand palette (from client logo: charcoal + bronze) */
+  --color-acorn-charcoal: #262018;
+  --color-acorn-bronze: #745b39;
+  --color-acorn-gold: #c08a3e;
+  --color-acorn-rust: #8a4a2e;
+  --color-acorn-cream: #f7f2ea;
+  --color-acorn-stone: #eae1d2;
 }
 
 body {

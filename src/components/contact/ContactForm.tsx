@@ -34,15 +34,15 @@ export default function ContactForm() {
 
   if (submitted) {
     return (
-      <div className="rounded-sm border border-amber-200 bg-amber-50 p-8">
-        <h3 className="text-lg font-semibold text-stone-900">Thanks for reaching out.</h3>
-        <p className="mt-2 text-sm leading-relaxed text-stone-600">
+      <div className="rounded-sm border border-acorn-gold/30 bg-acorn-stone p-8">
+        <h3 className="text-lg font-semibold text-acorn-charcoal">Thanks for reaching out.</h3>
+        <p className="mt-2 text-sm leading-relaxed text-acorn-charcoal/70">
           We&apos;ve received your message and will get back to you shortly.
         </p>
         <button
           type="button"
           onClick={() => setSubmitted(false)}
-          className="mt-4 text-sm font-semibold uppercase tracking-wider text-amber-600 hover:text-amber-700"
+          className="mt-4 text-sm font-semibold uppercase tracking-wider text-acorn-gold hover:text-acorn-bronze"
         >
           Send another message
         </button>
@@ -54,7 +54,7 @@ export default function ContactForm() {
     <form onSubmit={handleSubmit} className="flex flex-col gap-5">
       <div className="grid gap-5 sm:grid-cols-2">
         <div className="flex flex-col gap-2">
-          <label htmlFor="name" className="text-sm font-semibold text-stone-900">
+          <label htmlFor="name" className="text-sm font-semibold text-acorn-charcoal">
             Name
           </label>
           <input
@@ -63,11 +63,11 @@ export default function ContactForm() {
             required
             value={formData.name}
             onChange={(event) => handleChange("name", event.target.value)}
-            className="rounded-sm border border-stone-300 bg-white px-4 py-3 text-sm text-stone-900 outline-none focus:border-amber-600"
+            className="rounded-sm border border-acorn-bronze/30 bg-white px-4 py-3 text-sm text-acorn-charcoal outline-none focus:border-acorn-gold"
           />
         </div>
         <div className="flex flex-col gap-2">
-          <label htmlFor="phone" className="text-sm font-semibold text-stone-900">
+          <label htmlFor="phone" className="text-sm font-semibold text-acorn-charcoal">
             Phone
           </label>
           <input
@@ -75,13 +75,13 @@ export default function ContactForm() {
             type="tel"
             value={formData.phone}
             onChange={(event) => handleChange("phone", event.target.value)}
-            className="rounded-sm border border-stone-300 bg-white px-4 py-3 text-sm text-stone-900 outline-none focus:border-amber-600"
+            className="rounded-sm border border-acorn-bronze/30 bg-white px-4 py-3 text-sm text-acorn-charcoal outline-none focus:border-acorn-gold"
           />
         </div>
       </div>
 
       <div className="flex flex-col gap-2">
-        <label htmlFor="email" className="text-sm font-semibold text-stone-900">
+        <label htmlFor="email" className="text-sm font-semibold text-acorn-charcoal">
           Email
         </label>
         <input
@@ -90,12 +90,12 @@ export default function ContactForm() {
           required
           value={formData.email}
           onChange={(event) => handleChange("email", event.target.value)}
-          className="rounded-sm border border-stone-300 bg-white px-4 py-3 text-sm text-stone-900 outline-none focus:border-amber-600"
+          className="rounded-sm border border-acorn-bronze/30 bg-white px-4 py-3 text-sm text-acorn-charcoal outline-none focus:border-acorn-gold"
         />
       </div>
 
       <div className="flex flex-col gap-2">
-        <label htmlFor="message" className="text-sm font-semibold text-stone-900">
+        <label htmlFor="message" className="text-sm font-semibold text-acorn-charcoal">
           Message
         </label>
         <textarea
@@ -104,7 +104,7 @@ export default function ContactForm() {
           rows={5}
           value={formData.message}
           onChange={(event) => handleChange("message", event.target.value)}
-          className="resize-none rounded-sm border border-stone-300 bg-white px-4 py-3 text-sm text-stone-900 outline-none focus:border-amber-600"
+          className="resize-none rounded-sm border border-acorn-bronze/30 bg-white px-4 py-3 text-sm text-acorn-charcoal outline-none focus:border-acorn-gold"
         />
       </div>
 

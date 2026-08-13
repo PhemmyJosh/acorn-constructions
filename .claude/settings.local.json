@@ -21,7 +21,13 @@
       "Bash(curl -s -o /tmp/contact.html -w \"%{http_code}\\\\n\" http://localhost:3001/contact)",
       "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://localhost:3001/)",
       "Bash(curl -s http://localhost:3000/ -o /tmp/home2.html)",
-      "Bash(curl -s http://localhost:3000/about -o /tmp/about2.html)"
+      "Bash(curl -s http://localhost:3000/about -o /tmp/about2.html)",
+      "Bash(git restore *)",
+      "Bash(node -e ' *)",
+      "Bash(node -e \"console.log\\(require.resolve\\('sharp'\\)\\)\")",
+      "Bash(node -e \"console.log\\(require.resolve\\('puppeteer'\\)\\)\")",
+      "Bash(node -e \"console.log\\(require.resolve\\('playwright'\\)\\)\")",
+      "Bash(curl -s http://localhost:3000/ -o /tmp/home3.html)"
     ]
   }
 }

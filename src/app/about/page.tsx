@@ -25,16 +25,16 @@ export default function AboutPage() {
         description={`A Lloydminster, Alberta builder serving ${company.serviceArea} with residential, light commercial, and post frame construction.`}
       />
 
-      <Section tone="light">
+      <Section tone="cream">
         <div className="grid gap-12 lg:grid-cols-2 lg:items-center lg:gap-16">
           <div className="flex flex-col gap-5">
-            <span className="text-sm font-semibold uppercase tracking-[0.2em] text-amber-600">
+            <span className="text-sm font-semibold uppercase tracking-[0.2em] text-acorn-gold">
               Our History
             </span>
             <h2 className="text-3xl font-semibold sm:text-4xl">
               From a one-man operation to crews across two provinces
             </h2>
-            <p className="text-base leading-relaxed text-stone-600">
+            <p className="text-base leading-relaxed text-acorn-charcoal/70">
               Acorn Construction was founded in 2011 in Lloydminster, Alberta,
               by Mark Acorn, a Red Seal journeyman carpenter who entered the
               trade in 2002 and earned his journeyman ticket in 2006. What
@@ -42,17 +42,19 @@ export default function AboutPage() {
               has grown steadily into multiple crews working throughout
               Alberta and Saskatchewan.
             </p>
-            <p className="text-base leading-relaxed text-stone-600">
-              From single-family homes to our largest project to date at
-              34,000 square feet, that growth has never come at the cost of
-              the standard Mark set on day one: take pride in everything you
-              do, and deliver a top-quality product every time, no matter the
-              size of the job.
+            <p className="text-base leading-relaxed text-acorn-charcoal/70">
+              From single-family homes to our largest project to date at{" "}
+              <span className="font-semibold text-acorn-rust">
+                34,000 square feet
+              </span>
+              , that growth has never come at the cost of the standard Mark
+              set on day one: take pride in everything you do, and deliver a
+              top-quality product every time, no matter the size of the job.
             </p>
           </div>
           <div className="relative aspect-[4/3] w-full overflow-hidden rounded-sm">
             <Image
-              src="https://placehold.co/1200x900/1c1917/e7e5e4?text=Our+History"
+              src="https://placehold.co/1200x900/262018/f7f2ea?text=Our+History"
               alt="Acorn Construction crew on a job site"
               fill
               className="object-cover"
@@ -61,10 +63,10 @@ export default function AboutPage() {
         </div>
       </Section>
 
-      <Section tone="cream">
+      <Section tone="stone">
         <div className="grid gap-10 lg:grid-cols-2 lg:gap-16">
           <div className="flex flex-col gap-4">
-            <span className="text-sm font-semibold uppercase tracking-[0.2em] text-amber-600">
+            <span className="text-sm font-semibold uppercase tracking-[0.2em] text-acorn-gold">
               Our Vision
             </span>
             <h2 className="text-2xl font-semibold sm:text-3xl">
@@ -74,7 +76,7 @@ export default function AboutPage() {
             </h2>
           </div>
           <div className="flex flex-col gap-4">
-            <span className="text-sm font-semibold uppercase tracking-[0.2em] text-amber-600">
+            <span className="text-sm font-semibold uppercase tracking-[0.2em] text-acorn-gold">
               Our Mission
             </span>
             <h2 className="text-2xl font-semibold sm:text-3xl">
@@ -92,7 +94,7 @@ export default function AboutPage() {
         description="Live the values, build the company."
       />
 
-      <Section tone="light">
+      <Section tone="stone">
         <SectionHeading
           eyebrow="Leadership"
           title="The people behind every build"
@@ -100,20 +102,20 @@ export default function AboutPage() {
           className="mx-auto"
         />
 
-        <div className="mt-14 flex flex-col gap-8 rounded-sm border border-stone-200 bg-stone-50 p-8 lg:flex-row lg:items-start lg:gap-12 lg:p-12">
+        <div className="mt-14 flex flex-col gap-8 rounded-sm border border-acorn-bronze/20 bg-white p-8 lg:flex-row lg:items-start lg:gap-12 lg:p-12">
           {/* Headshot is a placeholder (PLACEHOLDER_HEADSHOT) pending a real photo from the client */}
           <div className="relative aspect-[4/5] w-full max-w-xs shrink-0 overflow-hidden rounded-sm">
             <Image src={founder.image} alt={founder.name} fill className="object-cover" />
           </div>
           <div className="flex flex-col gap-4">
             <div>
-              <p className="text-xl font-semibold text-stone-900">{founder.name}</p>
-              <p className="text-sm font-medium uppercase tracking-wide text-amber-600">
+              <p className="text-xl font-semibold text-acorn-charcoal">{founder.name}</p>
+              <p className="text-sm font-medium uppercase tracking-wide text-acorn-gold">
                 {founder.role}
               </p>
             </div>
             {founder.bio?.map((paragraph) => (
-              <p key={paragraph} className="text-base leading-relaxed text-stone-600">
+              <p key={paragraph} className="text-base leading-relaxed text-acorn-charcoal/70">
                 {paragraph}
               </p>
             ))}
@@ -128,8 +130,8 @@ export default function AboutPage() {
                 <Image src={member.image} alt={member.name} fill className="object-cover" />
               </div>
               <div>
-                <p className="text-base font-semibold text-stone-900">{member.name}</p>
-                <p className="text-sm text-stone-500">{member.role}</p>
+                <p className="text-base font-semibold text-acorn-charcoal">{member.name}</p>
+                <p className="text-sm text-acorn-charcoal/60">{member.role}</p>
               </div>
             </div>
           ))}

@@ -52,11 +52,11 @@ export default function ProjectGrid({ projects }: ProjectGridProps) {
               fill
               className="object-cover transition-transform duration-300 group-hover:scale-105"
             />
-            <div className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-slate-950/80 via-slate-950/10 to-transparent p-5">
-              <span className="text-xs font-semibold uppercase tracking-wider text-amber-400">
+            <div className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-acorn-charcoal/85 via-acorn-charcoal/10 to-transparent p-5">
+              <span className="text-xs font-semibold uppercase tracking-wider text-acorn-gold">
                 {project.category}
               </span>
-              <span className="text-base font-semibold text-white">{project.title}</span>
+              <span className="text-base font-semibold text-acorn-cream">{project.title}</span>
             </div>
           </button>
         ))}

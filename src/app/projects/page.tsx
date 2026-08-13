@@ -20,7 +20,7 @@ export default function ProjectsPage() {
         description="A look at recent residential, commercial, and specialty builds. Click any project for a closer look."
       />
 
-      <Section tone="light">
+      <Section tone="cream">
         <ProjectGrid projects={projects} />
       </Section>
 
