@@ -34,7 +34,8 @@
       "Bash(curl -s -o /dev/null -w \"5129674 -> %{http_code}\\\\n\" \"https://images.pexels.com/photos/5129674/pexels-photo-5129674.jpeg?auto=compress&cs=tinysrgb&w=1600\")",
       "Bash(curl -s -o __TRACKED_VAR__/wide_5129674.jpg 'https://images.pexels.com/photos/5129674/pexels-photo-5129674.jpeg?auto=compress&cs=tinysrgb&w=800')",
       "Bash(curl -s -o __TRACKED_VAR__/frame_8491085.jpg 'https://images.pexels.com/photos/8491085/pexels-photo-8491085.jpeg?auto=compress&cs=tinysrgb&w=800')",
-      "Bash(curl -s http://localhost:3000/ -o /tmp/home_v2.html)"
+      "Bash(curl -s http://localhost:3000/ -o /tmp/home_v2.html)",
+      "Bash(curl -s http://localhost:3000/ -o /tmp/home_v3.html -w \"%{http_code}\\\\n\")"
     ]
   }
 }
