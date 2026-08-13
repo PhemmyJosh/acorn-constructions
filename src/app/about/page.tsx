@@ -7,6 +7,7 @@ import CoreValues from "@/components/shared/CoreValues";
 import FinalCta from "@/components/home/FinalCta";
 import { team } from "@/data/team";
 import { company } from "@/data/company";
+import { photos } from "@/data/photos";
 
 export const metadata: Metadata = {
   title: "About Us | Acorn Construction",
@@ -23,6 +24,7 @@ export default function AboutPage() {
         eyebrow="About Us"
         title="Founded in 2011. Still swinging hammers."
         description={`A Lloydminster, Alberta builder serving ${company.serviceArea} with residential, light commercial, and post frame construction.`}
+        backgroundImage={photos.crewWithFinishedHouses}
       />
 
       <Section tone="cream">
@@ -54,7 +56,7 @@ export default function AboutPage() {
           </div>
           <div className="relative aspect-[4/3] w-full overflow-hidden rounded-sm">
             <Image
-              src="https://placehold.co/1200x900/262018/f7f2ea?text=Our+History"
+              src={photos.trussInterior}
               alt="Acorn Construction crew on a job site"
               fill
               className="object-cover"
@@ -102,7 +104,26 @@ export default function AboutPage() {
           className="mx-auto"
         />
 
-        <div className="mt-14 flex flex-col gap-8 rounded-sm border border-acorn-bronze/20 bg-white p-8 lg:flex-row lg:items-start lg:gap-12 lg:p-12">
+        <div className="mx-auto mt-10 flex max-w-md justify-center gap-4">
+          <div className="relative aspect-square w-1/2 overflow-hidden rounded-sm">
+            <Image
+              src={photos.workerWithBlueprints}
+              alt="Acorn team member reviewing project plans"
+              fill
+              className="object-cover"
+            />
+          </div>
+          <div className="relative aspect-square w-1/2 overflow-hidden rounded-sm">
+            <Image
+              src={photos.crewOnTrussesPlayful}
+              alt="Acorn crew member on site"
+              fill
+              className="object-cover"
+            />
+          </div>
+        </div>
+
+        <div className="mt-10 flex flex-col gap-8 rounded-sm border border-acorn-bronze/20 bg-white p-8 lg:flex-row lg:items-start lg:gap-12 lg:p-12">
           {/* Headshot is a placeholder (PLACEHOLDER_HEADSHOT) pending a real photo from the client */}
           <div className="relative aspect-[4/5] w-full max-w-xs shrink-0 overflow-hidden rounded-sm">
             <Image src={founder.image} alt={founder.name} fill className="object-cover" />
