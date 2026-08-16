@@ -6,6 +6,12 @@ import { photos } from "@/data/photos";
 
 const DIFFERENTIATORS = [
   {
+    icon: HardHat,
+    title: "25 Years in the Trade",
+    description:
+      "Founder Mark Acorn's hands-on framing experience, on every project since day one.",
+  },
+  {
     icon: Maximize2,
     title: "34,000 Sq Ft",
     description: "Largest project to date",
@@ -19,11 +25,6 @@ const DIFFERENTIATORS = [
     icon: Handshake,
     title: "Built to Plug Into Your Project",
     description: "Seamless subcontractor handoff after excavation or foundation stage",
-  },
-  {
-    icon: HardHat,
-    title: "25 Years",
-    description: "Hands-on framing experience, founder-led",
   },
 ];
 
@@ -44,7 +45,7 @@ export default function WhyBuildWithAcorn() {
             className="object-cover"
           />
         </div>
-        <div className="flex flex-col gap-6 lg:relative lg:z-10 lg:-ml-16 lg:mt-12 lg:gap-8">
+        <div className="flex flex-col justify-center gap-6 lg:relative lg:z-10 lg:-ml-16 lg:gap-8">
           {DIFFERENTIATORS.map((item, index) => {
             const Icon = item.icon;
             return (
