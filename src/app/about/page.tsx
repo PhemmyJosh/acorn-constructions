@@ -125,7 +125,18 @@ export default function AboutPage() {
         </div>
 
         <div className="mt-10 flex flex-col gap-8 rounded-sm border border-acorn-bronze/20 bg-white p-8 lg:flex-row lg:items-start lg:gap-12 lg:p-12">
-          <TeamAvatar name={founder.name} image={founder.image} className="mx-auto h-44 w-44 lg:mx-0" />
+          {founder.image ? (
+            <div className="relative aspect-[4/5] w-full max-w-xs shrink-0 overflow-hidden rounded-lg lg:mx-0">
+              <Image
+                src={founder.image}
+                alt={founder.name}
+                fill
+                className="object-cover object-top"
+              />
+            </div>
+          ) : (
+            <TeamAvatar name={founder.name} image={founder.image} className="mx-auto h-44 w-44 lg:mx-0" />
+          )}
           <div className="flex flex-col gap-4">
             <div>
               <p className="text-xl font-semibold text-acorn-charcoal">{founder.name}</p>
