@@ -3,7 +3,7 @@ import { Clock, Mail, MapPin, Phone } from "lucide-react";
 import PageHero from "@/components/ui/PageHero";
 import Section from "@/components/ui/Section";
 import ContactForm from "@/components/contact/ContactForm";
-import MapPlaceholder from "@/components/contact/MapPlaceholder";
+import LocationMap from "@/components/contact/LocationMap";
 import { company } from "@/data/company";
 
 export const metadata: Metadata = {
@@ -67,7 +67,7 @@ export default function ContactPage() {
               </div>
             </div>
 
-            <MapPlaceholder />
+            <LocationMap />
           </div>
         </div>
       </Section>
