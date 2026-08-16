@@ -37,5 +37,6 @@ export const navLinks: NavLink[] = [
     })),
   },
   { label: "Projects", href: "/projects" },
+  { label: "Careers", href: "/careers" },
   { label: "Contact", href: "/contact" },
 ];

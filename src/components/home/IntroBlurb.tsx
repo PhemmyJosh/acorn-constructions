@@ -27,7 +27,7 @@ export default function IntroBlurb() {
             href="/about"
             className="inline-flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-acorn-charcoal transition-colors hover:text-acorn-gold"
           >
-            About Us
+            Learn More
             <ArrowRight size={16} />
           </Link>
         </div>
