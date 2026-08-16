@@ -3,7 +3,7 @@ import Link from "next/link";
 import { Mail, MapPin, Phone } from "lucide-react";
 import { navLinks, company } from "@/data/company";
 import Container from "@/components/ui/Container";
-import { FacebookIcon, InstagramIcon } from "@/components/ui/SocialIcons";
+import { FacebookIcon, LinkedinIcon } from "@/components/ui/SocialIcons";
 
 export default function Footer() {
   const year = new Date().getFullYear();
@@ -36,13 +36,13 @@ export default function Footer() {
               <FacebookIcon size={16} />
             </a>
             <a
-              href={company.social.instagram}
-              aria-label="Acorn Construction on Instagram"
+              href={company.social.linkedin}
+              aria-label="Acorn Construction on LinkedIn"
               target="_blank"
               rel="noopener noreferrer"
               className="flex h-9 w-9 items-center justify-center rounded-full border border-acorn-cream/20 text-acorn-cream/70 transition-colors hover:border-acorn-gold hover:text-acorn-gold"
             >
-              <InstagramIcon size={16} />
+              <LinkedinIcon size={16} />
             </a>
           </div>
         </div>
@@ -75,7 +75,6 @@ export default function Footer() {
 
         <div className="flex flex-col gap-3">
           <h3 className="text-sm font-semibold uppercase tracking-wider text-acorn-cream">Contact</h3>
-          {/* PLACEHOLDER: full street address needed from client */}
           <div className="flex items-start gap-2 text-sm text-acorn-cream/60">
             <MapPin size={16} className="mt-0.5 shrink-0 text-acorn-gold" />
             <span>
@@ -84,7 +83,6 @@ export default function Footer() {
               {company.address.cityStateZip}
             </span>
           </div>
-          {/* PLACEHOLDER: phone number needed from client */}
           <a
             href={company.phoneHref}
             className="flex items-center gap-2 text-sm text-acorn-cream/60 transition-colors hover:text-acorn-gold"

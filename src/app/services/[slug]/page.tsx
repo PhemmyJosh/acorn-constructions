@@ -97,7 +97,6 @@ export default async function ServiceDetailPage({ params }: ServicePageProps) {
             >
               Get a Quote
             </Link>
-            {/* PLACEHOLDER: phone number needed from client */}
             <a
               href={company.phoneHref}
               className="flex items-center justify-center gap-2 rounded-sm border border-acorn-charcoal px-7 py-3.5 text-sm font-semibold uppercase tracking-wider text-acorn-charcoal transition-colors duration-200 hover:bg-acorn-charcoal hover:text-acorn-cream"

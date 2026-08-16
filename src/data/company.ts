@@ -1,8 +1,6 @@
 import { NavLink } from "@/types";
 
-// PLACEHOLDER: phone, email, and street address are needed from the client.
-// The values below are non-functional placeholders standing in until real
-// contact details are provided.
+// PLACEHOLDER: email is still needed from the client.
 export const company = {
   name: "Acorn Construction",
   legalName: "Acorn Construction Ltd.",
@@ -11,16 +9,16 @@ export const company = {
   headquarters: "Lloydminster, Alberta, Canada",
   serviceArea: "Alberta and Saskatchewan",
   serviceAreaLine: "Proudly serving Alberta and Saskatchewan",
-  phoneDisplay: "(000) 000-0000",
-  phoneHref: "tel:+10000000000",
+  phoneDisplay: "+1 780 205 6361",
+  phoneHref: "tel:+17802056361",
   email: "info@acornconstruction.example",
   address: {
-    line1: "Street address needed from client",
-    cityStateZip: "Lloydminster, Alberta, Canada",
+    line1: "146C Miller St",
+    cityStateZip: "Blackfoot, Alberta, T9V 0Y4",
   },
   social: {
-    facebook: "https://facebook.com",
-    instagram: "https://instagram.com",
+    facebook: "https://www.facebook.com/Acornconstructionltd/",
+    linkedin: "https://www.linkedin.com/company/143066254/",
   },
 };
 
