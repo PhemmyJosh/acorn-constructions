@@ -1,5 +1,4 @@
 import Hero from "@/components/home/Hero";
-import StatStrip from "@/components/home/StatStrip";
 import CategoryShowcase from "@/components/home/CategoryShowcase";
 import WhyBuildWithAcorn from "@/components/home/WhyBuildWithAcorn";
 import IntroBlurb from "@/components/home/IntroBlurb";
@@ -14,7 +13,6 @@ export default function Home() {
   return (
     <>
       <Hero />
-      <StatStrip />
       <CategoryShowcase />
       <WhyBuildWithAcorn />
       <IntroBlurb />
