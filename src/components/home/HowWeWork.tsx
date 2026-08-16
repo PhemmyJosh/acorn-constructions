@@ -3,6 +3,9 @@ import SectionHeading from "@/components/ui/SectionHeading";
 import Reveal from "@/components/motion/Reveal";
 import { processSteps, type ProcessStep } from "@/data/howWeWork";
 
+/** Slightly wider than the site's card-grid stagger, to read as a sequence. */
+const STEP_STAGGER = 0.12;
+
 function StepMarker({ step }: { step: ProcessStep }) {
   const Icon = step.icon;
   return (
@@ -17,7 +20,9 @@ function StepMarker({ step }: { step: ProcessStep }) {
 function StepBody({ step, index }: { step: ProcessStep; index: number }) {
   return (
     <div className="flex flex-col gap-2">
-      <span className="font-heading text-5xl font-bold leading-none text-acorn-gold/35">
+      {/* Gold at 75% over charcoal clears 3:1 for large text, so the numeral
+          stays legible while still sitting behind the step title. */}
+      <span className="font-heading text-5xl font-bold leading-none text-acorn-gold/75">
         {String(index + 1).padStart(2, "0")}
       </span>
       <h3 className="text-base font-semibold text-acorn-cream">{step.title}</h3>
@@ -41,52 +46,57 @@ export default function HowWeWork() {
       </Reveal>
 
       {/* Desktop: horizontal spine with steps alternating above and below it.
-          The timeline reveals as one unit rather than per-step, so the markers
-          never drift off the spine mid-animation. */}
-      <Reveal className="relative mt-20 hidden lg:block">
+          Each step reveals on its own delay. Markers fade without translating
+          so they never drift off the spine mid-animation; only the text
+          bodies slide up. */}
+      <div className="relative mt-20 hidden lg:block">
         {/* Column centres sit at 10%, 30%, 50%, 70% and 90%, so the spine
             spans exactly from the first marker to the last. */}
         <div className="absolute left-[10%] right-[10%] top-1/2 h-px -translate-y-1/2 bg-acorn-gold/25" />
         <ol className="relative grid grid-cols-5 gap-6">
           {processSteps.map((step, index) => {
             const isAbove = index % 2 === 0;
+            const delay = index * STEP_STAGGER;
             return (
               <li key={step.title} className="grid grid-rows-[1fr_auto_1fr] gap-4">
                 {isAbove ? (
-                  <div className="row-start-1 flex items-end">
+                  <Reveal className="row-start-1 flex items-end" delay={delay}>
                     <StepBody step={step} index={index} />
-                  </div>
+                  </Reveal>
                 ) : null}
-                <div className="row-start-2 flex justify-center">
+                <Reveal className="row-start-2 flex justify-center" delay={delay} y={0}>
                   <StepMarker step={step} />
-                </div>
+                </Reveal>
                 {!isAbove ? (
-                  <div className="row-start-3 flex items-start">
+                  <Reveal className="row-start-3 flex items-start" delay={delay}>
                     <StepBody step={step} index={index} />
-                  </div>
+                  </Reveal>
                 ) : null}
               </li>
             );
           })}
         </ol>
-      </Reveal>
+      </div>
 
       {/* Mobile and tablet: vertical spine with steps stacked down the page */}
-      <Reveal className="relative mt-14 lg:hidden">
+      <div className="relative mt-14 lg:hidden">
         <div className="absolute bottom-0 left-7 top-0 w-px bg-acorn-gold/25" />
         <ol className="relative flex flex-col gap-10">
-          {processSteps.map((step, index) => (
-            <li key={step.title} className="flex gap-5 sm:gap-6">
-              <div className="shrink-0">
-                <StepMarker step={step} />
-              </div>
-              <div className="min-w-0 pt-1">
-                <StepBody step={step} index={index} />
-              </div>
-            </li>
-          ))}
+          {processSteps.map((step, index) => {
+            const delay = index * STEP_STAGGER;
+            return (
+              <li key={step.title} className="flex gap-5 sm:gap-6">
+                <Reveal className="shrink-0" delay={delay} y={0}>
+                  <StepMarker step={step} />
+                </Reveal>
+                <Reveal className="min-w-0 pt-1" delay={delay}>
+                  <StepBody step={step} index={index} />
+                </Reveal>
+              </li>
+            );
+          })}
         </ol>
-      </Reveal>
+      </div>
     </Section>
   );
 }
