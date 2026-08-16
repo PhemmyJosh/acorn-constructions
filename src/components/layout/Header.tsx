@@ -4,6 +4,7 @@ import { Phone } from "lucide-react";
 import { navLinks, company } from "@/data/company";
 import Button from "@/components/ui/Button";
 import MobileNav from "./MobileNav";
+import ServicesDropdown from "./ServicesDropdown";
 
 export default function Header() {
   return (
@@ -21,15 +22,19 @@ export default function Header() {
         </Link>
 
         <nav className="hidden items-center gap-8 md:flex">
-          {navLinks.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className="text-sm font-medium text-acorn-cream/80 transition-colors duration-200 hover:text-acorn-gold"
-            >
-              {link.label}
-            </Link>
-          ))}
+          {navLinks.map((link) =>
+            link.children ? (
+              <ServicesDropdown key={link.href} label={link.label} items={link.children} />
+            ) : (
+              <Link
+                key={link.href}
+                href={link.href}
+                className="text-sm font-medium text-acorn-cream/80 transition-colors duration-200 hover:text-acorn-gold"
+              >
+                {link.label}
+              </Link>
+            )
+          )}
         </nav>
 
         <div className="hidden items-center gap-6 md:flex">

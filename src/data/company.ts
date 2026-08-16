@@ -1,4 +1,5 @@
 import { NavLink } from "@/types";
+import { services } from "@/data/services";
 
 // PLACEHOLDER: email is still needed from the client.
 export const company = {
@@ -25,7 +26,16 @@ export const company = {
 export const navLinks: NavLink[] = [
   { label: "Home", href: "/" },
   { label: "About", href: "/about" },
-  { label: "Services", href: "/services" },
+  {
+    // Renders as a dropdown/accordion. Children are derived from the service
+    // data so slugs stay single-sourced.
+    label: "Services",
+    href: "/services",
+    children: services.map((service) => ({
+      label: service.navLabel,
+      href: `/services/${service.slug}`,
+    })),
+  },
   { label: "Projects", href: "/projects" },
   { label: "Contact", href: "/contact" },
 ];

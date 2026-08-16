@@ -3,6 +3,8 @@ import { LucideIcon } from "lucide-react";
 export interface Service {
   slug: string;
   title: string;
+  /** Condensed label used in the nav dropdown, where the full title is too long. */
+  navLabel: string;
   shortDescription: string;
   description: string[];
   icon: LucideIcon;
@@ -37,4 +39,6 @@ export interface Project {
 export interface NavLink {
   label: string;
   href: string;
+  /** When present, this nav item renders as a dropdown (desktop) or accordion (mobile). */
+  children?: Array<{ label: string; href: string }>;
 }

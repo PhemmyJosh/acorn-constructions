@@ -6,6 +6,7 @@ export const services: Service[] = [
   {
     slug: "residential-light-commercial-framing",
     title: "Residential & Light Commercial Wood Frame Construction",
+    navLabel: "Residential & Commercial Framing",
     shortDescription:
       "Precise framing for custom homes, additions, garages, and light commercial buildings, built with real craftsmanship.",
     description: [
@@ -26,6 +27,7 @@ export const services: Service[] = [
   {
     slug: "foundations",
     title: "Foundations",
+    navLabel: "Foundations",
     shortDescription:
       "Excavation, footings, foundation walls, and slab-on-grade work engineered for strength and long-term structural performance.",
     description: [
@@ -46,6 +48,7 @@ export const services: Service[] = [
   {
     slug: "post-frame-construction",
     title: "Post Frame Construction",
+    navLabel: "Post Frame Construction",
     shortDescription:
       "Agricultural buildings, workshops, storage buildings, and custom post frame structures built for durability and efficiency.",
     description: [
