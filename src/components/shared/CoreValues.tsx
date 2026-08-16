@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Container from "@/components/ui/Container";
 import SectionHeading from "@/components/ui/SectionHeading";
+import Reveal, { REVEAL_STAGGER } from "@/components/motion/Reveal";
 import { coreValues } from "@/data/coreValues";
 import { photos } from "@/data/photos";
 
@@ -24,25 +25,31 @@ export default function CoreValues({
         className="object-cover opacity-[0.08]"
       />
       <Container className="relative z-10">
-        <SectionHeading
-          eyebrow={eyebrow}
-          title={title}
-          description={description}
-          tone="dark"
-          align="center"
-          className="mx-auto"
-        />
+        <Reveal>
+          <SectionHeading
+            eyebrow={eyebrow}
+            title={title}
+            description={description}
+            tone="dark"
+            align="center"
+            className="mx-auto"
+          />
+        </Reveal>
         <div className="mt-14 grid gap-10 sm:grid-cols-2 lg:grid-cols-3">
-          {coreValues.map((value) => {
+          {coreValues.map((value, index) => {
             const Icon = value.icon;
             return (
-              <div key={value.title} className="flex flex-col items-start gap-4">
+              <Reveal
+                key={value.title}
+                delay={index * REVEAL_STAGGER}
+                className="flex flex-col items-start gap-4"
+              >
                 <div className="flex h-12 w-12 items-center justify-center rounded-full bg-acorn-gold text-acorn-charcoal">
                   <Icon size={22} />
                 </div>
                 <h3 className="text-lg font-semibold text-acorn-cream">{value.title}</h3>
                 <p className="text-sm leading-relaxed text-acorn-cream/60">{value.description}</p>
-              </div>
+              </Reveal>
             );
           })}
         </div>
