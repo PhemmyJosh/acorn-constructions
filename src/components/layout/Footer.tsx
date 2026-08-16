@@ -102,10 +102,16 @@ export default function Footer() {
       </Container>
 
       <div className="border-t border-acorn-cream/10 py-6">
-        <Container>
+        <Container className="flex flex-col items-center gap-3 sm:flex-row sm:justify-between">
           <p className="text-center text-xs text-acorn-cream/50">
             &copy; {year} {company.legalName}. All rights reserved.
           </p>
+          <Link
+            href="/privacy-policy"
+            className="text-xs text-acorn-cream/50 transition-colors hover:text-acorn-gold"
+          >
+            Privacy Policy
+          </Link>
         </Container>
       </div>
     </footer>
