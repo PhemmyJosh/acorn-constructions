@@ -1,5 +1,6 @@
 import Section from "@/components/ui/Section";
 import SectionHeading from "@/components/ui/SectionHeading";
+import Reveal from "@/components/motion/Reveal";
 import { processSteps, type ProcessStep } from "@/data/howWeWork";
 
 function StepMarker({ step }: { step: ProcessStep }) {
@@ -28,17 +29,21 @@ function StepBody({ step, index }: { step: ProcessStep; index: number }) {
 export default function HowWeWork() {
   return (
     <Section tone="dark">
-      <SectionHeading
-        eyebrow="How We Work"
-        title="A clear process from scope to handover"
-        description="As the framing subcontractor, we plug in once the site is ready and carry the project through to a finished, walked-through structure."
-        tone="dark"
-        align="center"
-        className="mx-auto"
-      />
+      <Reveal>
+        <SectionHeading
+          eyebrow="How We Work"
+          title="A clear process from scope to handover"
+          description="As the framing subcontractor, we plug in once the site is ready and carry the project through to a finished, walked-through structure."
+          tone="dark"
+          align="center"
+          className="mx-auto"
+        />
+      </Reveal>
 
-      {/* Desktop: horizontal spine with steps alternating above and below it */}
-      <div className="relative mt-20 hidden lg:block">
+      {/* Desktop: horizontal spine with steps alternating above and below it.
+          The timeline reveals as one unit rather than per-step, so the markers
+          never drift off the spine mid-animation. */}
+      <Reveal className="relative mt-20 hidden lg:block">
         {/* Column centres sit at 10%, 30%, 50%, 70% and 90%, so the spine
             spans exactly from the first marker to the last. */}
         <div className="absolute left-[10%] right-[10%] top-1/2 h-px -translate-y-1/2 bg-acorn-gold/25" />
@@ -64,10 +69,10 @@ export default function HowWeWork() {
             );
           })}
         </ol>
-      </div>
+      </Reveal>
 
       {/* Mobile and tablet: vertical spine with steps stacked down the page */}
-      <div className="relative mt-14 lg:hidden">
+      <Reveal className="relative mt-14 lg:hidden">
         <div className="absolute bottom-0 left-7 top-0 w-px bg-acorn-gold/25" />
         <ol className="relative flex flex-col gap-10">
           {processSteps.map((step, index) => (
@@ -81,7 +86,7 @@ export default function HowWeWork() {
             </li>
           ))}
         </ol>
-      </div>
+      </Reveal>
     </Section>
   );
 }
