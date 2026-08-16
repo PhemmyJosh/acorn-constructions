@@ -7,7 +7,7 @@ export const services: Service[] = [
     slug: "residential-light-commercial-framing",
     title: "Residential & Light Commercial Wood Frame Construction",
     shortDescription:
-      "Custom homes, additions, garages, shops, and light commercial framing — delivered with precision, structural integrity, and quality craftsmanship at every stage.",
+      "Custom homes, additions, garages, and light commercial framing — precise, structurally sound, and built with real craftsmanship.",
     description: [
       "We provide professional wood frame construction services for residential homes and light commercial buildings. From custom homes and additions to garages, shops, and small commercial structures, our team delivers precision framing, structural integrity, and quality workmanship at every stage of construction.",
     ],
@@ -27,7 +27,7 @@ export const services: Service[] = [
     slug: "foundations",
     title: "Foundations",
     shortDescription:
-      "Excavation, footings, foundation walls, and slab-on-grade work engineered for strength and lasting performance.",
+      "Excavation, footings, foundation walls, and slab-on-grade work engineered for strength and long-term structural performance.",
     description: [
       "A strong building starts with a solid foundation. We provide foundation construction services that create stable, durable bases for residential and light commercial projects. Our team focuses on accuracy, proper preparation, and quality concrete work to ensure long-term structural performance.",
     ],
@@ -47,7 +47,7 @@ export const services: Service[] = [
     slug: "post-frame-construction",
     title: "Post Frame Construction",
     shortDescription:
-      "Agricultural buildings, workshops, storage buildings, and custom post frame structures — cost-effective, durable, and built to last.",
+      "Agricultural buildings, workshops, storage buildings, and custom post frame structures built for durability and efficiency.",
     description: [
       "Post frame construction is a versatile and cost-effective building solution for agricultural, residential, commercial, and storage applications. Whether you need a shop, barn, garage, warehouse, or custom post frame building, we deliver structures designed for strength, functionality, and efficiency.",
     ],

@@ -1,17 +1,18 @@
 export interface TeamMember {
   name: string;
   role: string;
-  image: string;
+  image?: string;
   shortBio?: string;
   bio?: string[];
 }
 
-// Headshots are placeholders (PLACEHOLDER_HEADSHOT) pending real photos from the client.
+// Members without an `image` render an initials avatar (see TeamAvatar) until
+// a real headshot is provided.
 export const team: TeamMember[] = [
   {
     name: "Mark Acorn",
     role: "Founder & CEO",
-    image: "https://placehold.co/500x600/292524/e7e5e4?text=Mark+Acorn",
+    image: "/mark-acorn.jpg",
     shortBio:
       "Mark Acorn is the founder and CEO of Acorn Construction, a Lloydminster-based builder specializing in residential, commercial, and post frame construction. A Red Seal journeyman carpenter since 2002, he founded Acorn Construction in 2011 as a one-man operation and has grown it into multiple crews across Alberta and Saskatchewan. For Mark, the real reward is in the homes built for great clients and the relationships made along the way.",
     bio: [
@@ -24,16 +25,13 @@ export const team: TeamMember[] = [
   {
     name: "Jeremy McColm",
     role: "Operations Manager",
-    image: "https://placehold.co/500x600/292524/e7e5e4?text=Jeremy+McColm",
   },
   {
     name: "Laura Acorn",
     role: "Office Manager",
-    image: "https://placehold.co/500x600/292524/e7e5e4?text=Laura+Acorn",
   },
   {
     name: "Blessing Fadumila",
     role: "Operations Coordinator",
-    image: "https://placehold.co/500x600/292524/e7e5e4?text=Blessing+Fadumila",
   },
 ];

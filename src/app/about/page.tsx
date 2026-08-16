@@ -4,6 +4,7 @@ import PageHero from "@/components/ui/PageHero";
 import Section from "@/components/ui/Section";
 import SectionHeading from "@/components/ui/SectionHeading";
 import CoreValues from "@/components/shared/CoreValues";
+import TeamAvatar from "@/components/shared/TeamAvatar";
 import FinalCta from "@/components/home/FinalCta";
 import { team } from "@/data/team";
 import { company } from "@/data/company";
@@ -124,10 +125,7 @@ export default function AboutPage() {
         </div>
 
         <div className="mt-10 flex flex-col gap-8 rounded-sm border border-acorn-bronze/20 bg-white p-8 lg:flex-row lg:items-start lg:gap-12 lg:p-12">
-          {/* Headshot is a placeholder (PLACEHOLDER_HEADSHOT) pending a real photo from the client */}
-          <div className="relative aspect-[4/5] w-full max-w-xs shrink-0 overflow-hidden rounded-sm">
-            <Image src={founder.image} alt={founder.name} fill className="object-cover" />
-          </div>
+          <TeamAvatar name={founder.name} image={founder.image} className="mx-auto h-44 w-44 lg:mx-0" />
           <div className="flex flex-col gap-4">
             <div>
               <p className="text-xl font-semibold text-acorn-charcoal">{founder.name}</p>
@@ -145,11 +143,8 @@ export default function AboutPage() {
 
         <div className="mt-10 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
           {restOfTeam.map((member) => (
-            <div key={member.name} className="flex flex-col gap-4">
-              {/* Headshot is a placeholder (PLACEHOLDER_HEADSHOT) pending a real photo from the client */}
-              <div className="relative aspect-[5/6] w-full overflow-hidden rounded-sm">
-                <Image src={member.image} alt={member.name} fill className="object-cover" />
-              </div>
+            <div key={member.name} className="flex flex-col items-center gap-4 text-center">
+              <TeamAvatar name={member.name} image={member.image} className="h-44 w-44" />
               <div>
                 <p className="text-base font-semibold text-acorn-charcoal">{member.name}</p>
                 <p className="text-sm text-acorn-charcoal/60">{member.role}</p>
