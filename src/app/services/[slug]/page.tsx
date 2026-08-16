@@ -2,11 +2,11 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { CheckCircle2, Phone } from "lucide-react";
+import { CheckCircle2 } from "lucide-react";
 import Section from "@/components/ui/Section";
 import Container from "@/components/ui/Container";
+import FinalCtaBanner from "@/components/shared/FinalCtaBanner";
 import { services, getServiceBySlug } from "@/data/services";
-import { company } from "@/data/company";
 
 interface ServicePageProps {
   params: Promise<{ slug: string }>;
@@ -85,29 +85,6 @@ export default async function ServiceDetailPage({ params }: ServicePageProps) {
         </div>
       </Section>
 
-      <section className="bg-acorn-gold py-16 text-acorn-charcoal sm:py-20">
-        <Container className="flex flex-col items-center gap-6 text-center">
-          <h2 className="max-w-2xl text-2xl font-semibold sm:text-3xl">
-            {service.relatedCtaText}
-          </h2>
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-            <Link
-              href="/contact"
-              className="inline-flex items-center justify-center rounded-sm border border-acorn-charcoal bg-acorn-charcoal px-7 py-3.5 text-sm font-semibold uppercase tracking-wider text-acorn-cream transition-colors duration-200 hover:bg-transparent hover:text-acorn-charcoal"
-            >
-              Get a Quote
-            </Link>
-            <a
-              href={company.phoneHref}
-              className="flex items-center justify-center gap-2 rounded-sm border border-acorn-charcoal px-7 py-3.5 text-sm font-semibold uppercase tracking-wider text-acorn-charcoal transition-colors duration-200 hover:bg-acorn-charcoal hover:text-acorn-cream"
-            >
-              <Phone size={16} />
-              {company.phoneDisplay}
-            </a>
-          </div>
-        </Container>
-      </section>
-
       <Section tone="stone">
         <h2 className="text-2xl font-semibold text-acorn-charcoal">Other Services</h2>
         <div className="mt-8 grid gap-6 sm:grid-cols-2">
@@ -125,6 +102,8 @@ export default async function ServiceDetailPage({ params }: ServicePageProps) {
           ))}
         </div>
       </Section>
+
+      <FinalCtaBanner title={service.relatedCtaText} />
     </>
   );
 }

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import PageHero from "@/components/ui/PageHero";
 import Section from "@/components/ui/Section";
 import ServiceCard from "@/components/services/ServiceCard";
-import FinalCta from "@/components/home/FinalCta";
+import FinalCtaBanner from "@/components/shared/FinalCtaBanner";
 import { services } from "@/data/services";
 
 export const metadata: Metadata = {
@@ -37,7 +37,7 @@ export default function ServicesPage() {
         </div>
       </Section>
 
-      <FinalCta />
+      <FinalCtaBanner />
     </>
   );
 }

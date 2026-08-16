@@ -5,7 +5,7 @@ import Section from "@/components/ui/Section";
 import SectionHeading from "@/components/ui/SectionHeading";
 import CoreValues from "@/components/shared/CoreValues";
 import TeamAvatar from "@/components/shared/TeamAvatar";
-import FinalCta from "@/components/home/FinalCta";
+import FinalCtaBanner from "@/components/shared/FinalCtaBanner";
 import { team } from "@/data/team";
 import { photos } from "@/data/photos";
 
@@ -145,7 +145,7 @@ export default function AboutPage() {
         </div>
       </Section>
 
-      <FinalCta />
+      <FinalCtaBanner />
     </>
   );
 }

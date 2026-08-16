@@ -5,7 +5,7 @@ import IntroBlurb from "@/components/home/IntroBlurb";
 import HowWeWork from "@/components/home/HowWeWork";
 import GalleryPreview from "@/components/home/GalleryPreview";
 import Testimonials from "@/components/home/Testimonials";
-import PhotoCtaBanner from "@/components/home/PhotoCtaBanner";
+import FinalCtaBanner from "@/components/shared/FinalCtaBanner";
 
 export default function Home() {
   return (
@@ -17,7 +17,7 @@ export default function Home() {
       <HowWeWork />
       <GalleryPreview />
       <Testimonials />
-      <PhotoCtaBanner />
+      <FinalCtaBanner />
     </>
   );
 }

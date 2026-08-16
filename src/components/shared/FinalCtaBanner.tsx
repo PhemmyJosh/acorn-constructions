@@ -5,7 +5,17 @@ import Container from "@/components/ui/Container";
 import { company } from "@/data/company";
 import { photos } from "@/data/photos";
 
-export default function PhotoCtaBanner() {
+interface FinalCtaBannerProps {
+  /**
+   * Headline override. Service detail pages pass their own per-service copy;
+   * every other page uses the standard headline.
+   */
+  title?: string;
+}
+
+export default function FinalCtaBanner({
+  title = "Ready to Start Your Build?",
+}: FinalCtaBannerProps) {
   return (
     <section className="relative flex min-h-[60vh] items-center overflow-hidden bg-acorn-charcoal text-acorn-cream">
       <Image
@@ -21,7 +31,7 @@ export default function PhotoCtaBanner() {
           Let&apos;s Build Something
         </span>
         <h2 className="max-w-2xl text-4xl font-bold leading-tight sm:text-5xl lg:text-6xl">
-          Ready to Start Your Build?
+          {title}
         </h2>
         <p className="max-w-xl text-lg leading-relaxed text-acorn-cream/80">
           From first sketch to final walkthrough, our crews bring the same

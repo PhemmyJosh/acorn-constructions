@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import PageHero from "@/components/ui/PageHero";
 import Section from "@/components/ui/Section";
 import ProjectsGalleryClient from "@/components/projects/ProjectsGalleryClient";
-import FinalCta from "@/components/home/FinalCta";
+import FinalCtaBanner from "@/components/shared/FinalCtaBanner";
 import { projects } from "@/data/projects";
 
 export const metadata: Metadata = {
@@ -24,7 +24,7 @@ export default function ProjectsPage() {
         <ProjectsGalleryClient projects={projects} />
       </Section>
 
-      <FinalCta />
+      <FinalCtaBanner />
     </>
   );
 }
