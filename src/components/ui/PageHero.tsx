@@ -1,13 +1,26 @@
 import Image from "next/image";
+import type { ReactNode } from "react";
 
 interface PageHeroProps {
   eyebrow?: string;
-  title: string;
+  /** Accepts nodes so a page can control its own line breaks. */
+  title: ReactNode;
   description?: string;
   backgroundImage?: string;
+  /**
+   * Replaces the h1's width and type-size classes. Override when a longer
+   * headline needs to hold a specific line count at small widths.
+   */
+  titleClassName?: string;
 }
 
-export default function PageHero({ eyebrow, title, description, backgroundImage }: PageHeroProps) {
+export default function PageHero({
+  eyebrow,
+  title,
+  description,
+  backgroundImage,
+  titleClassName = "max-w-2xl text-4xl sm:text-5xl",
+}: PageHeroProps) {
   return (
     <section className="relative overflow-hidden bg-acorn-charcoal py-20 text-acorn-cream sm:py-24">
       {backgroundImage ? (
@@ -22,7 +35,7 @@ export default function PageHero({ eyebrow, title, description, backgroundImage 
             {eyebrow}
           </span>
         ) : null}
-        <h1 className="max-w-2xl text-4xl font-bold sm:text-5xl">{title}</h1>
+        <h1 className={`font-bold ${titleClassName}`}>{title}</h1>
         {description ? (
           <p className="max-w-xl text-base leading-relaxed text-acorn-cream/70 sm:text-lg">
             {description}

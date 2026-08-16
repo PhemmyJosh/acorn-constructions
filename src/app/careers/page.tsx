@@ -18,7 +18,17 @@ export default function CareersPage() {
     <>
       <PageHero
         eyebrow="Careers"
-        title="Build More Than Structures. Build Your Career With Us."
+        // Each sentence is its own block so the headline always breaks
+        // between the two sentences rather than wherever it happens to fit.
+        title={
+          <>
+            <span className="block">Build More Than Structures.</span>
+            <span className="block">Build Your Career With Us.</span>
+          </>
+        }
+        // Fluid size so each sentence holds a single line at every width,
+        // keeping the headline to exactly two lines down to small phones.
+        titleClassName="max-w-none text-[clamp(1.375rem,6.2vw,3rem)] leading-tight"
         description="At Acorn Construction, we're more than a framing company. We're a team of skilled, safety-first tradespeople dedicated to precision and quality on every job. Join our growing crew and help us build across Alberta and Saskatchewan while growing your own skills and career."
         backgroundImage={photos.crewBuildingByLake}
       />
