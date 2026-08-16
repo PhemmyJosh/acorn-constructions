@@ -25,7 +25,7 @@ export default function Header() {
             <Link
               key={link.href}
               href={link.href}
-              className="text-sm font-medium text-acorn-cream/80 transition-colors hover:text-acorn-gold"
+              className="text-sm font-medium text-acorn-cream/80 transition-colors duration-200 hover:text-acorn-gold"
             >
               {link.label}
             </Link>
@@ -35,7 +35,7 @@ export default function Header() {
         <div className="hidden items-center gap-6 md:flex">
           <a
             href={company.phoneHref}
-            className="flex items-center gap-2 text-sm font-semibold text-acorn-cream transition-colors hover:text-acorn-gold"
+            className="flex items-center gap-2 text-sm font-semibold text-acorn-cream transition-colors duration-200 hover:text-acorn-gold"
           >
             <Phone size={16} />
             {company.phoneDisplay}

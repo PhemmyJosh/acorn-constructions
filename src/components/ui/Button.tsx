@@ -21,8 +21,10 @@ const variantClasses: Record<ButtonVariant, string> = {
     "bg-transparent text-acorn-charcoal border border-acorn-charcoal/30 hover:border-acorn-charcoal focus-visible:outline-acorn-charcoal",
 };
 
+// Buttons get a subtle hover scale and no shadow change, so only one effect
+// is ever in play on a given element.
 const baseClasses =
-  "inline-flex items-center justify-center gap-2 rounded-sm px-7 py-3.5 text-sm font-semibold uppercase tracking-wider transition-colors duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2";
+  "inline-flex items-center justify-center gap-2 rounded-sm px-7 py-3.5 text-sm font-semibold uppercase tracking-wider transition duration-200 ease-in-out hover:scale-[1.02] motion-reduce:transition-none motion-reduce:hover:scale-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2";
 
 export default function Button({
   children,
