@@ -14,7 +14,7 @@ export default function Footer() {
         <div className="flex flex-col gap-4 sm:col-span-2 lg:col-span-1">
           <Link href="/" className="w-fit">
             <Image
-              src="/acorn-logo.png"
+              src="/acorn-logo-white.png"
               alt="Acorn Construction, since 2011"
               width={158}
               height={180}

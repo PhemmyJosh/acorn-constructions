@@ -21,7 +21,7 @@ export default function MobileNav() {
       </button>
 
       {isOpen ? (
-        <div className="fixed inset-x-0 top-[var(--header-height,64px)] bottom-0 z-40 flex flex-col bg-acorn-charcoal px-6 py-8">
+        <div className="fixed inset-x-0 top-[var(--header-height,104px)] bottom-0 z-40 flex flex-col bg-acorn-charcoal px-6 py-8">
           <nav className="flex flex-col gap-1">
             {navLinks.map((link) => (
               <Link

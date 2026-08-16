@@ -8,21 +8,16 @@ import MobileNav from "./MobileNav";
 export default function Header() {
   return (
     <header className="sticky top-0 z-50 bg-acorn-charcoal">
-      <div className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between px-6 sm:px-8 lg:px-10">
-        <Link href="/" className="flex items-center gap-3 text-acorn-cream">
-          {/* Full lockup cropped to the icon mark — the wordmark reads too small at nav height */}
-          <span className="relative aspect-[3/2] h-11 overflow-hidden rounded-sm">
-            <Image
-              src="/acorn-logo.png"
-              alt=""
-              fill
-              priority
-              className="object-cover object-top"
-            />
-          </span>
-          <span className="text-lg font-semibold uppercase tracking-wide">
-            Acorn <span className="text-acorn-gold">Construction</span>
-          </span>
+      <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-3 sm:px-8 lg:px-10">
+        <Link href="/" className="flex items-center text-acorn-cream">
+          <Image
+            src="/acorn-logo-white.png"
+            alt="Acorn Construction, since 2011"
+            width={158}
+            height={180}
+            priority
+            className="h-20 w-auto"
+          />
         </Link>
 
         <nav className="hidden items-center gap-8 md:flex">
