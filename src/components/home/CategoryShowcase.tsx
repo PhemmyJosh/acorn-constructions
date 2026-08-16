@@ -3,25 +3,28 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import Section from "@/components/ui/Section";
 import SectionHeading from "@/components/ui/SectionHeading";
+import Reveal, { REVEAL_STAGGER } from "@/components/motion/Reveal";
 import { services } from "@/data/services";
 
 export default function CategoryShowcase() {
   return (
     <Section tone="cream">
-      <SectionHeading
-        eyebrow="What We Build"
-        title="Built for Every Project"
-        description="Three core disciplines, one crew standard: precise, safe, and finished right."
-        align="center"
-        className="mx-auto"
-      />
+      <Reveal>
+        <SectionHeading
+          eyebrow="What We Build"
+          title="Built for Every Project"
+          description="Three core disciplines, one crew standard: precise, safe, and finished right."
+          align="center"
+          className="mx-auto"
+        />
+      </Reveal>
       <div className="mt-14 grid gap-8 lg:grid-cols-3">
-        {services.map((service) => (
-          <Link
-            key={service.slug}
-            href={`/services/${service.slug}`}
-            className="group relative aspect-[3/4] w-full overflow-hidden rounded-sm"
-          >
+        {services.map((service, index) => (
+          <Reveal key={service.slug} delay={index * REVEAL_STAGGER}>
+            <Link
+              href={`/services/${service.slug}`}
+              className="group relative block aspect-[3/4] w-full overflow-hidden rounded-sm"
+            >
             <Image
               src={service.heroImage}
               alt={service.title}
@@ -41,7 +44,8 @@ export default function CategoryShowcase() {
                 <ArrowRight size={16} />
               </span>
             </div>
-          </Link>
+            </Link>
+          </Reveal>
         ))}
       </div>
     </Section>
