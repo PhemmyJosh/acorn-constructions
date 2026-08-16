@@ -2,6 +2,7 @@ import Section from "@/components/ui/Section";
 import SectionHeading from "@/components/ui/SectionHeading";
 import Button from "@/components/ui/Button";
 import MasonryGrid from "@/components/projects/MasonryGrid";
+import Reveal from "@/components/motion/Reveal";
 import { projects } from "@/data/projects";
 
 const FEATURED_IDS = [
@@ -23,20 +24,24 @@ export default function GalleryPreview() {
 
   return (
     <Section tone="cream">
-      <SectionHeading
-        eyebrow="Our Work"
-        title="A look at recent builds"
-        align="center"
-        className="mx-auto"
-      />
-      <div className="mt-14">
+      <Reveal>
+        <SectionHeading
+          eyebrow="Our Work"
+          title="A look at recent builds"
+          align="center"
+          className="mx-auto"
+        />
+      </Reveal>
+      {/* The masonry grid uses CSS columns, so it reveals as one unit rather
+          than per-tile to avoid fighting the column flow. */}
+      <Reveal className="mt-14">
         <MasonryGrid projects={featured} />
-      </div>
-      <div className="mt-4 flex justify-center">
+      </Reveal>
+      <Reveal className="mt-4 flex justify-center">
         <Button href="/projects" variant="secondary">
           View All Projects
         </Button>
-      </div>
+      </Reveal>
     </Section>
   );
 }
