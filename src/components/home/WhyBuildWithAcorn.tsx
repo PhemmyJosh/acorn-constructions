@@ -2,6 +2,7 @@ import { Handshake, HardHat, Maximize2, Users } from "lucide-react";
 import Image from "next/image";
 import Section from "@/components/ui/Section";
 import SectionHeading from "@/components/ui/SectionHeading";
+import Reveal, { REVEAL_STAGGER } from "@/components/motion/Reveal";
 import { photos } from "@/data/photos";
 
 const DIFFERENTIATORS = [
@@ -32,26 +33,31 @@ const DIFFERENTIATORS = [
 export default function WhyBuildWithAcorn() {
   return (
     <Section tone="stone">
-      <SectionHeading
-        eyebrow="Why Build With Acorn"
-        title="Scale, experience, and a seamless handoff"
-        className="mb-14"
-      />
+      <Reveal>
+        <SectionHeading
+          eyebrow="Why Build With Acorn"
+          title="Scale, experience, and a seamless handoff"
+          className="mb-14"
+        />
+      </Reveal>
       <div className="grid gap-8 lg:grid-cols-2 lg:gap-0">
-        <div className="relative aspect-[4/5] w-full overflow-hidden rounded-sm lg:aspect-auto">
+        {/* The Reveal wrapper doubles as the image container so the element
+            stretching to the grid row height is the same one being animated. */}
+        <Reveal className="relative aspect-[4/5] w-full overflow-hidden rounded-sm lg:aspect-auto">
           <Image
             src={photos.framingDetail}
             alt="Acorn crew member framing a wall on site"
             fill
             className="object-cover"
           />
-        </div>
+        </Reveal>
         <div className="flex flex-col justify-center gap-6 lg:relative lg:z-10 lg:-ml-16 lg:gap-8">
           {DIFFERENTIATORS.map((item, index) => {
             const Icon = item.icon;
             return (
-              <div
+              <Reveal
                 key={item.title}
+                delay={index * REVEAL_STAGGER}
                 className={`flex items-start gap-4 rounded-sm border border-acorn-bronze/20 bg-white p-6 shadow-lg sm:p-7 ${
                   index % 2 === 1 ? "lg:ml-10" : ""
                 }`}
@@ -65,7 +71,7 @@ export default function WhyBuildWithAcorn() {
                     {item.description}
                   </p>
                 </div>
-              </div>
+              </Reveal>
             );
           })}
         </div>
