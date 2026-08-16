@@ -3,6 +3,7 @@ import { Phone } from "lucide-react";
 import Button from "@/components/ui/Button";
 import Container from "@/components/ui/Container";
 import { company } from "@/data/company";
+import Reveal from "@/components/motion/Reveal";
 import { photos } from "@/data/photos";
 
 interface FinalCtaBannerProps {
@@ -26,7 +27,8 @@ export default function FinalCtaBanner({
       />
       <div className="absolute inset-0 bg-gradient-to-t from-acorn-charcoal via-acorn-charcoal/75 to-acorn-charcoal/40" />
 
-      <Container className="relative z-10 flex flex-col items-center gap-6 py-24 text-center">
+      <Reveal className="relative z-10 w-full">
+      <Container className="flex flex-col items-center gap-6 py-24 text-center">
         <span className="text-sm font-semibold uppercase tracking-[0.3em] text-acorn-gold">
           Let&apos;s Build Something
         </span>
@@ -50,6 +52,7 @@ export default function FinalCtaBanner({
           </a>
         </div>
       </Container>
+      </Reveal>
     </section>
   );
 }
