@@ -104,26 +104,7 @@ export default function AboutPage() {
           className="mx-auto"
         />
 
-        <div className="mx-auto mt-10 flex max-w-md justify-center gap-4">
-          <div className="relative aspect-square w-1/2 overflow-hidden rounded-sm">
-            <Image
-              src={photos.workerWithBlueprints}
-              alt="Acorn team member reviewing project plans"
-              fill
-              className="object-cover"
-            />
-          </div>
-          <div className="relative aspect-square w-1/2 overflow-hidden rounded-sm">
-            <Image
-              src={photos.crewOnTrussesPlayful}
-              alt="Acorn crew member on site"
-              fill
-              className="object-cover"
-            />
-          </div>
-        </div>
-
-        <div className="mt-10 flex flex-col gap-8 rounded-sm border border-acorn-bronze/20 bg-white p-8 lg:flex-row lg:items-start lg:gap-12 lg:p-12">
+        <div className="mt-14 flex flex-col gap-8 rounded-sm border border-acorn-bronze/20 bg-white p-8 lg:flex-row lg:items-start lg:gap-12 lg:p-12">
           {founder.image ? (
             <div className="relative aspect-[4/5] w-full max-w-xs shrink-0 overflow-hidden rounded-lg lg:mx-0">
               <Image
