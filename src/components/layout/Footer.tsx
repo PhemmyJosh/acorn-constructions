@@ -75,7 +75,7 @@ export default function Footer() {
 
         <div className="flex flex-col gap-3">
           <h3 className="text-sm font-semibold uppercase tracking-wider text-acorn-cream">Contact</h3>
-          {/* PLACEHOLDER — full street address needed from client */}
+          {/* PLACEHOLDER: full street address needed from client */}
           <div className="flex items-start gap-2 text-sm text-acorn-cream/60">
             <MapPin size={16} className="mt-0.5 shrink-0 text-acorn-gold" />
             <span>
@@ -84,7 +84,7 @@ export default function Footer() {
               {company.address.cityStateZip}
             </span>
           </div>
-          {/* PLACEHOLDER — phone number needed from client */}
+          {/* PLACEHOLDER: phone number needed from client */}
           <a
             href={company.phoneHref}
             className="flex items-center gap-2 text-sm text-acorn-cream/60 transition-colors hover:text-acorn-gold"
@@ -92,7 +92,7 @@ export default function Footer() {
             <Phone size={16} className="shrink-0 text-acorn-gold" />
             {company.phoneDisplay}
           </a>
-          {/* PLACEHOLDER — email needed from client */}
+          {/* PLACEHOLDER: email needed from client */}
           <a
             href={`mailto:${company.email}`}
             className="flex items-center gap-2 text-sm text-acorn-cream/60 transition-colors hover:text-acorn-gold"

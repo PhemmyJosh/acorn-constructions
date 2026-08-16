@@ -20,7 +20,7 @@ export default function FinalCta() {
           >
             Get a Quote
           </Link>
-          {/* PLACEHOLDER — phone number needed from client */}
+          {/* PLACEHOLDER: phone number needed from client */}
           <a
             href={company.phoneHref}
             className="flex items-center justify-center gap-2 text-lg font-semibold text-acorn-charcoal"

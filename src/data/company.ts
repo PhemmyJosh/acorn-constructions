@@ -1,6 +1,6 @@
 import { NavLink } from "@/types";
 
-// PLACEHOLDER — phone, email, and street address are needed from the client.
+// PLACEHOLDER: phone, email, and street address are needed from the client.
 // The values below are non-functional placeholders standing in until real
 // contact details are provided.
 export const company = {

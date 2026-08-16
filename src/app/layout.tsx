@@ -15,7 +15,7 @@ const oswald = Oswald({
   weight: ["400", "500", "600", "700"],
 });
 
-// PLACEHOLDER — set metadataBase to the production domain once the client
+// PLACEHOLDER: set metadataBase to the production domain once the client
 // provides one, so relative OG/icon URLs below resolve correctly when shared.
 export const metadata: Metadata = {
   title: "Acorn Construction | Residential, Commercial & Post Frame Builders",

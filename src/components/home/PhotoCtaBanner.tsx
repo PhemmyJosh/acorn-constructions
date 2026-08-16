@@ -31,7 +31,7 @@ export default function PhotoCtaBanner() {
           <Button href="/contact" variant="primary" className="px-9 py-4 text-base">
             Get a Quote
           </Button>
-          {/* PLACEHOLDER — phone number needed from client */}
+          {/* PLACEHOLDER: phone number needed from client */}
           <a
             href={company.phoneHref}
             className="flex items-center justify-center gap-2 rounded-sm border border-acorn-cream/70 px-9 py-4 text-base font-semibold uppercase tracking-wider text-acorn-cream transition-colors duration-200 hover:bg-acorn-cream hover:text-acorn-charcoal"

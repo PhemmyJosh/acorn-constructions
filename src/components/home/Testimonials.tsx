@@ -4,7 +4,7 @@ import SectionHeading from "@/components/ui/SectionHeading";
 import Card from "@/components/ui/Card";
 import { testimonials } from "@/data/testimonials";
 
-// TESTIMONIALS NEEDED FROM CLIENT — the quotes below are placeholder copy
+// TESTIMONIALS NEEDED FROM CLIENT: the quotes below are placeholder copy
 // standing in until real client testimonials are provided.
 export default function Testimonials() {
   return (

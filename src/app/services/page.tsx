@@ -22,7 +22,7 @@ export default function ServicesPage() {
 
       <Section tone="cream">
         {/*
-          Subcontractor scope note — Acorn typically joins projects as a
+          Subcontractor scope note: Acorn typically joins projects as a
           subcontractor after excavation or foundation stage to complete the
           framing scope.
         */}

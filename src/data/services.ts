@@ -7,7 +7,7 @@ export const services: Service[] = [
     slug: "residential-light-commercial-framing",
     title: "Residential & Light Commercial Wood Frame Construction",
     shortDescription:
-      "Custom homes, additions, garages, and light commercial framing — precise, structurally sound, and built with real craftsmanship.",
+      "Precise framing for custom homes, additions, garages, and light commercial buildings, built with real craftsmanship.",
     description: [
       "We provide professional wood frame construction services for residential homes and light commercial buildings. From custom homes and additions to garages, shops, and small commercial structures, our team delivers precision framing, structural integrity, and quality workmanship at every stage of construction.",
     ],
