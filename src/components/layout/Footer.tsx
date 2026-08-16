@@ -4,12 +4,14 @@ import { Mail, MapPin, Phone } from "lucide-react";
 import { navLinks, company } from "@/data/company";
 import Container from "@/components/ui/Container";
 import { FacebookIcon, LinkedinIcon } from "@/components/ui/SocialIcons";
+import Reveal from "@/components/motion/Reveal";
 
 export default function Footer() {
   const year = new Date().getFullYear();
 
   return (
     <footer className="bg-acorn-charcoal text-acorn-cream/70">
+      <Reveal>
       <Container className="grid gap-12 py-16 sm:grid-cols-2 lg:grid-cols-4 lg:py-20">
         <div className="flex flex-col gap-4 sm:col-span-2 lg:col-span-1">
           <Link href="/" className="w-fit">
@@ -100,6 +102,7 @@ export default function Footer() {
           </a>
         </div>
       </Container>
+      </Reveal>
 
       <div className="border-t border-acorn-cream/10 py-6">
         <Container className="flex flex-col items-center gap-3 sm:flex-row sm:justify-between">
