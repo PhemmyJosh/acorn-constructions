@@ -37,7 +37,7 @@ export default function CoreValues({
             const Icon = value.icon;
             return (
               <div key={value.title} className="flex flex-col items-start gap-4">
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-acorn-bronze/20 text-acorn-bronze">
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-acorn-gold text-acorn-charcoal">
                   <Icon size={22} />
                 </div>
                 <h3 className="text-lg font-semibold text-acorn-cream">{value.title}</h3>
