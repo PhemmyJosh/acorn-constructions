@@ -10,7 +10,6 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-inter);
   --font-heading: var(--font-oswald);
-  --font-mono: var(--font-jetbrains-mono);
 
   /* Acorn Construction brand palette (from client logo: charcoal + bronze) */
   --color-acorn-charcoal: #262018;
