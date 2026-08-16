@@ -8,7 +8,7 @@ import { projects } from "@/data/projects";
 export const metadata: Metadata = {
   title: "Projects | Acorn Construction",
   description:
-    "Browse a selection of Acorn Construction's residential, foundation, and post frame projects across Alberta and Saskatchewan.",
+    "Browse a selection of Acorn Construction's residential, foundation, and post frame projects.",
 };
 
 export default function ProjectsPage() {

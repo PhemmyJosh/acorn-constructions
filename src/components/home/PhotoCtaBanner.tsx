@@ -25,7 +25,7 @@ export default function PhotoCtaBanner() {
         </h2>
         <p className="max-w-xl text-lg leading-relaxed text-acorn-cream/80">
           From first sketch to final walkthrough, our crews bring the same
-          standard to every job across Alberta and Saskatchewan.
+          standard to every job.
         </p>
         <div className="mt-4 flex flex-col gap-4 sm:flex-row sm:items-center">
           <Button href="/contact" variant="primary" className="px-9 py-4 text-base">

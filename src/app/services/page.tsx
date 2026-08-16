@@ -8,7 +8,7 @@ import { services } from "@/data/services";
 export const metadata: Metadata = {
   title: "Services | Acorn Construction",
   description:
-    "Explore Acorn Construction's residential & light commercial framing, foundations, and post frame construction services across Alberta and Saskatchewan.",
+    "Explore Acorn Construction's residential & light commercial framing, foundations, and post frame construction services.",
 };
 
 export default function ServicesPage() {
@@ -17,7 +17,7 @@ export default function ServicesPage() {
       <PageHero
         eyebrow="What We Do"
         title="Construction services for every project"
-        description="Framing, foundations, and post frame construction across Alberta and Saskatchewan, delivered with the same craftsmanship on every job."
+        description="Framing, foundations, and post frame construction delivered with the same craftsmanship on every job."
       />
 
       <Section tone="cream">

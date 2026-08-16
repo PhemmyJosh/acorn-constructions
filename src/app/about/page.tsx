@@ -7,13 +7,12 @@ import CoreValues from "@/components/shared/CoreValues";
 import TeamAvatar from "@/components/shared/TeamAvatar";
 import FinalCta from "@/components/home/FinalCta";
 import { team } from "@/data/team";
-import { company } from "@/data/company";
 import { photos } from "@/data/photos";
 
 export const metadata: Metadata = {
   title: "About Us | Acorn Construction",
   description:
-    "The story, vision, mission, and leadership team behind Acorn Construction, a Lloydminster, Alberta builder serving Alberta and Saskatchewan since 2011.",
+    "The story, vision, mission, and leadership team behind Acorn Construction, a Lloydminster, Alberta builder since 2011.",
 };
 
 export default function AboutPage() {
@@ -24,7 +23,7 @@ export default function AboutPage() {
       <PageHero
         eyebrow="About Us"
         title="Founded in 2011. Still swinging hammers."
-        description={`A Lloydminster, Alberta builder serving ${company.serviceArea} with residential, light commercial, and post frame construction.`}
+        description="A Lloydminster, Alberta builder specializing in residential, light commercial, and post frame construction."
         backgroundImage={photos.crewWithFinishedHouses}
       />
 
@@ -35,15 +34,15 @@ export default function AboutPage() {
               Our History
             </span>
             <h2 className="text-3xl font-semibold sm:text-4xl">
-              From a one-man operation to crews across two provinces
+              From a one-man operation to multiple crews
             </h2>
             <p className="text-base leading-relaxed text-acorn-charcoal/70">
               Acorn Construction was founded in 2011 in Lloydminster, Alberta,
               by Mark Acorn, a Red Seal journeyman carpenter who entered the
               trade in 2002 and earned his journeyman ticket in 2006. What
               began as a one-man operation building homes across Lloydminster
-              has grown steadily into multiple crews working throughout
-              Alberta and Saskatchewan.
+              has grown steadily into multiple crews working across Western
+              Canada.
             </p>
             <p className="text-base leading-relaxed text-acorn-charcoal/70">
               From single-family homes to our largest project to date at{" "}

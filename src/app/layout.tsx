@@ -20,7 +20,7 @@ const oswald = Oswald({
 export const metadata: Metadata = {
   title: "Acorn Construction | Residential, Commercial & Post Frame Builders",
   description:
-    "Acorn Construction Ltd. is a Lloydminster, Alberta-based builder delivering residential, light commercial, and post frame construction across Alberta and Saskatchewan since 2011.",
+    "Acorn Construction Ltd. is a Lloydminster, Alberta-based builder delivering residential, light commercial, and post frame construction since 2011.",
   icons: {
     icon: "/acorn-logo.png",
     shortcut: "/acorn-logo.png",
@@ -29,14 +29,14 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Acorn Construction | Residential, Commercial & Post Frame Builders",
     description:
-      "Residential, light commercial, and post frame construction across Alberta and Saskatchewan since 2011.",
+      "Residential, light commercial, and post frame construction since 2011.",
     images: ["/acorn-logo.png"],
   },
   twitter: {
     card: "summary",
     title: "Acorn Construction | Residential, Commercial & Post Frame Builders",
     description:
-      "Residential, light commercial, and post frame construction across Alberta and Saskatchewan since 2011.",
+      "Residential, light commercial, and post frame construction since 2011.",
     images: ["/acorn-logo.png"],
   },
 };
