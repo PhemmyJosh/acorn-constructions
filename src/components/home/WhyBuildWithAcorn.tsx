@@ -9,22 +9,23 @@ const DIFFERENTIATORS = [
     icon: HardHat,
     title: "25 Years in the Trade",
     description:
-      "Founder Mark Acorn's hands-on framing experience, on every project since day one.",
+      "We're led by founder Mark Acorn, a Red Seal journeyman with 25 years of hands-on framing experience.",
   },
   {
     icon: Maximize2,
     title: "34,000 Sq Ft",
-    description: "Largest project to date",
+    description: "We've built projects as large as 34,000 square feet, our biggest to date.",
   },
   {
     icon: Users,
     title: "Multiple Crews, Multiple Sites",
-    description: "Running simultaneous crews across projects",
+    description: "We run multiple crews across multiple job sites at the same time.",
   },
   {
     icon: Handshake,
     title: "Built to Plug Into Your Project",
-    description: "Seamless subcontractor handoff after excavation or foundation stage",
+    description:
+      "We step in seamlessly as your subcontractor right after excavation or foundation work is complete.",
   },
 ];
 
