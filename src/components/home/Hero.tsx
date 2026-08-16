@@ -18,24 +18,29 @@ export default function Hero() {
     target: sectionRef,
     offset: ["start start", "end start"],
   });
-  const scale = useTransform(scrollYProgress, [0, 1], [1, 1.05]);
+  // The style prop is applied unconditionally so server and client render the
+  // same markup; reduced motion flattens the output range instead of dropping
+  // the prop, which would otherwise be a hydration mismatch.
+  const scale = useTransform(
+    scrollYProgress,
+    [0, 1],
+    prefersReducedMotion ? [1, 1] : [1, 1.05]
+  );
 
-  const loadIn = prefersReducedMotion
-    ? {}
-    : {
-        initial: { opacity: 0, y: 16 },
-        animate: { opacity: 1, y: 0 },
-      };
+  // Identical initial and end states on server and client, so there is no
+  // hydration mismatch. Reduced motion is handled through the transition
+  // below: a zero duration snaps content in with no perceptible movement.
+  const loadIn = {
+    initial: { opacity: 0, y: 16 },
+    animate: { opacity: 1, y: 0 },
+  };
 
   return (
     <section
       ref={sectionRef}
       className="relative flex min-h-[90vh] items-center overflow-hidden bg-acorn-charcoal text-acorn-cream"
     >
-      <motion.div
-        className="absolute inset-0"
-        style={prefersReducedMotion ? undefined : { scale }}
-      >
+      <motion.div className="absolute inset-0" style={{ scale }}>
         <Image
           src={photos.trussInterior}
           alt="Wood frame roof structure under construction"
@@ -49,14 +54,14 @@ export default function Hero() {
       <Container className="relative z-10 flex flex-col gap-6 py-32">
         <motion.h1
           {...loadIn}
-          transition={{ duration: 0.6, ease: "easeOut", delay: 0.1 }}
+          transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.6, ease: "easeOut", delay: 0.1 }}
           className="max-w-3xl text-4xl font-bold leading-tight sm:text-5xl lg:text-6xl"
         >
           We Bring the Same Quality to Every Single Project We Build.
         </motion.h1>
         <motion.p
           {...loadIn}
-          transition={{ duration: 0.6, ease: "easeOut", delay: 0.22 }}
+          transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.6, ease: "easeOut", delay: 0.22 }}
           className="max-w-xl text-lg leading-relaxed text-acorn-cream/80 sm:text-xl"
         >
           Residential, light commercial, and post frame construction built on
@@ -64,7 +69,7 @@ export default function Hero() {
         </motion.p>
         <motion.div
           {...loadIn}
-          transition={{ duration: 0.6, ease: "easeOut", delay: 0.3 }}
+          transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.6, ease: "easeOut", delay: 0.3 }}
           className="mt-4 flex flex-col gap-4 sm:flex-row sm:items-center"
         >
           <Button href="/contact" variant="primary">

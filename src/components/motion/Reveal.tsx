@@ -29,10 +29,18 @@ export default function Reveal({ children, className, delay = 0, y = 20 }: Revea
   return (
     <motion.div
       className={className}
-      initial={prefersReducedMotion ? false : { opacity: 0, y }}
-      whileInView={prefersReducedMotion ? undefined : { opacity: 1, y: 0 }}
+      // `initial` and the end state are identical on the server and the
+      // client, so there is no hydration mismatch. Reduced motion is handled
+      // purely through the transition: a zero duration snaps the element to
+      // its final state with no perceptible movement.
+      initial={{ opacity: 0, y }}
+      whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.2 }}
-      transition={{ duration: REVEAL_DURATION, ease: "easeOut", delay }}
+      transition={
+        prefersReducedMotion
+          ? { duration: 0 }
+          : { duration: REVEAL_DURATION, ease: "easeOut", delay }
+      }
     >
       {children}
     </motion.div>
