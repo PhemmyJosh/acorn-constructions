@@ -31,7 +31,7 @@ export default function Footer() {
               aria-label="Acorn Construction on Facebook"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex h-9 w-9 items-center justify-center rounded-full border border-acorn-cream/20 text-acorn-cream/70 transition-colors hover:border-acorn-gold hover:text-acorn-gold"
+              className="flex h-11 w-11 items-center justify-center rounded-full border border-acorn-cream/20 text-acorn-cream/70 transition-colors hover:border-acorn-gold hover:text-acorn-gold"
             >
               <FacebookIcon size={16} />
             </a>
@@ -40,7 +40,7 @@ export default function Footer() {
               aria-label="Acorn Construction on LinkedIn"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex h-9 w-9 items-center justify-center rounded-full border border-acorn-cream/20 text-acorn-cream/70 transition-colors hover:border-acorn-gold hover:text-acorn-gold"
+              className="flex h-11 w-11 items-center justify-center rounded-full border border-acorn-cream/20 text-acorn-cream/70 transition-colors hover:border-acorn-gold hover:text-acorn-gold"
             >
               <LinkedinIcon size={16} />
             </a>

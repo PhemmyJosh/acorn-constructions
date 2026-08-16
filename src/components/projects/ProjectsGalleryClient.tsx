@@ -47,7 +47,7 @@ export default function ProjectsGalleryClient({ projects }: ProjectsGalleryClien
             key={category}
             type="button"
             onClick={() => selectCategory(category)}
-            className={`rounded-full border px-5 py-2 text-sm font-semibold uppercase tracking-wider transition-colors ${
+            className={`rounded-full border px-5 py-3 text-sm font-semibold uppercase tracking-wider transition-colors ${
               activeCategory === category
                 ? "border-acorn-charcoal bg-acorn-charcoal text-acorn-cream"
                 : "border-acorn-charcoal/30 text-acorn-charcoal hover:border-acorn-charcoal"
