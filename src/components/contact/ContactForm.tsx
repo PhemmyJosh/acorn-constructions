@@ -2,6 +2,7 @@
 
 import { FormEvent, useState } from "react";
 import Button from "@/components/ui/Button";
+import { postJson } from "@/lib/submit-form";
 
 interface ContactFormData {
   name: string;
@@ -20,14 +21,28 @@ const initialFormData: ContactFormData = {
 export default function ContactForm() {
   const [formData, setFormData] = useState<ContactFormData>(initialFormData);
   const [submitted, setSubmitted] = useState(false);
+  const [isSending, setIsSending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   function handleChange(field: keyof ContactFormData, value: string) {
     setFormData((current) => ({ ...current, [field]: value }));
   }
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    console.log("Contact form submission:", formData);
+    if (isSending) return;
+
+    setIsSending(true);
+    setError(null);
+
+    const result = await postJson("/api/contact", formData);
+
+    setIsSending(false);
+    if (!result.ok) {
+      setError(result.error ?? null);
+      return;
+    }
+
     setSubmitted(true);
     setFormData(initialFormData);
   }
@@ -108,8 +123,22 @@ export default function ContactForm() {
         />
       </div>
 
-      <Button type="submit" variant="primary" className="self-start">
-        Send Message
+      {error && (
+        <p
+          role="alert"
+          className="rounded-sm border border-acorn-rust/40 bg-acorn-rust/5 px-4 py-3 text-sm text-acorn-rust"
+        >
+          {error}
+        </p>
+      )}
+
+      <Button
+        type="submit"
+        variant="primary"
+        className="self-start"
+        disabled={isSending}
+      >
+        {isSending ? "Sending..." : "Send Message"}
       </Button>
     </form>
   );

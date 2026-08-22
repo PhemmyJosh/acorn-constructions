@@ -1,0 +1,59 @@
+import mysql from "mysql2/promise";
+
+/**
+ * Shared MySQL connection pool.
+ *
+ * Created lazily on first query rather than at module load, so importing this
+ * file during `next build` never tries to open a socket. That keeps the build
+ * working on machines (and CI) where MySQL is not running.
+ *
+ * The pool is cached on globalThis because the dev server hot-reloads modules,
+ * which would otherwise leak a new pool on every edit.
+ */
+const globalForDb = globalThis as unknown as {
+  acornDbPool?: mysql.Pool;
+};
+
+export function getPool(): mysql.Pool {
+  if (!globalForDb.acornDbPool) {
+    globalForDb.acornDbPool = mysql.createPool({
+      host: process.env.DB_HOST ?? "localhost",
+      port: Number(process.env.DB_PORT ?? 3306),
+      user: process.env.DB_USER ?? "root",
+      password: process.env.DB_PASSWORD ?? "",
+      database: process.env.DB_NAME ?? "acorn_construction",
+      waitForConnections: true,
+      connectionLimit: 10,
+      queueLimit: 0,
+      // Keeps DATE columns as 'YYYY-MM-DD' strings instead of JS Dates, which
+      // avoids timezone drift when displaying them in the admin tables.
+      dateStrings: true,
+    });
+  }
+  return globalForDb.acornDbPool;
+}
+
+/** Everything these queries actually bind. */
+export type SqlParam = string | number | boolean | null | Buffer | Date;
+
+/** Runs an INSERT and returns the new row id. */
+export async function insert(
+  sql: string,
+  params: readonly SqlParam[]
+): Promise<number> {
+  const [result] = await getPool().execute<mysql.ResultSetHeader>(sql, [
+    ...params,
+  ]);
+  return result.insertId;
+}
+
+/** Runs a SELECT and returns the rows. */
+export async function query<T>(
+  sql: string,
+  params: readonly SqlParam[] = []
+): Promise<T[]> {
+  const [rows] = await getPool().execute<mysql.RowDataPacket[]>(sql, [
+    ...params,
+  ]);
+  return rows as T[];
+}

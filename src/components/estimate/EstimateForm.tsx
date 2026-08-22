@@ -3,6 +3,7 @@
 import { FormEvent, ReactNode, useState } from "react";
 import { ChevronDown } from "lucide-react";
 import Button from "@/components/ui/Button";
+import { postJson } from "@/lib/submit-form";
 
 const BUILDING_TYPES = ["Residential", "Commercial", "Post Frame", "Other"] as const;
 const COUNTRIES = ["Canada", "United States"] as const;
@@ -71,14 +72,28 @@ function SelectShell({ children }: { children: ReactNode }) {
 export default function EstimateForm() {
   const [formData, setFormData] = useState<EstimateFormData>(initialFormData);
   const [submitted, setSubmitted] = useState(false);
+  const [isSending, setIsSending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   function handleChange(field: keyof EstimateFormData, value: string) {
     setFormData((current) => ({ ...current, [field]: value }));
   }
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    console.log("Estimate request submission:", formData);
+    if (isSending) return;
+
+    setIsSending(true);
+    setError(null);
+
+    const result = await postJson("/api/estimate", formData);
+
+    setIsSending(false);
+    if (!result.ok) {
+      setError(result.error ?? null);
+      return;
+    }
+
     setSubmitted(true);
     setFormData(initialFormData);
   }
@@ -329,8 +344,22 @@ export default function EstimateForm() {
         </div>
       </fieldset>
 
-      <Button type="submit" variant="primary" className="mt-10 self-start">
-        Get My Free Estimate
+      {error && (
+        <p
+          role="alert"
+          className="mt-8 rounded-sm border border-acorn-rust/40 bg-acorn-rust/5 px-4 py-3 text-sm text-acorn-rust"
+        >
+          {error}
+        </p>
+      )}
+
+      <Button
+        type="submit"
+        variant="primary"
+        className="mt-10 self-start"
+        disabled={isSending}
+      >
+        {isSending ? "Sending..." : "Get My Free Estimate"}
       </Button>
     </form>
   );

@@ -2,6 +2,7 @@
 
 import { FormEvent, useRef, useState } from "react";
 import Button from "@/components/ui/Button";
+import { postFormData } from "@/lib/submit-form";
 import {
   proficiencyGroups,
   RESUME_ACCEPT,
@@ -44,6 +45,8 @@ export default function ApplicationForm() {
   const [resume, setResume] = useState<File | null>(null);
   const [resumeError, setResumeError] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
+  const [isSending, setIsSending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   function handleChange(field: keyof ApplicationFormData, value: string) {
@@ -82,14 +85,34 @@ export default function ApplicationForm() {
     if (fileInputRef.current) fileInputRef.current.value = "";
   }
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    console.log("Career application submission:", {
-      ...formData,
-      proficiencies,
-      resumeFileName: resume?.name ?? null,
-      resumeSizeBytes: resume?.size ?? null,
-    });
+    if (isSending) return;
+
+    setIsSending(true);
+    setError(null);
+
+    // Multipart rather than JSON, so the resume goes up as a real file instead
+    // of being base64-inflated into a JSON body.
+    const payload = new FormData();
+    for (const [field, value] of Object.entries(formData)) {
+      payload.append(field, value);
+    }
+    for (const option of proficiencies) {
+      payload.append("proficiencies", option);
+    }
+    if (resume) {
+      payload.append("resume", resume, resume.name);
+    }
+
+    const result = await postFormData("/api/careers", payload);
+
+    setIsSending(false);
+    if (!result.ok) {
+      setError(result.error ?? null);
+      return;
+    }
+
     setSubmitted(true);
     resetForm();
   }
@@ -278,8 +301,22 @@ export default function ApplicationForm() {
         ) : null}
       </div>
 
-      <Button type="submit" variant="primary" className="self-start">
-        Apply Now
+      {error && (
+        <p
+          role="alert"
+          className="rounded-sm border border-acorn-rust/40 bg-acorn-rust/5 px-4 py-3 text-sm text-acorn-rust"
+        >
+          {error}
+        </p>
+      )}
+
+      <Button
+        type="submit"
+        variant="primary"
+        className="self-start"
+        disabled={isSending}
+      >
+        {isSending ? "Sending..." : "Apply Now"}
       </Button>
     </form>
   );

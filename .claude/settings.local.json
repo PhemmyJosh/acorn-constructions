@@ -45,7 +45,8 @@
       "Bash(curl -s -o /dev/null -w \"home=%{http_code}\\\\n\" \"http://localhost:3000/\")",
       "Bash(curl -s -o /dev/null -w \"projects=%{http_code}\\\\n\" \"http://localhost:3000/projects\")",
       "Bash(curl -s http://localhost:3000/ -o /tmp/home_v5.html)",
-      "Bash(curl -s -o /dev/null -w \"about=%{http_code}\\\\n\" \"http://localhost:3000/about\")"
+      "Bash(curl -s -o /dev/null -w \"about=%{http_code}\\\\n\" \"http://localhost:3000/about\")",
+      "Read(//c/Users/adeyinka/**)"
     ]
   }
 }

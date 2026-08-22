@@ -10,6 +10,8 @@ interface ButtonProps {
   className?: string;
   type?: "button" | "submit";
   onClick?: () => void;
+  /** Only applies to the button form (ignored when `href` is set). */
+  disabled?: boolean;
 }
 
 const variantClasses: Record<ButtonVariant, string> = {
@@ -33,6 +35,7 @@ export default function Button({
   className = "",
   type = "button",
   onClick,
+  disabled = false,
 }: ButtonProps) {
   const classes = `${baseClasses} ${variantClasses[variant]} ${className}`;
 
@@ -53,7 +56,12 @@ export default function Button({
   }
 
   return (
-    <button type={type} onClick={onClick} className={classes}>
+    <button
+      type={type}
+      onClick={onClick}
+      disabled={disabled}
+      className={`${classes} disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:scale-100`}
+    >
       {children}
     </button>
   );
