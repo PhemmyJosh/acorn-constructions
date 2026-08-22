@@ -15,7 +15,7 @@ export default function MobileNav() {
   }
 
   return (
-    <div className="md:hidden">
+    <div className="lg:hidden">
       <button
         type="button"
         aria-label={isOpen ? "Close menu" : "Open menu"}

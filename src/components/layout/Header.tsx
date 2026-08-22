@@ -10,18 +10,22 @@ export default function Header() {
   return (
     <header className="sticky top-0 z-50 bg-acorn-charcoal">
       <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-3 sm:px-8 lg:px-10">
-        <Link href="/" className="flex items-center text-acorn-cream">
+        <Link href="/" className="flex shrink-0 items-center text-acorn-cream">
+          {/* Horizontal lockup already includes the wordmark. sizes keeps the
+              served file near its display width rather than shipping the
+              full-resolution asset. */}
           <Image
-            src="/acorn-logo-white.png"
-            alt="Acorn Construction, since 2011"
-            width={158}
-            height={180}
+            src="/acorn-logo-horizontal.png"
+            alt="Acorn Construction"
+            width={4179}
+            height={1513}
             priority
-            className="h-20 w-auto"
+            sizes="160px"
+            className="h-12 w-auto"
           />
         </Link>
 
-        <nav className="hidden items-center gap-8 md:flex">
+        <nav className="hidden items-center gap-6 lg:flex xl:gap-8">
           {navLinks.map((link) =>
             link.children ? (
               <ServicesDropdown key={link.href} label={link.label} items={link.children} />
@@ -37,7 +41,7 @@ export default function Header() {
           )}
         </nav>
 
-        <div className="hidden items-center gap-6 md:flex">
+        <div className="hidden shrink-0 items-center gap-4 lg:flex xl:gap-6">
           <a
             href={company.phoneHref}
             className="flex items-center gap-2 text-sm font-semibold text-acorn-cream transition-colors duration-200 hover:text-acorn-gold"
