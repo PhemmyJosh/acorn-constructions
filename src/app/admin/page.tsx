@@ -17,7 +17,9 @@ import {
   type SubmissionRow,
   type TabKey,
 } from "@/lib/admin-data";
+import { dashboardStats, type DashboardStats } from "@/lib/admin-stats";
 import AdminBar from "./AdminBar";
+import StatsOverview from "./StatsOverview";
 import LoginForm from "./LoginForm";
 import RowShell from "./RowShell";
 import DeleteButton from "./DeleteButton";
@@ -36,22 +38,6 @@ interface AdminPageProps {
     read?: string;
     id?: string;
   }>;
-}
-
-/** Per-tab unread counts, in one round trip rather than three. */
-async function unreadCounts(): Promise<Record<TabKey, number>> {
-  const rows = await query<{ contact: number; estimate: number; careers: number }>(
-    `SELECT
-       (SELECT COUNT(*) FROM ${TABLE_NAMES.contact}  WHERE is_read = 0) AS contact,
-       (SELECT COUNT(*) FROM ${TABLE_NAMES.estimate} WHERE is_read = 0) AS estimate,
-       (SELECT COUNT(*) FROM ${TABLE_NAMES.careers}  WHERE is_read = 0) AS careers`
-  );
-  const row = rows[0];
-  return {
-    contact: Number(row?.contact ?? 0),
-    estimate: Number(row?.estimate ?? 0),
-    careers: Number(row?.careers ?? 0),
-  };
 }
 
 export default async function AdminPage({ searchParams }: AdminPageProps) {
@@ -99,12 +85,12 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
   const wantsDetail = Number.isInteger(detailId) && detailId > 0;
 
   let rows: SubmissionRow[] = [];
-  let unread: Record<TabKey, number> = { contact: 0, estimate: 0, careers: 0 };
+  let stats: DashboardStats | null = null;
   let detailRow: SubmissionRow | null = null;
   let dbError: string | null = null;
 
   try {
-    unread = await unreadCounts();
+    stats = await dashboardStats();
 
     if (wantsDetail) {
       const found = await query<SubmissionRow>(
@@ -133,7 +119,7 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
           [detailId]
         );
         detailRow = refreshed[0] ?? detailRow;
-        unread = await unreadCounts();
+        stats = await dashboardStats();
       }
     }
 
@@ -152,13 +138,15 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
   const closeHref = `/admin?${new URLSearchParams({ tab, ...listParams })}`;
   const columns = LIST_COLUMNS[tab];
 
-  const totalUnread = dbError
-    ? null
-    : unread.contact + unread.estimate + unread.careers;
+  const unread: Record<TabKey, number> = {
+    contact: stats?.contact.unread ?? 0,
+    estimate: stats?.estimate.unread ?? 0,
+    careers: stats?.careers.unread ?? 0,
+  };
 
   return (
     <>
-      <AdminBar authed unread={totalUnread} />
+      <AdminBar authed unread={stats ? stats.totalUnread : null} />
 
       <div className="px-4 py-10 sm:px-8">
         <div className="mx-auto max-w-7xl">
@@ -170,6 +158,8 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
             Newest first by default. Click any row to read it in full.
           </p>
         </header>
+
+        {stats && <StatsOverview stats={stats} />}
 
         <nav aria-label="Submission types" className="mt-6 flex flex-wrap gap-2">
           {TABS.map((candidate) => {
@@ -249,7 +239,12 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
               <table className="min-w-full border-collapse text-left text-sm">
                 <thead className="bg-acorn-stone">
                   <tr>
-                    <th className="w-8 px-3 py-3">
+                    {/* relative: sr-only is position:absolute, and without a
+                        positioned ancestor it resolves against the initial
+                        containing block — escaping this table's horizontal
+                        scroll container and making the whole page scroll
+                        sideways. Anchoring it to the cell keeps it contained. */}
+                    <th className="relative w-8 px-3 py-3">
                       <span className="sr-only">Unread</span>
                     </th>
                     {columns.map((column) => (
@@ -262,7 +257,7 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
                         listParams={listParams}
                       />
                     ))}
-                    <th className="px-3 py-3">
+                    <th className="relative px-3 py-3">
                       <span className="sr-only">Actions</span>
                     </th>
                   </tr>

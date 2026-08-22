@@ -28,7 +28,7 @@ export default function AdminBar({
           <div className="flex items-center gap-4">
             {unread !== null && (
               <span
-                className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold ${
+                className={`inline-flex items-center gap-2 whitespace-nowrap rounded-full px-3 py-1 text-xs font-semibold ${
                   unread > 0
                     ? "bg-acorn-gold text-acorn-charcoal"
                     : "border border-acorn-cream/25 text-acorn-cream/70"
