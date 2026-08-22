@@ -2,6 +2,11 @@ import { NextResponse } from "next/server";
 import { insert } from "@/lib/db";
 import { sendNotification } from "@/lib/mailer";
 import {
+  HONEYPOT_FIELD,
+  isHoneypotFilled,
+  noteHoneypotHit,
+} from "@/lib/spam";
+import {
   nullableDate,
   nullableInt,
   nullableText,
@@ -18,6 +23,14 @@ export async function POST(request: Request) {
   }
 
   const body = (payload ?? {}) as Record<string, unknown>;
+
+  // Honeypot: report success so the bot does not retry or adapt, but store
+  // nothing and send no email. Checked before validation so the response looks
+  // identical whatever else the bot filled in.
+  if (isHoneypotFilled(body[HONEYPOT_FIELD])) {
+    noteHoneypotHit("/api/estimate");
+    return NextResponse.json({ ok: true }, { status: 201 });
+  }
 
   const name = text(body.name, 255);
   const email = text(body.email, 254);
@@ -72,6 +85,8 @@ export async function POST(request: Request) {
     );
   }
 
+  console.log(`[api/estimate] Stored estimate_requests row ${id}`);
+
   await sendNotification({
     subject: `New estimate request from ${name}`,
     replyTo: email,
@@ -93,5 +108,8 @@ export async function POST(request: Request) {
     ],
   });
 
-  return NextResponse.json({ ok: true, id }, { status: 201 });
+  // Body is deliberately identical to the honeypot response above, so an
+  // automated submitter cannot tell a discarded post from a stored one. The row
+  // id stays server-side; nothing in the UI needs it.
+  return NextResponse.json({ ok: true }, { status: 201 });
 }

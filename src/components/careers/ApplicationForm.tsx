@@ -2,7 +2,9 @@
 
 import { FormEvent, useRef, useState } from "react";
 import Button from "@/components/ui/Button";
+import HoneypotField from "@/components/ui/HoneypotField";
 import { postFormData } from "@/lib/submit-form";
+import { HONEYPOT_FIELD } from "@/lib/spam";
 import {
   proficiencyGroups,
   RESUME_ACCEPT,
@@ -98,6 +100,11 @@ export default function ApplicationForm() {
     for (const [field, value] of Object.entries(formData)) {
       payload.append(field, value);
     }
+
+    // The honeypot input is uncontrolled, so read it straight off the form.
+    const honeypot = new FormData(event.currentTarget).get(HONEYPOT_FIELD);
+    payload.append(HONEYPOT_FIELD, typeof honeypot === "string" ? honeypot : "");
+
     for (const option of proficiencies) {
       payload.append("proficiencies", option);
     }
@@ -140,6 +147,8 @@ export default function ApplicationForm() {
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+      <HoneypotField />
+
       <div className="grid gap-5 sm:grid-cols-2">
         <div className="flex flex-col gap-2">
           <label htmlFor="applicant-name" className={labelClasses}>

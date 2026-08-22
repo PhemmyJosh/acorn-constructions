@@ -1,6 +1,11 @@
 import { NextResponse } from "next/server";
 import { insert } from "@/lib/db";
 import { sendNotification } from "@/lib/mailer";
+import {
+  HONEYPOT_FIELD,
+  isHoneypotFilled,
+  noteHoneypotHit,
+} from "@/lib/spam";
 import { nullableText, text, validateCommon } from "@/lib/validation";
 
 /** Mirrors the limit shown on the form and enforced client-side. */
@@ -16,6 +21,14 @@ export async function POST(request: Request) {
       { error: "Invalid request body. Expected multipart form data." },
       { status: 400 }
     );
+  }
+
+  // Honeypot: report success so the bot does not retry or adapt, but store
+  // nothing and send no email. Checked before anything else, so an automated
+  // upload is discarded without the resume ever being read into memory.
+  if (isHoneypotFilled(form.get(HONEYPOT_FIELD))) {
+    noteHoneypotHit("/api/careers");
+    return NextResponse.json({ ok: true }, { status: 201 });
   }
 
   const name = text(form.get("name"), 255);
@@ -89,6 +102,8 @@ export async function POST(request: Request) {
     );
   }
 
+  console.log(`[api/careers] Stored career_applications row ${id}`);
+
   await sendNotification({
     subject: `New career application from ${name}`,
     replyTo: email,
@@ -115,5 +130,8 @@ export async function POST(request: Request) {
         : undefined,
   });
 
-  return NextResponse.json({ ok: true, id }, { status: 201 });
+  // Body is deliberately identical to the honeypot response above, so an
+  // automated submitter cannot tell a discarded post from a stored one. The row
+  // id stays server-side; nothing in the UI needs it.
+  return NextResponse.json({ ok: true }, { status: 201 });
 }

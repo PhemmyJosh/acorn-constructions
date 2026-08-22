@@ -2,7 +2,9 @@
 
 import { FormEvent, useState } from "react";
 import Button from "@/components/ui/Button";
+import HoneypotField from "@/components/ui/HoneypotField";
 import { postJson } from "@/lib/submit-form";
+import { HONEYPOT_FIELD } from "@/lib/spam";
 
 interface ContactFormData {
   name: string;
@@ -35,7 +37,13 @@ export default function ContactForm() {
     setIsSending(true);
     setError(null);
 
-    const result = await postJson("/api/contact", formData);
+    // The honeypot input is uncontrolled, so read it straight off the form.
+    const honeypot = new FormData(event.currentTarget).get(HONEYPOT_FIELD);
+
+    const result = await postJson("/api/contact", {
+      ...formData,
+      [HONEYPOT_FIELD]: typeof honeypot === "string" ? honeypot : "",
+    });
 
     setIsSending(false);
     if (!result.ok) {
@@ -67,6 +75,8 @@ export default function ContactForm() {
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+      <HoneypotField />
+
       <div className="grid gap-5 sm:grid-cols-2">
         <div className="flex flex-col gap-2">
           <label htmlFor="name" className="text-sm font-semibold text-acorn-charcoal">

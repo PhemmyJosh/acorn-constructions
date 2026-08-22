@@ -13,8 +13,14 @@ const oswald = Oswald({
   weight: ["400", "500", "600", "700"],
 });
 
-// PLACEHOLDER: set metadataBase to the production domain once the client
-// provides one, so relative OG/icon URLs below resolve correctly when shared.
+// TODO: PRE-LAUNCH BLOCKER - set to real production domain before going live,
+// currently a placeholder. Social sharing previews are broken until this is
+// fixed.
+//
+// Without metadataBase, Next.js resolves the relative OG/Twitter image paths
+// below against http://localhost:3000, so every shared link points at an
+// unreachable image. Add `metadataBase: new URL("https://<domain>")` here once
+// the domain is decided. See DEPLOYMENT.md.
 export const metadata: Metadata = {
   title: "Acorn Construction | Residential, Commercial & Post Frame Builders",
   description:

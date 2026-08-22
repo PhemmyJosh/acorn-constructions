@@ -14,6 +14,27 @@ const globalForDb = globalThis as unknown as {
   acornDbPool?: mysql.Pool;
 };
 
+/**
+ * Maximum simultaneous MySQL connections.
+ *
+ * Deliberately conservative: shared hosting usually caps concurrent
+ * connections per database far below what a dedicated server allows, and
+ * exhausting that cap takes the whole site down rather than just slowing it.
+ * This site's queries are short form inserts and one admin SELECT, so a small
+ * pool is plenty.
+ *
+ * TODO: check this against Hostinger's stated MySQL connection limit once the
+ * account exists (hPanel > Databases), and raise or lower DB_POOL_MAX to suit.
+ */
+const DEFAULT_POOL_MAX = 5;
+
+function poolMax(): number {
+  const configured = Number(process.env.DB_POOL_MAX);
+  return Number.isInteger(configured) && configured > 0
+    ? configured
+    : DEFAULT_POOL_MAX;
+}
+
 export function getPool(): mysql.Pool {
   if (!globalForDb.acornDbPool) {
     globalForDb.acornDbPool = mysql.createPool({
@@ -23,7 +44,7 @@ export function getPool(): mysql.Pool {
       password: process.env.DB_PASSWORD ?? "",
       database: process.env.DB_NAME ?? "acorn_construction",
       waitForConnections: true,
-      connectionLimit: 10,
+      connectionLimit: poolMax(),
       queueLimit: 0,
       // Keeps DATE columns as 'YYYY-MM-DD' strings instead of JS Dates, which
       // avoids timezone drift when displaying them in the admin tables.

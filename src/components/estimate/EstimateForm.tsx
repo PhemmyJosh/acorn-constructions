@@ -3,7 +3,9 @@
 import { FormEvent, ReactNode, useState } from "react";
 import { ChevronDown } from "lucide-react";
 import Button from "@/components/ui/Button";
+import HoneypotField from "@/components/ui/HoneypotField";
 import { postJson } from "@/lib/submit-form";
+import { HONEYPOT_FIELD } from "@/lib/spam";
 
 const BUILDING_TYPES = ["Residential", "Commercial", "Post Frame", "Other"] as const;
 const COUNTRIES = ["Canada", "United States"] as const;
@@ -86,7 +88,13 @@ export default function EstimateForm() {
     setIsSending(true);
     setError(null);
 
-    const result = await postJson("/api/estimate", formData);
+    // The honeypot input is uncontrolled, so read it straight off the form.
+    const honeypot = new FormData(event.currentTarget).get(HONEYPOT_FIELD);
+
+    const result = await postJson("/api/estimate", {
+      ...formData,
+      [HONEYPOT_FIELD]: typeof honeypot === "string" ? honeypot : "",
+    });
 
     setIsSending(false);
     if (!result.ok) {
@@ -121,6 +129,8 @@ export default function EstimateForm() {
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col">
+      <HoneypotField />
+
       <fieldset className="flex flex-col gap-6">
         <legend className={legendClasses}>Contact Information</legend>
 
