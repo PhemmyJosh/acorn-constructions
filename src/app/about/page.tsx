@@ -4,7 +4,6 @@ import PageHero from "@/components/ui/PageHero";
 import Section from "@/components/ui/Section";
 import SectionHeading from "@/components/ui/SectionHeading";
 import CoreValues from "@/components/shared/CoreValues";
-import TeamAvatar from "@/components/shared/TeamAvatar";
 import FinalCtaBanner from "@/components/shared/FinalCtaBanner";
 import { team } from "@/data/team";
 import { photos } from "@/data/photos";
@@ -16,7 +15,7 @@ export const metadata: Metadata = {
 };
 
 export default function AboutPage() {
-  const [founder, ...restOfTeam] = team;
+  const [founder] = team;
 
   return (
     <>
@@ -99,27 +98,26 @@ export default function AboutPage() {
       <Section tone="stone">
         <SectionHeading
           eyebrow="Leadership"
-          title="The people behind every build"
+          title="The founder behind every build"
           align="center"
           className="mx-auto"
         />
 
-        <div className="mt-14 flex flex-col gap-8 rounded-sm border border-acorn-bronze/20 bg-white p-8 lg:flex-row lg:items-start lg:gap-12 lg:p-12">
-          {founder.image ? (
-            <div className="relative aspect-[4/5] w-full max-w-xs shrink-0 overflow-hidden rounded-lg lg:mx-0">
-              <Image
-                src={founder.image}
-                alt={founder.name}
-                fill
-                className="object-cover object-top"
-              />
-            </div>
-          ) : (
-            <TeamAvatar name={founder.name} image={founder.image} className="mx-auto h-44 w-44 lg:mx-0" />
-          )}
+        {/* A single leadership profile, so this is a side-by-side photo and
+            bio treatment rather than a card in a grid that would leave gaps. */}
+        <div className="mt-14 grid gap-10 lg:grid-cols-[minmax(0,22rem)_minmax(0,1fr)] lg:items-start lg:gap-14">
+          <div className="relative mx-auto aspect-[4/5] w-full max-w-sm overflow-hidden rounded-sm lg:mx-0 lg:max-w-none">
+            <Image
+              src={founder.image ?? ""}
+              alt={founder.name}
+              fill
+              sizes="(min-width: 1024px) 22rem, 100vw"
+              className="object-cover object-top"
+            />
+          </div>
           <div className="flex flex-col gap-4">
             <div>
-              <p className="text-xl font-semibold text-acorn-charcoal">{founder.name}</p>
+              <p className="text-2xl font-semibold text-acorn-charcoal">{founder.name}</p>
               <p className="text-sm font-medium uppercase tracking-wide text-acorn-gold">
                 {founder.role}
               </p>
@@ -130,18 +128,6 @@ export default function AboutPage() {
               </p>
             ))}
           </div>
-        </div>
-
-        <div className="mt-10 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-          {restOfTeam.map((member) => (
-            <div key={member.name} className="flex flex-col items-center gap-4 text-center">
-              <TeamAvatar name={member.name} image={member.image} className="h-44 w-44" />
-              <div>
-                <p className="text-base font-semibold text-acorn-charcoal">{member.name}</p>
-                <p className="text-sm text-acorn-charcoal/60">{member.role}</p>
-              </div>
-            </div>
-          ))}
         </div>
       </Section>
 

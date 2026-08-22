@@ -5,8 +5,6 @@ export interface TeamMember {
   bio?: string[];
 }
 
-// Members without an `image` render an initials avatar (see TeamAvatar) until
-// a real headshot is provided.
 export const team: TeamMember[] = [
   {
     name: "Mark Acorn",
@@ -18,17 +16,5 @@ export const team: TeamMember[] = [
       "Coming from a family of tradesmen, Mark has always found joy in working with his hands and being outdoors. He's built a career mostly in residential construction, with time spent in commercial and concrete work along the way. He earned his Red Seal journeyman ticket in 2006 and founded Acorn Construction in 2011, starting as a one-man operation. Since then, the company has grown steadily to multiple crews across multiple areas, and it's still growing.",
       "At Acorn, the philosophy is simple: take pride in everything you do and deliver a top-quality product every time, no matter the size of the job. For Mark, the real reward is in the houses built for great clients and the relationships made along the way.",
     ],
-  },
-  {
-    name: "Jeremy McColm",
-    role: "Operations Manager",
-  },
-  {
-    name: "Laura Acorn",
-    role: "Office Manager",
-  },
-  {
-    name: "Blessing Fadumila",
-    role: "Operations Coordinator",
   },
 ];
