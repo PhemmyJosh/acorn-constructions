@@ -50,7 +50,7 @@ export default function Header() {
             {company.phoneDisplay}
           </a>
           <Button href="/estimate" variant="primary" className="px-5 py-2.5 text-xs">
-            Get a Quote
+            Get a Free Estimate
           </Button>
         </div>
 

@@ -128,7 +128,7 @@ export default function Hero() {
           className="mt-4 flex flex-col gap-4 sm:flex-row sm:items-center"
         >
           <Button href="/estimate" variant="primary">
-            Get a Quote
+            Get a Free Estimate
           </Button>
           <Link
             href="/services"

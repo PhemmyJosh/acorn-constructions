@@ -99,7 +99,7 @@ export default function MobileNav() {
               onClick={closeMenu}
               className="inline-flex items-center justify-center rounded-sm bg-acorn-gold px-7 py-3.5 text-sm font-semibold uppercase tracking-wider text-acorn-charcoal transition hover:brightness-90"
             >
-              Get a Quote
+              Get a Free Estimate
             </Link>
           </div>
         </div>
