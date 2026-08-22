@@ -10,8 +10,9 @@ export interface SubmitResult {
   error?: string;
 }
 
-const GENERIC_ERROR =
-  "Something went wrong sending that. Please try again, or call us directly.";
+// The UI adds the phone/email fallback beneath whichever message is shown, so
+// these stay short and do not repeat it.
+const GENERIC_ERROR = "Something went wrong sending that. Please try again.";
 
 interface ApiErrorBody {
   error?: unknown;

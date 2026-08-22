@@ -48,7 +48,7 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error("[api/contact] Database insert failed:", error);
     return NextResponse.json(
-      { error: "We couldn't save your message. Please try again or call us." },
+      { error: "We couldn't save your message. Please try again." },
       { status: 500 }
     );
   }

@@ -80,7 +80,7 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error("[api/estimate] Database insert failed:", error);
     return NextResponse.json(
-      { error: "We couldn't save your request. Please try again or call us." },
+      { error: "We couldn't save your request. Please try again." },
       { status: 500 }
     );
   }
