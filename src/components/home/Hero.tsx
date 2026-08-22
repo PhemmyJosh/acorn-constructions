@@ -15,7 +15,6 @@ export default function Hero() {
   const prefersReducedMotion = useReducedMotion();
 
   const [activeIndex, setActiveIndex] = useState(0);
-  const [isPaused, setIsPaused] = useState(false);
   // Only slides in this set get an <Image> mounted. Starts as just the first
   // slide so the server render and the initial page load fetch one image, not
   // all of them; the rest are added as the carousel needs them.
@@ -47,7 +46,7 @@ export default function Hero() {
   }, [canRotate]);
 
   useEffect(() => {
-    if (!canRotate || isPaused) return;
+    if (!canRotate) return;
 
     const id = window.setInterval(() => {
       setActiveIndex((current) => {
@@ -60,7 +59,7 @@ export default function Hero() {
     }, SLIDE_DURATION_MS);
 
     return () => window.clearInterval(id);
-  }, [canRotate, isPaused]);
+  }, [canRotate]);
 
   // Identical initial and end states on server and client, so there is no
   // hydration mismatch. Reduced motion is handled through the transition
@@ -73,8 +72,6 @@ export default function Hero() {
   return (
     <section
       ref={sectionRef}
-      onMouseEnter={() => setIsPaused(true)}
-      onMouseLeave={() => setIsPaused(false)}
       className="relative flex min-h-[90vh] items-center overflow-hidden bg-acorn-charcoal text-acorn-cream"
     >
       <motion.div className="absolute inset-0" style={{ scale }}>
@@ -96,13 +93,15 @@ export default function Hero() {
                 fill
                 sizes="100vw"
                 priority={index === 0}
-                className="object-cover opacity-50"
+                className="object-cover"
               />
             </motion.div>
           ) : null
         )}
       </motion.div>
-      <div className="absolute inset-0 bg-gradient-to-t from-acorn-charcoal via-acorn-charcoal/70 to-acorn-charcoal/30" />
+      {/* Flat uniform tint rather than a gradient, so text legibility is the
+          same wherever it sits and consistent across every slide. */}
+      <div className="absolute inset-0 bg-acorn-charcoal/45" />
 
       <Container className="relative z-10 flex flex-col gap-6 py-32">
         <motion.h1
@@ -115,7 +114,10 @@ export default function Hero() {
         <motion.p
           {...loadIn}
           transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.6, ease: "easeOut", delay: 0.22 }}
-          className="max-w-xl text-lg leading-relaxed text-acorn-cream/80 sm:text-xl"
+          // Full-opacity cream rather than /80: at a 45% overlay the dimmed
+          // variant fell under 4.5:1 across more than half of this band on the
+          // brighter slides.
+          className="max-w-xl text-lg leading-relaxed text-acorn-cream sm:text-xl"
         >
           Residential, light commercial, and post frame construction built on
           craftsmanship, safety, and trust.
