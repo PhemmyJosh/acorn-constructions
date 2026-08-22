@@ -1,16 +1,25 @@
 "use client";
 
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion";
 import Button from "@/components/ui/Button";
 import Container from "@/components/ui/Container";
-import { photos } from "@/data/photos";
+import { heroImages } from "@/data/heroImages";
+
+const SLIDE_DURATION_MS = 5500;
 
 export default function Hero() {
   const sectionRef = useRef<HTMLElement>(null);
   const prefersReducedMotion = useReducedMotion();
+
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
+  // Only slides in this set get an <Image> mounted. Starts as just the first
+  // slide so the server render and the initial page load fetch one image, not
+  // all of them; the rest are added as the carousel needs them.
+  const [mountedSlides, setMountedSlides] = useState<number[]>([0]);
 
   // Tracks progress across the hero only, from the moment its top hits the
   // top of the viewport until its bottom leaves.
@@ -27,6 +36,32 @@ export default function Hero() {
     prefersReducedMotion ? [1, 1] : [1, 1.05]
   );
 
+  const canRotate = !prefersReducedMotion && heroImages.length > 1;
+
+  // Warm the next slide one tick after mount so the first crossfade has an
+  // image ready without competing with the initial paint.
+  useEffect(() => {
+    if (!canRotate) return;
+    const id = window.setTimeout(() => setMountedSlides((prev) => [...prev, 1]), 1200);
+    return () => window.clearTimeout(id);
+  }, [canRotate]);
+
+  useEffect(() => {
+    if (!canRotate || isPaused) return;
+
+    const id = window.setInterval(() => {
+      setActiveIndex((current) => {
+        const next = (current + 1) % heroImages.length;
+        // Mount the slide after next so it is decoded before its turn.
+        const upcoming = (next + 1) % heroImages.length;
+        setMountedSlides((prev) => (prev.includes(upcoming) ? prev : [...prev, upcoming]));
+        return next;
+      });
+    }, SLIDE_DURATION_MS);
+
+    return () => window.clearInterval(id);
+  }, [canRotate, isPaused]);
+
   // Identical initial and end states on server and client, so there is no
   // hydration mismatch. Reduced motion is handled through the transition
   // below: a zero duration snaps content in with no perceptible movement.
@@ -38,16 +73,34 @@ export default function Hero() {
   return (
     <section
       ref={sectionRef}
+      onMouseEnter={() => setIsPaused(true)}
+      onMouseLeave={() => setIsPaused(false)}
       className="relative flex min-h-[90vh] items-center overflow-hidden bg-acorn-charcoal text-acorn-cream"
     >
       <motion.div className="absolute inset-0" style={{ scale }}>
-        <Image
-          src={photos.trussInterior}
-          alt="Wood frame roof structure under construction"
-          fill
-          priority
-          className="object-cover opacity-50"
-        />
+        {heroImages.map((image, index) =>
+          mountedSlides.includes(index) ? (
+            <motion.div
+              key={image.src}
+              aria-hidden="true"
+              className="absolute inset-0"
+              initial={false}
+              animate={{ opacity: index === activeIndex ? 1 : 0 }}
+              transition={
+                prefersReducedMotion ? { duration: 0 } : { duration: 1.2, ease: "easeInOut" }
+              }
+            >
+              <Image
+                src={image.src}
+                alt=""
+                fill
+                sizes="100vw"
+                priority={index === 0}
+                className="object-cover opacity-50"
+              />
+            </motion.div>
+          ) : null
+        )}
       </motion.div>
       <div className="absolute inset-0 bg-gradient-to-t from-acorn-charcoal via-acorn-charcoal/70 to-acorn-charcoal/30" />
 
