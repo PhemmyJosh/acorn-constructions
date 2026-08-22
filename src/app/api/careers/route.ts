@@ -105,6 +105,7 @@ export async function POST(request: Request) {
   console.log(`[api/careers] Stored career_applications row ${id}`);
 
   await sendNotification({
+    dashboardPath: `/admin?tab=careers&id=${id}`,
     subject: `New career application from ${name}`,
     replyTo: email,
     lines: [

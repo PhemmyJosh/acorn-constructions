@@ -68,6 +68,17 @@ export async function insert(
   return result.insertId;
 }
 
+/** Runs an UPDATE or DELETE and returns the number of rows affected. */
+export async function execute(
+  sql: string,
+  params: readonly SqlParam[] = []
+): Promise<number> {
+  const [result] = await getPool().execute<mysql.ResultSetHeader>(sql, [
+    ...params,
+  ]);
+  return result.affectedRows;
+}
+
 /** Runs a SELECT and returns the rows. */
 export async function query<T>(
   sql: string,

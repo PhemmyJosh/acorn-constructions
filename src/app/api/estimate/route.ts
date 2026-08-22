@@ -88,6 +88,7 @@ export async function POST(request: Request) {
   console.log(`[api/estimate] Stored estimate_requests row ${id}`);
 
   await sendNotification({
+    dashboardPath: `/admin?tab=estimate&id=${id}`,
     subject: `New estimate request from ${name}`,
     replyTo: email,
     lines: [

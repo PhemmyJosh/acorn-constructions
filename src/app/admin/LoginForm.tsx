@@ -5,11 +5,20 @@ import { login, type LoginState } from "./actions";
 
 const initialState: LoginState = {};
 
-export default function LoginForm({ configured }: { configured: boolean }) {
+export default function LoginForm({
+  configured,
+  next,
+}: {
+  configured: boolean;
+  /** Where to land after a successful sign-in, e.g. an emailed deep link. */
+  next?: string;
+}) {
   const [state, formAction, isPending] = useActionState(login, initialState);
 
   return (
     <form action={formAction} className="space-y-5">
+      {next && <input type="hidden" name="next" value={next} />}
+
       <div className="flex flex-col gap-2">
         <label
           htmlFor="admin-password"

@@ -58,6 +58,7 @@ export async function POST(request: Request) {
   // The submission is already stored, so a mail failure must not fail the
   // request; sendNotification logs and reports rather than throwing.
   await sendNotification({
+    dashboardPath: `/admin?tab=contact&id=${id}`,
     subject: `New contact message from ${name}`,
     replyTo: email,
     lines: [

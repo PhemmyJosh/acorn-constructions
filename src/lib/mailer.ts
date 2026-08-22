@@ -51,6 +51,19 @@ async function getTransporter(): Promise<Transporter> {
   return globalForMail.acornTransporter;
 }
 
+/**
+ * Base URL used to build the "View in Dashboard" link.
+ *
+ * Set APP_URL in production to the real domain (see DEPLOYMENT.md). It is kept
+ * separate from metadataBase because notification emails need an absolute URL
+ * even while the public domain is still undecided. Any trailing slash is
+ * trimmed so the joined path never doubles up.
+ */
+function appUrl(): string {
+  const configured = process.env.APP_URL?.trim();
+  return (configured || "http://localhost:3000").replace(/\/+$/, "");
+}
+
 export interface NotificationAttachment {
   filename: string;
   content: Buffer;
@@ -67,6 +80,12 @@ export async function sendNotification(options: {
   lines: Array<[label: string, value: string]>;
   replyTo?: string;
   attachments?: NotificationAttachment[];
+  /**
+   * Admin path for this submission, e.g. "/admin?tab=contact&id=17". Rendered
+   * as a "View in Dashboard" button at the top of the email, and as a plain URL
+   * in the text part.
+   */
+  dashboardPath?: string;
 }): Promise<{ sent: boolean; previewUrl?: string }> {
   const to = process.env.NOTIFY_EMAIL?.trim();
   if (!to) {
@@ -77,11 +96,28 @@ export async function sendNotification(options: {
   try {
     const transporter = await getTransporter();
 
-    const text = options.lines
+    const dashboardUrl = options.dashboardPath
+      ? `${appUrl()}${options.dashboardPath}`
+      : null;
+
+    const fields = options.lines
       .map(([label, value]) => `${label}: ${value || "-"}`)
       .join("\n");
 
-    const html = `<table cellpadding="6" style="font-family:system-ui,sans-serif;font-size:14px;border-collapse:collapse">
+    const text = dashboardUrl
+      ? `View in Dashboard: ${dashboardUrl}\n\n${fields}`
+      : fields;
+
+    // Table-based, inline-styled markup with the palette hardcoded: emails
+    // render outside the site's stylesheet, and mail clients are unreliable
+    // with anything more modern.
+    const button = dashboardUrl
+      ? `<p style="margin:0 0 20px;font-family:system-ui,sans-serif"><a href="${escapeHtml(
+          dashboardUrl
+        )}" style="display:inline-block;background:#c08a3e;color:#262018;font-size:14px;font-weight:600;text-decoration:none;padding:12px 22px;border-radius:2px">View in Dashboard</a></p>`
+      : "";
+
+    const html = `${button}<table cellpadding="6" style="font-family:system-ui,sans-serif;font-size:14px;border-collapse:collapse">
 ${options.lines
   .map(
     ([label, value]) =>

@@ -107,6 +107,7 @@ throwaway Ethereal test inbox instead of real email.
 
 | Variable | Value |
 | --- | --- |
+| `APP_URL` | the live site's base URL, e.g. `https://acornconstruction.ca` — notification emails build their "View in Dashboard" link from this, so leaving it unset makes those links point at localhost |
 | `DB_HOST` | from step 3 (usually `localhost`) |
 | `DB_PORT` | `3306` unless Hostinger states otherwise |
 | `DB_USER` | prefixed username from step 3 |
@@ -200,6 +201,9 @@ Do all of this against the live domain, not localhost.
       browser console on the live site:
       `document.querySelector('[name=website]').value = 'bot'` before
       submitting; the UI should report success but **no row should appear**.
+- [ ] **Dashboard link in email** — open the notification email and click
+      *View in Dashboard*. Confirm it goes to the live domain (not localhost)
+      and lands on the right entry's detail view after signing in.
 - [ ] **/admin login** — sign in with the production `ADMIN_PASSWORD` over
       HTTPS. Confirm a wrong password is rejected.
 - [ ] **/admin data** — confirm all three tabs list the rows just created, and
