@@ -1,8 +1,0 @@
-<!doctype html><html><body style="margin:0;background:#888"><div id="f"></div>
-<script>
-const q=new URLSearchParams(location.search);
-const f=document.createElement('iframe');
-f.style.cssText='width:'+(q.get('w')||1440)+'px;height:'+(q.get('h')||200)+'px;border:0;display:block';
-f.src=q.get('p')||'/';
-document.getElementById('f').appendChild(f);
-</script></body></html>
