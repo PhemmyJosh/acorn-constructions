@@ -40,7 +40,7 @@ export default function FinalCtaBanner({
           standard to every job.
         </p>
         <div className="mt-4 flex flex-col gap-4 sm:flex-row sm:items-center">
-          <Button href="/contact" variant="primary" className="px-9 py-4 text-base">
+          <Button href="/estimate" variant="primary" className="px-9 py-4 text-base">
             Get a Quote
           </Button>
           <a

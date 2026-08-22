@@ -45,7 +45,7 @@ export default function Header() {
             <Phone size={16} />
             {company.phoneDisplay}
           </a>
-          <Button href="/contact" variant="primary" className="px-5 py-2.5 text-xs">
+          <Button href="/estimate" variant="primary" className="px-5 py-2.5 text-xs">
             Get a Quote
           </Button>
         </div>

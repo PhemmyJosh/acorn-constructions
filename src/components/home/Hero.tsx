@@ -72,7 +72,7 @@ export default function Hero() {
           transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.6, ease: "easeOut", delay: 0.3 }}
           className="mt-4 flex flex-col gap-4 sm:flex-row sm:items-center"
         >
-          <Button href="/contact" variant="primary">
+          <Button href="/estimate" variant="primary">
             Get a Quote
           </Button>
           <Link

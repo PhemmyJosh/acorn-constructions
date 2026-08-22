@@ -95,7 +95,7 @@ export default function MobileNav() {
               {company.phoneDisplay}
             </a>
             <Link
-              href="/contact"
+              href="/estimate"
               onClick={closeMenu}
               className="inline-flex items-center justify-center rounded-sm bg-acorn-gold px-7 py-3.5 text-sm font-semibold uppercase tracking-wider text-acorn-charcoal transition hover:brightness-90"
             >
