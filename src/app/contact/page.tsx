@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Clock, Mail, MapPin, Phone } from "lucide-react";
+import { Mail, MapPin, Phone } from "lucide-react";
 import PageHero from "@/components/ui/PageHero";
 import Section from "@/components/ui/Section";
 import ContactForm from "@/components/contact/ContactForm";
@@ -55,15 +55,6 @@ export default function ContactPage() {
                 <Mail size={18} className="shrink-0 text-acorn-gold" />
                 {company.email}
               </a>
-              <p className="text-sm text-acorn-charcoal/60">{company.serviceAreaLine}</p>
-              <div className="flex items-start gap-3 text-sm text-acorn-charcoal/70">
-                <Clock size={18} className="mt-0.5 shrink-0 text-acorn-gold" />
-                <span>
-                  Monday &ndash; Friday: 7:00am &ndash; 5:00pm
-                  <br />
-                  Saturday: By appointment
-                </span>
-              </div>
             </div>
 
             <LocationMap />
