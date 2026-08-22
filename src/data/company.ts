@@ -1,7 +1,6 @@
 import { NavLink } from "@/types";
 import { services } from "@/data/services";
 
-// PLACEHOLDER: email is still needed from the client.
 export const company = {
   name: "Acorn Construction",
   legalName: "Acorn Construction Ltd.",
@@ -12,7 +11,7 @@ export const company = {
   serviceAreaLine: "Proudly serving Alberta and Saskatchewan",
   phoneDisplay: "+1 780 205 6361",
   phoneHref: "tel:+17802056361",
-  email: "info@acornconstruction.example",
+  email: "mark@acornconstruction.ca",
   address: {
     line1: "146C Miller St",
     cityStateZip: "Blackfoot, Alberta, T9V 0Y4",

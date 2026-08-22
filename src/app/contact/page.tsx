@@ -48,7 +48,6 @@ export default function ContactPage() {
                 <Phone size={18} className="shrink-0 text-acorn-gold" />
                 {company.phoneDisplay}
               </a>
-              {/* PLACEHOLDER: email needed from client */}
               <a
                 href={`mailto:${company.email}`}
                 className="flex items-center gap-3 text-sm text-acorn-charcoal/70 transition-colors hover:text-acorn-gold"

@@ -92,7 +92,6 @@ export default function Footer() {
             <Phone size={16} className="shrink-0 text-acorn-gold" />
             {company.phoneDisplay}
           </a>
-          {/* PLACEHOLDER: email needed from client */}
           <a
             href={`mailto:${company.email}`}
             className="flex items-center gap-2 text-sm text-acorn-cream/60 transition-colors hover:text-acorn-gold"
