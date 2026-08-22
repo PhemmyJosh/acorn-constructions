@@ -1,7 +1,5 @@
 import type { Metadata } from "next";
 import { Inter, Oswald } from "next/font/google";
-import Header from "@/components/layout/Header";
-import Footer from "@/components/layout/Footer";
 import "./globals.css";
 
 const inter = Inter({
@@ -41,18 +39,24 @@ export const metadata: Metadata = {
   },
 };
 
+/**
+ * Shell only: <html>/<body>, fonts and global styles.
+ *
+ * The public site chrome (header, footer) lives in `(site)/layout.tsx` so that
+ * /admin can sit outside it with its own bare layout, rather than rendering the
+ * marketing nav and CTAs around an internal tool.
+ */
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${inter.variable} ${oswald.variable} h-full antialiased`}>
-      <body className="flex min-h-full flex-col">
-        <Header />
-        <main className="flex-1">{children}</main>
-        <Footer />
-      </body>
+    <html
+      lang="en"
+      className={`${inter.variable} ${oswald.variable} h-full antialiased`}
+    >
+      <body className="flex min-h-full flex-col">{children}</body>
     </html>
   );
 }

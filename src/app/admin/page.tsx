@@ -1,16 +1,10 @@
 import Link from "next/link";
-import type { Metadata } from "next";
 import { isAdminConfigured, isAuthenticated } from "@/lib/admin-auth";
 import { query } from "@/lib/db";
 import LoginForm from "./LoginForm";
-import { logout } from "./actions";
 
-export const metadata: Metadata = {
-  title: "Admin | Acorn Construction",
-  robots: { index: false, follow: false },
-};
-
-// Reads the session cookie and live database rows on every request.
+// Live database rows on every request; the layout also opts this route into
+// dynamic rendering by reading the session cookie.
 export const dynamic = "force-dynamic";
 
 type TabKey = "contact" | "estimate" | "careers";
@@ -104,9 +98,7 @@ function parseProficiencies(value: string | null): string | null {
 export default async function AdminPage({ searchParams }: AdminPageProps) {
   if (!(await isAuthenticated())) {
     return (
-      // The root layout already provides <main>, so this page uses plain
-      // wrappers; the top padding clears the fixed site header.
-      <div className="flex min-h-[70vh] items-center justify-center bg-acorn-cream px-6 pt-32 pb-24">
+      <div className="flex min-h-[70vh] items-center justify-center px-6 py-20">
         <div className="w-full max-w-sm rounded-sm border border-acorn-bronze/20 bg-white p-8 shadow-sm">
           <h1 className="font-heading text-2xl uppercase tracking-wide text-acorn-charcoal">
             Admin Sign In
@@ -153,25 +145,15 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
   }
 
   return (
-    <div className="min-h-[70vh] bg-acorn-cream px-4 pt-28 pb-16 sm:px-8">
+    <div className="px-4 py-10 sm:px-8">
       <div className="mx-auto max-w-7xl">
-        <header className="flex flex-wrap items-end justify-between gap-4 border-b border-acorn-bronze/20 pb-6">
-          <div>
-            <h1 className="font-heading text-3xl uppercase tracking-wide text-acorn-charcoal">
-              Form Submissions
-            </h1>
-            <p className="mt-1 text-sm text-acorn-charcoal/70">
-              Acorn Construction Ltd. — newest first by default.
-            </p>
-          </div>
-          <form action={logout}>
-            <button
-              type="submit"
-              className="rounded-sm border border-acorn-bronze/40 px-4 py-2 font-heading text-xs uppercase tracking-[0.15em] text-acorn-charcoal transition-colors hover:bg-acorn-stone"
-            >
-              Sign out
-            </button>
-          </form>
+        <header className="border-b border-acorn-bronze/20 pb-6">
+          <h1 className="font-heading text-3xl uppercase tracking-wide text-acorn-charcoal">
+            Form Submissions
+          </h1>
+          <p className="mt-1 text-sm text-acorn-charcoal/70">
+            Newest first by default.
+          </p>
         </header>
 
         <nav className="mt-6 flex flex-wrap gap-2">
