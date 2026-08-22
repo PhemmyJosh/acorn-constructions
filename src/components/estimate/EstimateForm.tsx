@@ -1,6 +1,7 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, ReactNode, useState } from "react";
+import { ChevronDown } from "lucide-react";
 import Button from "@/components/ui/Button";
 
 const BUILDING_TYPES = ["Residential", "Commercial", "Post Frame"] as const;
@@ -43,14 +44,29 @@ const initialFormData: EstimateFormData = {
 const fieldClasses =
   "rounded-sm border border-acorn-bronze/30 bg-white px-4 py-3 text-sm text-acorn-charcoal outline-none focus:border-acorn-gold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-acorn-gold";
 
-// Selects need extra right padding so the native arrow is not crowded
-// against the border, matching the inputs' horizontal rhythm.
-const selectClasses = `${fieldClasses} pr-10`;
+// appearance-none removes the native caret, which ignores padding, so a
+// custom chevron can be positioned with the same right inset as the inputs'
+// left padding. pr-12 keeps long option text from running under it.
+const selectClasses = `${fieldClasses} w-full cursor-pointer appearance-none pr-12`;
 
 const labelClasses = "text-sm font-semibold text-acorn-charcoal";
 
 const legendClasses =
   "mb-6 text-xs font-semibold uppercase tracking-[0.2em] text-acorn-gold";
+
+/** Wraps a native select so the custom chevron can be absolutely positioned. */
+function SelectShell({ children }: { children: ReactNode }) {
+  return (
+    <div className="relative">
+      {children}
+      <ChevronDown
+        size={18}
+        aria-hidden="true"
+        className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-acorn-charcoal/60"
+      />
+    </div>
+  );
+}
 
 export default function EstimateForm() {
   const [formData, setFormData] = useState<EstimateFormData>(initialFormData);
@@ -149,7 +165,7 @@ export default function EstimateForm() {
           />
         </div>
 
-        <div className="grid gap-6 sm:grid-cols-3">
+        <div className="grid gap-6 sm:grid-cols-2">
           <div className="flex flex-col gap-2">
             <label htmlFor="estimate-city" className={labelClasses}>
               City
@@ -176,6 +192,9 @@ export default function EstimateForm() {
               className={fieldClasses}
             />
           </div>
+        </div>
+
+        <div className="grid gap-6 sm:grid-cols-2">
           <div className="flex flex-col gap-2">
             <label htmlFor="estimate-postal" className={labelClasses}>
               ZIP / Postal Code
@@ -189,25 +208,26 @@ export default function EstimateForm() {
               className={fieldClasses}
             />
           </div>
-        </div>
-
-        <div className="flex flex-col gap-2 sm:max-w-xs">
-          <label htmlFor="estimate-country" className={labelClasses}>
-            Country
-          </label>
-          <select
-            id="estimate-country"
-            autoComplete="country-name"
-            value={formData.country}
-            onChange={(event) => handleChange("country", event.target.value)}
-            className={selectClasses}
-          >
-            {COUNTRIES.map((country) => (
-              <option key={country} value={country}>
-                {country}
-              </option>
-            ))}
-          </select>
+          <div className="flex flex-col gap-2">
+            <label htmlFor="estimate-country" className={labelClasses}>
+              Country
+            </label>
+            <SelectShell>
+              <select
+                id="estimate-country"
+                autoComplete="country-name"
+                value={formData.country}
+                onChange={(event) => handleChange("country", event.target.value)}
+                className={selectClasses}
+              >
+                {COUNTRIES.map((country) => (
+                  <option key={country} value={country}>
+                    {country}
+                  </option>
+                ))}
+              </select>
+            </SelectShell>
+          </div>
         </div>
       </fieldset>
 
@@ -221,19 +241,21 @@ export default function EstimateForm() {
             <label htmlFor="estimate-type" className={labelClasses}>
               Type of Building
             </label>
-            <select
-              id="estimate-type"
-              value={formData.buildingType}
-              onChange={(event) => handleChange("buildingType", event.target.value)}
-              className={selectClasses}
-            >
-              <option value="">Select a building type</option>
-              {BUILDING_TYPES.map((type) => (
-                <option key={type} value={type}>
-                  {type}
-                </option>
-              ))}
-            </select>
+            <SelectShell>
+              <select
+                id="estimate-type"
+                value={formData.buildingType}
+                onChange={(event) => handleChange("buildingType", event.target.value)}
+                className={selectClasses}
+              >
+                <option value="">Select a building type</option>
+                {BUILDING_TYPES.map((type) => (
+                  <option key={type} value={type}>
+                    {type}
+                  </option>
+                ))}
+              </select>
+            </SelectShell>
           </div>
           <div className="flex flex-col gap-2">
             <label htmlFor="estimate-location" className={labelClasses}>
