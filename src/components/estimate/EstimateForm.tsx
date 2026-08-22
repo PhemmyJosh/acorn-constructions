@@ -4,7 +4,7 @@ import { FormEvent, ReactNode, useState } from "react";
 import { ChevronDown } from "lucide-react";
 import Button from "@/components/ui/Button";
 
-const BUILDING_TYPES = ["Residential", "Commercial", "Post Frame"] as const;
+const BUILDING_TYPES = ["Residential", "Commercial", "Post Frame", "Other"] as const;
 const COUNTRIES = ["Canada", "United States"] as const;
 
 interface EstimateFormData {
