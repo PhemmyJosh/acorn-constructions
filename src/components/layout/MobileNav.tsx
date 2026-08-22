@@ -5,12 +5,22 @@ import Link from "next/link";
 import { ChevronDown, Menu, X, Phone } from "lucide-react";
 import { navLinks, company } from "@/data/company";
 
-export default function MobileNav() {
+interface MobileNavProps {
+  /** Lets the header force its solid background while the menu is open. */
+  onOpenChange?: (isOpen: boolean) => void;
+}
+
+export default function MobileNav({ onOpenChange }: MobileNavProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [expanded, setExpanded] = useState<string | null>(null);
 
+  function setOpen(next: boolean) {
+    setIsOpen(next);
+    onOpenChange?.(next);
+  }
+
   function closeMenu() {
-    setIsOpen(false);
+    setOpen(false);
     setExpanded(null);
   }
 
@@ -20,14 +30,14 @@ export default function MobileNav() {
         type="button"
         aria-label={isOpen ? "Close menu" : "Open menu"}
         aria-expanded={isOpen}
-        onClick={() => setIsOpen((open) => !open)}
+        onClick={() => setOpen(!isOpen)}
         className="-mr-2 flex h-11 w-11 items-center justify-center text-acorn-cream"
       >
         {isOpen ? <X size={26} /> : <Menu size={26} />}
       </button>
 
       {isOpen ? (
-        <div className="fixed inset-x-0 top-[var(--header-height,104px)] bottom-0 z-40 flex flex-col overflow-y-auto bg-acorn-charcoal px-6 py-8">
+        <div className="fixed inset-x-0 top-[72px] bottom-0 z-40 flex flex-col overflow-y-auto bg-acorn-charcoal px-6 py-8">
           <nav className="flex flex-col gap-1">
             {navLinks.map((link) => {
               if (!link.children) {

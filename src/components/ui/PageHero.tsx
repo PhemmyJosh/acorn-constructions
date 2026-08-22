@@ -22,7 +22,9 @@ export default function PageHero({
   titleClassName = "max-w-2xl text-4xl sm:text-5xl",
 }: PageHeroProps) {
   return (
-    <section className="relative overflow-hidden bg-acorn-charcoal py-20 text-acorn-cream sm:py-24">
+    // Extra top padding clears the fixed header, which no longer occupies
+    // layout space above this section.
+    <section className="relative overflow-hidden bg-acorn-charcoal pb-20 pt-32 text-acorn-cream sm:pb-24 sm:pt-36">
       {backgroundImage ? (
         <>
           <Image src={backgroundImage} alt="" fill priority className="object-cover opacity-40" />
