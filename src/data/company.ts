@@ -18,6 +18,7 @@ export const company = {
   },
   social: {
     facebook: "https://www.facebook.com/Acornconstructionltd/",
+    instagram: "https://www.instagram.com/acorn_construction_",
     linkedin: "https://www.linkedin.com/company/143066254/",
   },
 };

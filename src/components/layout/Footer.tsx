@@ -3,8 +3,23 @@ import Link from "next/link";
 import { Mail, MapPin, Phone } from "lucide-react";
 import { navLinks, company } from "@/data/company";
 import Container from "@/components/ui/Container";
-import { FacebookIcon, LinkedinIcon } from "@/components/ui/SocialIcons";
+import {
+  FacebookIcon,
+  InstagramIcon,
+  LinkedinIcon,
+} from "@/components/ui/SocialIcons";
 import Reveal from "@/components/motion/Reveal";
+
+/**
+ * Driven from an array so every network shares one set of styles and hover
+ * states, and adding another is a single line rather than another copy of the
+ * anchor markup.
+ */
+const socialLinks = [
+  { name: "Facebook", href: company.social.facebook, Icon: FacebookIcon },
+  { name: "Instagram", href: company.social.instagram, Icon: InstagramIcon },
+  { name: "LinkedIn", href: company.social.linkedin, Icon: LinkedinIcon },
+];
 
 export default function Footer() {
   const year = new Date().getFullYear();
@@ -28,24 +43,18 @@ export default function Footer() {
           </p>
           <p className="text-sm font-medium text-acorn-cream/80">{company.serviceAreaLine}</p>
           <div className="flex items-center gap-4 pt-2">
-            <a
-              href={company.social.facebook}
-              aria-label="Acorn Construction on Facebook"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex h-11 w-11 items-center justify-center rounded-full border border-acorn-cream/20 text-acorn-cream/70 transition-colors hover:border-acorn-gold hover:text-acorn-gold"
-            >
-              <FacebookIcon size={16} />
-            </a>
-            <a
-              href={company.social.linkedin}
-              aria-label="Acorn Construction on LinkedIn"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex h-11 w-11 items-center justify-center rounded-full border border-acorn-cream/20 text-acorn-cream/70 transition-colors hover:border-acorn-gold hover:text-acorn-gold"
-            >
-              <LinkedinIcon size={16} />
-            </a>
+            {socialLinks.map(({ name, href, Icon }) => (
+              <a
+                key={name}
+                href={href}
+                aria-label={`Acorn Construction on ${name}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex h-11 w-11 items-center justify-center rounded-full border border-acorn-cream/20 text-acorn-cream/70 transition-colors hover:border-acorn-gold hover:text-acorn-gold"
+              >
+                <Icon size={16} />
+              </a>
+            ))}
           </div>
         </div>
 
