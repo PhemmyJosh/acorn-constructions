@@ -7,10 +7,14 @@ import Section from "@/components/ui/Section";
 import Container from "@/components/ui/Container";
 import FinalCtaBanner from "@/components/shared/FinalCtaBanner";
 import { services, getServiceBySlug } from "@/data/services";
+import { getServiceOverview } from "@/lib/content-data";
 
 interface ServicePageProps {
   params: Promise<{ slug: string }>;
 }
+
+// Overview copy is client-editable, so this renders per request.
+export const dynamic = "force-dynamic";
 
 export function generateStaticParams() {
   return services.map((service) => ({ slug: service.slug }));
@@ -38,6 +42,10 @@ export default async function ServiceDetailPage({ params }: ServicePageProps) {
     notFound();
   }
 
+  // Falls back to the hardcoded copy when no row has been saved yet, which is
+  // the safety net while this rolls out.
+  const overview = (await getServiceOverview(slug)) ?? service.description;
+
   const otherServices = services.filter((item) => item.slug !== service.slug);
 
   return (
@@ -62,7 +70,7 @@ export default async function ServiceDetailPage({ params }: ServicePageProps) {
       <Section tone="cream">
         <div className="grid gap-12 lg:grid-cols-3 lg:gap-16">
           <div className="flex flex-col gap-5 lg:col-span-2">
-            {service.description.map((paragraph) => (
+            {overview.map((paragraph) => (
               <p key={paragraph} className="text-base leading-relaxed text-acorn-charcoal/70 sm:text-lg">
                 {paragraph}
               </p>

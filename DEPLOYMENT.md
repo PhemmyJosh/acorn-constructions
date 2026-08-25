@@ -75,7 +75,20 @@ the first boot will fail against a missing database.
    mysql -h localhost -u u123456789_acorn -p u123456789_acorn -e "SHOW TABLES;"
    ```
 
-   Expected: `career_applications`, `contact_submissions`, `estimate_requests`.
+   Expected: `career_applications`, `contact_submissions`, `estimate_requests`,
+   `projects`, `service_content`, `testimonials`.
+
+6. **Seed the editable content** so the site ships with the copy and gallery it
+   has today, rather than an empty Content tab:
+
+   ```bash
+   node scripts/seed-content.mjs
+   ```
+
+   Safe to re-run — it only fills tables that are empty and never overwrites
+   anything edited through the admin. Until it runs (or if it is skipped), the
+   site falls back to the copy compiled into `src/data/`, so nothing breaks
+   either way.
 
 ---
 
@@ -215,6 +228,11 @@ Do all of this against the live domain, not localhost.
 - [ ] **Unauthenticated access** — in a private window, confirm `/admin` shows
       the login form and `/api/admin/resume/1` returns 401.
 - [ ] **Mobile** — walk one form end to end on a real phone at ~375px wide.
+- [ ] **Content editing** — in the admin's Projects tab, add a project with a
+      real photo and confirm it appears on /projects; edit a testimonial and a
+      service's copy and confirm both pages update on refresh.
+- [ ] **Uploads survive a redeploy** — confirm `public/uploads/projects/` still
+      holds the uploaded photos after the next deploy (see the warning below).
 - [ ] **Social preview** — paste the homepage URL into a link-preview debugger
       and confirm the image resolves (this fails if step 6 was skipped).
 
@@ -244,6 +262,21 @@ Do all of this against the live domain, not localhost.
       try to downgrade Next and must not be run.
 
 ---
+
+## Uploaded project photos
+
+Project photos are written to `public/uploads/projects/` on the server's disk,
+not stored in the database and not in git. Two consequences:
+
+- **The deploy must not wipe that folder.** If Hostinger's Git deployment does a
+  clean checkout into a fresh directory each time, uploads will disappear.
+  Confirm behaviour after the first redeploy, and if it does wipe, move the
+  folder outside the deploy root and symlink it, or switch to object storage.
+- **Back it up.** These files are the only copy. A database backup does not
+  include them, unlike résumés, which are BLOBs inside MySQL.
+
+The folder is tracked in git via a `.gitkeep` so a fresh deploy always has
+somewhere to write; the images themselves are gitignored.
 
 ## Notes for later
 

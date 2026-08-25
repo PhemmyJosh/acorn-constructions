@@ -21,6 +21,27 @@ export const TABLE_NAMES: Record<TabKey, string> = {
   careers: "career_applications",
 };
 
+/* -------------------------------------------------------------------------- */
+/* Content tabs                                                                */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * The Content tabs sit in the same tab bar as the submission tabs but are a
+ * different kind of thing: editable site content rather than an inbox, with no
+ * read/unread state, sorting or filtering.
+ */
+export type ContentTabKey = "projects" | "testimonials" | "services";
+
+export const CONTENT_TABS: { key: ContentTabKey; label: string }[] = [
+  { key: "projects", label: "Projects" },
+  { key: "testimonials", label: "Testimonials" },
+  { key: "services", label: "Service Copy" },
+];
+
+export function isContentTab(value: unknown): value is ContentTabKey {
+  return CONTENT_TABS.some((t) => t.key === value);
+}
+
 export function toTab(value: unknown): TabKey {
   return TABS.some((t) => t.key === value) ? (value as TabKey) : "contact";
 }

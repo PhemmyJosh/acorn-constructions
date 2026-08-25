@@ -40,3 +40,8 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Client-uploaded project photos live on the server's disk, not in the repo.
+# The folder itself is tracked so a fresh deploy has somewhere to write.
+public/uploads/projects/*
+!public/uploads/projects/.gitkeep

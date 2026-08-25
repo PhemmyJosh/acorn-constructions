@@ -3,11 +3,11 @@ import Section from "@/components/ui/Section";
 import SectionHeading from "@/components/ui/SectionHeading";
 import Card from "@/components/ui/Card";
 import Reveal, { REVEAL_STAGGER } from "@/components/motion/Reveal";
-import { testimonials } from "@/data/testimonials";
+import { getPublishedTestimonials } from "@/lib/content-data";
 
-// TESTIMONIALS NEEDED FROM CLIENT: the quotes below are placeholder copy
-// standing in until real client testimonials are provided.
-export default function Testimonials() {
+export default async function Testimonials() {
+  const testimonials = await getPublishedTestimonials();
+
   return (
     <Section tone="stone">
       <Reveal>

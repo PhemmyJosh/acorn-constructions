@@ -3,7 +3,7 @@ import SectionHeading from "@/components/ui/SectionHeading";
 import Button from "@/components/ui/Button";
 import MasonryGrid from "@/components/projects/MasonryGrid";
 import Reveal from "@/components/motion/Reveal";
-import { projects } from "@/data/projects";
+import { getGalleryProjects } from "@/lib/content-data";
 
 const FEATURED_IDS = [
   "lakeview-timber-build",
@@ -17,7 +17,9 @@ const FEATURED_IDS = [
   "acreage-outbuilding",
 ];
 
-export default function GalleryPreview() {
+export default async function GalleryPreview() {
+  const projects = await getGalleryProjects();
+
   const featured = FEATURED_IDS.map((id) => projects.find((project) => project.id === id)).filter(
     (project): project is NonNullable<typeof project> => Boolean(project)
   );

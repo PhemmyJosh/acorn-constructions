@@ -86,6 +86,65 @@ CREATE TABLE IF NOT EXISTS career_applications (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ---------------------------------------------------------------------------
+-- 4. Editable site content
+-- ---------------------------------------------------------------------------
+-- These three tables back the admin's Content tabs. They let the client change
+-- project photos, testimonials and service copy without a code change.
+--
+-- Every page that reads them falls back to the hardcoded data in src/data/ if
+-- the table is empty or unreachable, so an empty database renders the original
+-- site rather than a blank one.
+
+CREATE TABLE IF NOT EXISTS projects (
+  id             INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  title          VARCHAR(255) NOT NULL,
+  -- Kept as a short key rather than a display label so the wording can change
+  -- without a data migration.
+  category       ENUM('residential','commercial','foundations','post_frame')
+                 NOT NULL DEFAULT 'residential',
+  -- Either a bare filename living in public/uploads/projects/, or an absolute
+  -- http(s) URL. The seeded stock photography uses URLs so that seeding changes
+  -- nothing on the live site; everything uploaded through the admin is a file.
+  image_filename VARCHAR(512)     NULL,
+  caption        VARCHAR(500)     NULL,
+  description    TEXT             NULL,
+  display_order  INT          NOT NULL DEFAULT 0,
+  created_at     TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at     TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP
+                 ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  KEY idx_projects_order (display_order, id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS testimonials (
+  id              INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  client_name     VARCHAR(255) NOT NULL,
+  -- Not in the original spec, but the home page already shows a role line
+  -- ("Homeowner, Residential Addition") under each name. Dropping it would
+  -- have visibly changed the live page on seed, so it is carried over.
+  client_role     VARCHAR(255)     NULL,
+  client_location VARCHAR(255)     NULL,
+  quote           TEXT         NOT NULL,
+  is_published    BOOLEAN      NOT NULL DEFAULT TRUE,
+  display_order   INT          NOT NULL DEFAULT 0,
+  created_at      TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at      TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP
+                  ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  KEY idx_testimonials_order (display_order, id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS service_content (
+  -- The slug is the natural key: it matches the route at /services/<slug> and
+  -- there is exactly one row per service.
+  service_slug  VARCHAR(191) NOT NULL,
+  overview_text TEXT             NULL,
+  updated_at    TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP
+                ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (service_slug)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ---------------------------------------------------------------------------
 -- MIGRATIONS
 -- ---------------------------------------------------------------------------
 -- Everything above is CREATE TABLE IF NOT EXISTS, which is a no-op against a

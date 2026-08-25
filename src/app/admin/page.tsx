@@ -6,6 +6,8 @@ import {
   TABLE_NAMES,
   TABS,
   READ_FILTERS,
+  CONTENT_TABS,
+  isContentTab,
   formatValue,
   readFilterClause,
   selectColumns,
@@ -25,6 +27,9 @@ import RowShell from "./RowShell";
 import DeleteButton from "./DeleteButton";
 import ResumeLink from "./ResumeLink";
 import SubmissionDetail from "./SubmissionDetail";
+import ProjectsPanel from "./content/ProjectsPanel";
+import TestimonialsPanel from "./content/TestimonialsPanel";
+import ServicesPanel from "./content/ServicesPanel";
 
 // Live database rows on every request; the layout also opts this route into
 // dynamic rendering by reading the session cookie.
@@ -37,6 +42,8 @@ interface AdminPageProps {
     dir?: string;
     read?: string;
     id?: string;
+    edit?: string;
+    error?: string;
   }>;
 }
 
@@ -70,6 +77,75 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
   }
 
   const params = await searchParams;
+
+  // ---- Content tabs -------------------------------------------------------
+  // Editable site content rather than an inbox: no read/unread, sorting or
+  // filtering, so this takes its own branch instead of contorting the
+  // submission view.
+  if (isContentTab(params.tab)) {
+    const contentTab = params.tab;
+    const editId = Number(params.edit);
+    const editing = Number.isInteger(editId) && editId > 0 ? editId : null;
+
+    let contentStats: DashboardStats | null = null;
+    let contentError: string | null = null;
+    try {
+      contentStats = await dashboardStats();
+    } catch (error) {
+      console.error("[admin] Stats query failed:", error);
+      contentError =
+        "Could not read the database. Check that MySQL is running and that schema.sql has been applied.";
+    }
+
+    const contentUnread: Record<TabKey, number> = {
+      contact: contentStats?.contact.unread ?? 0,
+      estimate: contentStats?.estimate.unread ?? 0,
+      careers: contentStats?.careers.unread ?? 0,
+    };
+
+    return (
+      <>
+        <AdminBar authed unread={contentStats ? contentStats.totalUnread : null} />
+
+        <div className="px-4 py-10 sm:px-8">
+          <div className="mx-auto max-w-7xl">
+            <header className="border-b border-acorn-bronze/20 pb-6">
+              <h1 className="font-heading text-3xl uppercase tracking-wide text-acorn-charcoal">
+                Site Content
+              </h1>
+              <p className="mt-1 text-sm text-acorn-charcoal/70">
+                Changes here go live on the website straight away.
+              </p>
+            </header>
+
+            <TabNav activeTab={contentTab} unread={contentUnread} />
+
+            {params.error && (
+              <p
+                role="alert"
+                className="mt-6 rounded-sm border border-acorn-rust/40 bg-acorn-rust/5 px-4 py-3 text-sm text-acorn-rust"
+              >
+                {params.error}
+              </p>
+            )}
+
+            {contentError ? (
+              <p className="mt-8 rounded-sm border border-acorn-rust/40 bg-white p-6 text-sm text-acorn-rust">
+                {contentError}
+              </p>
+            ) : contentTab === "projects" ? (
+              <ProjectsPanel editId={editing} />
+            ) : contentTab === "testimonials" ? (
+              <TestimonialsPanel editId={editing} />
+            ) : (
+              <ServicesPanel />
+            )}
+          </div>
+        </div>
+      </>
+    );
+  }
+
   const tab = toTab(params.tab);
   const sort = toSort(tab, params.sort);
   const dir = toDir(params.dir);
@@ -161,37 +237,7 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
 
         {stats && <StatsOverview stats={stats} />}
 
-        <nav aria-label="Submission types" className="mt-6 flex flex-wrap gap-2">
-          {TABS.map((candidate) => {
-            const active = candidate.key === tab;
-            const count = unread[candidate.key];
-            return (
-              <Link
-                key={candidate.key}
-                href={`/admin?tab=${candidate.key}`}
-                className={`inline-flex items-center gap-2 rounded-sm px-4 py-2 font-heading text-xs uppercase tracking-[0.15em] transition-colors ${
-                  active
-                    ? "bg-acorn-charcoal text-acorn-cream"
-                    : "border border-acorn-bronze/30 text-acorn-charcoal hover:bg-acorn-stone"
-                }`}
-              >
-                {candidate.label}
-                {count > 0 && (
-                  <span
-                    aria-label={`${count} unread`}
-                    className={`inline-flex min-w-5 items-center justify-center rounded-full px-1.5 py-0.5 text-[10px] font-bold leading-none ${
-                      active
-                        ? "bg-acorn-gold text-acorn-charcoal"
-                        : "bg-acorn-rust text-white"
-                    }`}
-                  >
-                    {count}
-                  </span>
-                )}
-              </Link>
-            );
-          })}
-        </nav>
+        <TabNav activeTab={tab} unread={unread} />
 
         <div className="mt-4 flex flex-wrap items-center gap-2">
           <span className="font-heading text-[11px] uppercase tracking-[0.15em] text-acorn-charcoal/60">
@@ -431,5 +477,69 @@ function Cell({
         )}
       </div>
     </td>
+  );
+}
+
+/**
+ * One tab bar for both groups. The submission tabs carry unread badges; the
+ * content tabs are separated by a divider so it reads as two kinds of thing
+ * rather than six equivalent inboxes.
+ */
+function TabNav({
+  activeTab,
+  unread,
+}: {
+  activeTab: string;
+  unread: Record<TabKey, number>;
+}) {
+  const base =
+    "inline-flex items-center gap-2 rounded-sm px-4 py-2 font-heading text-xs uppercase tracking-[0.15em] transition-colors";
+  const inactive =
+    "border border-acorn-bronze/30 text-acorn-charcoal hover:bg-acorn-stone";
+  const active = "bg-acorn-charcoal text-acorn-cream";
+
+  return (
+    <nav aria-label="Dashboard sections" className="mt-6 flex flex-wrap items-center gap-2">
+      {TABS.map((candidate) => {
+        const isActive = candidate.key === activeTab;
+        const count = unread[candidate.key];
+        return (
+          <Link
+            key={candidate.key}
+            href={`/admin?tab=${candidate.key}`}
+            className={`${base} ${isActive ? active : inactive}`}
+          >
+            {candidate.label}
+            {count > 0 && (
+              <span
+                aria-label={`${count} unread`}
+                className={`inline-flex min-w-5 items-center justify-center rounded-full px-1.5 py-0.5 text-[10px] font-bold leading-none ${
+                  isActive
+                    ? "bg-acorn-gold text-acorn-charcoal"
+                    : "bg-acorn-rust text-white"
+                }`}
+              >
+                {count}
+              </span>
+            )}
+          </Link>
+        );
+      })}
+
+      <span aria-hidden="true" className="mx-1 h-6 w-px bg-acorn-bronze/30" />
+
+      {CONTENT_TABS.map((candidate) => {
+        const isActive = candidate.key === activeTab;
+        return (
+          <Link
+            key={candidate.key}
+            href={`/admin?tab=${candidate.key}`}
+            className={`${base} ${isActive ? active : inactive}`}
+          >
+            {candidate.label}
+          </Link>
+        );
+      })}
+    </nav>
   );
 }
