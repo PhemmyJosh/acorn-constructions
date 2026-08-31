@@ -53,7 +53,8 @@ const useIsomorphicLayoutEffect =
 
 interface MasonryGridProps {
   projects: Project[];
-  onSelect?: (index: number) => void;
+  /** Receives the tile element too, so focus can be returned to it later. */
+  onSelect?: (index: number, trigger: HTMLElement) => void;
   linkHref?: string;
   className?: string;
 }
@@ -153,7 +154,7 @@ export default function MasonryGrid({
                 <button
                   key={project.id}
                   type="button"
-                  onClick={() => onSelect(index)}
+                  onClick={(event) => onSelect(index, event.currentTarget)}
                   className="group block w-full text-left"
                 >
                   {content}

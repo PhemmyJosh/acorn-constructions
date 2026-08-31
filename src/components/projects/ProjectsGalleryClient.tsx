@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import MasonryGrid from "./MasonryGrid";
 import Lightbox from "./Lightbox";
 import { Project, ProjectCategory } from "@/types";
@@ -34,7 +34,21 @@ export default function ProjectsGalleryClient({ projects }: ProjectsGalleryClien
     activeCategory === "All" ? projects : projects.filter((project) => project.category === activeCategory);
   const total = filtered.length;
 
-  const close = useCallback(() => setActiveIndex(null), []);
+  // The thumbnail that opened the lightbox, so focus can go back to it.
+  const triggerRef = useRef<HTMLElement | null>(null);
+
+  const open = useCallback((index: number, trigger: HTMLElement) => {
+    triggerRef.current = trigger;
+    setActiveIndex(index);
+  }, []);
+
+  const close = useCallback(() => {
+    setActiveIndex(null);
+    // The tile is still mounted behind the lightbox, so this is safe to do
+    // synchronously; if it has gone (a category switch, say) focus simply
+    // stays where the browser left it.
+    triggerRef.current?.focus();
+  }, []);
   const showPrev = useCallback(
     () => setActiveIndex((current) => (current === null ? null : (current - 1 + total) % total)),
     [total]
@@ -47,6 +61,8 @@ export default function ProjectsGalleryClient({ projects }: ProjectsGalleryClien
   function selectCategory(category: ProjectCategory | "All") {
     setActiveCategory(category);
     setActiveIndex(null);
+    // The tiles are about to be replaced, so the remembered one is stale.
+    triggerRef.current = null;
   }
 
   return (
@@ -68,7 +84,7 @@ export default function ProjectsGalleryClient({ projects }: ProjectsGalleryClien
         ))}
       </div>
 
-      <MasonryGrid projects={filtered} onSelect={setActiveIndex} />
+      <MasonryGrid projects={filtered} onSelect={open} />
 
       {activeIndex !== null ? (
         <Lightbox
