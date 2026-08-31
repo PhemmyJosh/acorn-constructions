@@ -161,6 +161,34 @@ export const DETAIL_FIELDS: Record<TabKey, ColumnDef[]> = {
   ],
 };
 
+/**
+ * Fields shown on the mobile card for each tab, under the client's name.
+ *
+ * A narrow screen cannot show a nine-column table without horizontal
+ * scrolling, so below the md breakpoint the table is replaced by these cards.
+ * Deliberately a shorter list than LIST_COLUMNS: the point is a scannable
+ * summary, with everything else one tap away in the detail view.
+ */
+export const CARD_FIELDS: Record<TabKey, ColumnDef[]> = {
+  contact: [
+    { label: "Received", key: "created_at", format: "datetime" },
+    { label: "Phone", key: "phone" },
+    { label: "Email", key: "email" },
+    { label: "Message", key: "message", wrap: true },
+  ],
+  estimate: [
+    { label: "Received", key: "created_at", format: "datetime" },
+    { label: "Type", key: "building_type" },
+    { label: "Location", key: "building_location" },
+    { label: "Description", key: "description", wrap: true },
+  ],
+  careers: [
+    { label: "Received", key: "created_at", format: "datetime" },
+    { label: "Comments", key: "comments", wrap: true },
+    { label: "Resume", key: "resume_filename", format: "resume" },
+  ],
+};
+
 export function sortableColumns(tab: TabKey): string[] {
   return LIST_COLUMNS[tab].filter((c) => c.sortable).map((c) => c.key);
 }
@@ -200,8 +228,13 @@ export const LIST_TEXT_CHARS = 200;
 export function listSelectColumns(tab: TabKey): string {
   const needed = new Set<string>(["id", "is_read", "read_at"]);
   const selected: string[] = [];
+  const seen = new Set<string>();
 
-  for (const column of LIST_COLUMNS[tab]) {
+  // Union of the desktop table columns and the mobile card fields: one query
+  // serves both, since which one renders is decided in CSS.
+  for (const column of [...LIST_COLUMNS[tab], ...CARD_FIELDS[tab]]) {
+    if (seen.has(column.key)) continue;
+    seen.add(column.key);
     needed.delete(column.key);
     if (column.wrap && column.format !== "json") {
       selected.push(`LEFT(${column.key}, ${LIST_TEXT_CHARS}) AS ${column.key}`);

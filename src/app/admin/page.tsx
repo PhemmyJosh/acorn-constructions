@@ -28,6 +28,7 @@ import RowShell from "./RowShell";
 import DeleteButton from "./DeleteButton";
 import ResumeLink from "./ResumeLink";
 import SubmissionDetail from "./SubmissionDetail";
+import SubmissionCards from "./SubmissionCards";
 import ProjectsPanel from "./content/ProjectsPanel";
 import TestimonialsPanel from "./content/TestimonialsPanel";
 import ServicesPanel from "./content/ServicesPanel";
@@ -282,7 +283,24 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
               {rows.length} {rows.length === 1 ? "entry" : "entries"}
               {readFilter !== "all" && ` · ${readFilter}`}
             </p>
-            <div className="mt-3 overflow-x-auto rounded-sm border border-acorn-bronze/20 bg-white">
+            {/* Below md the table becomes a stacked card list: nine columns
+                cannot be read on a phone without scrolling sideways. */}
+            <div className="md:hidden">
+              <SubmissionCards
+                tab={tab}
+                rows={rows}
+                listParams={listParams}
+                hrefFor={(row) =>
+                  `/admin?${new URLSearchParams({
+                    tab,
+                    ...listParams,
+                    id: String(row.id),
+                  })}`
+                }
+              />
+            </div>
+
+            <div className="mt-3 hidden overflow-x-auto rounded-sm border border-acorn-bronze/20 bg-white md:block">
               <table className="min-w-full border-collapse text-left text-sm">
                 <thead className="bg-acorn-stone">
                   <tr>
@@ -498,14 +516,19 @@ function TabNav({
   activeTab: string;
   unread: Record<TabKey, number>;
 }) {
+  // min-h-11 is 44px, the minimum comfortable tap target.
   const base =
-    "inline-flex items-center gap-2 rounded-sm px-4 py-2 font-heading text-xs uppercase tracking-[0.15em] transition-colors";
+    "inline-flex min-h-11 items-center gap-2 rounded-sm px-4 py-2 font-heading text-xs uppercase tracking-[0.15em] transition-colors";
   const inactive =
     "border border-acorn-bronze/30 text-acorn-charcoal hover:bg-acorn-stone";
   const active = "bg-acorn-charcoal text-acorn-cream";
 
   return (
-    <nav aria-label="Dashboard sections" className="mt-6 flex flex-wrap items-center gap-2">
+    <nav
+      aria-label="Dashboard sections"
+      className="mt-6 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center"
+    >
+      <div className="flex flex-wrap items-center gap-2">
       {TABS.map((candidate) => {
         const isActive = candidate.key === activeTab;
         const count = unread[candidate.key];
@@ -515,7 +538,10 @@ function TabNav({
             href={`/admin?tab=${candidate.key}`}
             className={`${base} ${isActive ? active : inactive}`}
           >
-            {candidate.label}
+            {/* Short label on the narrowest screens, so six 44px tabs still
+                wrap into a couple of rows rather than a tall stack. */}
+            <span className="sm:hidden">{candidate.shortLabel}</span>
+            <span className="hidden sm:inline">{candidate.label}</span>
             {count > 0 && (
               <span
                 aria-label={`${count} unread`}
@@ -532,8 +558,16 @@ function TabNav({
         );
       })}
 
-      <span aria-hidden="true" className="mx-1 h-6 w-px bg-acorn-bronze/30" />
+      </div>
 
+      {/* Only meaningful when the two groups sit on one line; when they stack
+          on mobile the line break is the separation. */}
+      <span
+        aria-hidden="true"
+        className="mx-1 hidden h-6 w-px bg-acorn-bronze/30 sm:block"
+      />
+
+      <div className="flex flex-wrap items-center gap-2">
       {CONTENT_TABS.map((candidate) => {
         const isActive = candidate.key === activeTab;
         return (
@@ -546,6 +580,7 @@ function TabNav({
           </Link>
         );
       })}
+      </div>
     </nav>
   );
 }

@@ -19,7 +19,7 @@ export default function AdminBar({
   return (
     <header className="border-b border-acorn-bronze/20 bg-acorn-charcoal">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4 sm:px-8">
-        <span className="font-heading text-sm uppercase tracking-[0.2em] text-acorn-cream">
+        <span className="font-heading text-xs uppercase tracking-[0.12em] text-acorn-cream sm:text-sm sm:tracking-[0.2em]">
           Acorn Construction
           <span className="text-acorn-gold"> — Admin</span>
         </span>
