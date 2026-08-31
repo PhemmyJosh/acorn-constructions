@@ -176,11 +176,48 @@ export function toDir(value: unknown): "ASC" | "DESC" {
 }
 
 /**
- * Explicit column list per tab. The careers table holds the resume BLOB, which
- * must never be pulled into a list or detail query — it is streamed on demand
- * by /api/admin/resume/[id] instead.
+ * How many characters of a long free-text field the table view fetches.
+ *
+ * The visible truncation is done in CSS (two lines, with an ellipsis), so this
+ * is purely a guard on what crosses the wire and lands in the DOM: a
+ * several-thousand-character message would otherwise be sent in full to render
+ * two lines of it. Comfortably more than two lines can ever show, so it never
+ * decides what the reader sees.
  */
-export function selectColumns(tab: TabKey): string {
+export const LIST_TEXT_CHARS = 200;
+
+/**
+ * Columns for the table view.
+ *
+ * Explicit rather than `*` so that free-text fields can be cut down in SQL,
+ * and so the careers table's resume BLOB is never pulled into a list query —
+ * it is streamed on demand by /api/admin/resume/[id] instead.
+ *
+ * JSON columns are exempt from the cut: slicing them mid-array would leave
+ * something JSON.parse cannot read. Those are bounded by a fixed set of
+ * checkboxes, not free text, so they need no guard.
+ */
+export function listSelectColumns(tab: TabKey): string {
+  const needed = new Set<string>(["id", "is_read", "read_at"]);
+  const selected: string[] = [];
+
+  for (const column of LIST_COLUMNS[tab]) {
+    needed.delete(column.key);
+    if (column.wrap && column.format !== "json") {
+      selected.push(`LEFT(${column.key}, ${LIST_TEXT_CHARS}) AS ${column.key}`);
+    } else {
+      selected.push(column.key);
+    }
+  }
+
+  return [...needed, ...selected].join(", ");
+}
+
+/**
+ * Columns for the detail view: everything, untruncated, so the full message is
+ * what the reader gets. Only the resume BLOB is held back.
+ */
+export function detailSelectColumns(tab: TabKey): string {
   if (tab !== "careers") return "*";
   return [
     "id",

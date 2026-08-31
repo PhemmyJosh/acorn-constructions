@@ -10,7 +10,8 @@ import {
   isContentTab,
   formatValue,
   readFilterClause,
-  selectColumns,
+  listSelectColumns,
+  detailSelectColumns,
   toDir,
   toReadFilter,
   toSort,
@@ -170,7 +171,7 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
 
     if (wantsDetail) {
       const found = await query<SubmissionRow>(
-        `SELECT ${selectColumns(tab)} FROM ${TABLE_NAMES[tab]} WHERE id = ?`,
+        `SELECT ${detailSelectColumns(tab)} FROM ${TABLE_NAMES[tab]} WHERE id = ?`,
         [detailId]
       );
       detailRow = found[0] ?? null;
@@ -191,7 +192,7 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
         // view shows the real read_at that MySQL just wrote instead of the
         // NULL it was fetched with.
         const refreshed = await query<SubmissionRow>(
-          `SELECT ${selectColumns(tab)} FROM ${TABLE_NAMES[tab]} WHERE id = ?`,
+          `SELECT ${detailSelectColumns(tab)} FROM ${TABLE_NAMES[tab]} WHERE id = ?`,
           [detailId]
         );
         detailRow = refreshed[0] ?? detailRow;
@@ -200,7 +201,7 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
     }
 
     rows = await query<SubmissionRow>(
-      `SELECT ${selectColumns(tab)} FROM ${TABLE_NAMES[tab]}
+      `SELECT ${listSelectColumns(tab)} FROM ${TABLE_NAMES[tab]}
         ${readFilterClause(readFilter)}
         ORDER BY ${sort} ${dir}, id ${dir}
         LIMIT 500`
@@ -462,7 +463,12 @@ function Cell({
       <div
         className={
           column.wrap
-            ? "min-w-[10rem] max-w-[16rem] whitespace-pre-wrap break-words"
+            ? // line-clamp-2 caps the cell at two lines and adds its own
+              // ellipsis; min-h reserves both lines even for a short message, so
+              // every row in the table is the same height whether the message is
+              // ten characters or ten thousand. 2.5rem is two lines of text-sm.
+              // The full text lives in the detail view.
+              "min-w-[10rem] max-w-[16rem] min-h-[2.5rem] whitespace-pre-wrap break-words line-clamp-2"
             : "whitespace-nowrap"
         }
       >
