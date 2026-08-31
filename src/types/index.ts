@@ -26,7 +26,12 @@ export interface Testimonial {
   location: string;
 }
 
-export type ProjectCategory = "Residential" | "Foundations" | "Post Frame";
+/** Display labels matching the `category` enum on the projects table. */
+export type ProjectCategory =
+  | "Residential"
+  | "Commercial"
+  | "Foundations"
+  | "Post Frame";
 
 export interface Project {
   id: string;

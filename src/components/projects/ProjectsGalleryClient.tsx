@@ -9,9 +9,10 @@ interface ProjectsGalleryClientProps {
   projects: Project[];
 }
 
-const CATEGORIES: Array<ProjectCategory | "All"> = [
-  "All",
+/** The order tabs appear in, when the projects actually use them. */
+const CATEGORY_ORDER: ProjectCategory[] = [
   "Residential",
+  "Commercial",
   "Foundations",
   "Post Frame",
 ];
@@ -19,6 +20,15 @@ const CATEGORIES: Array<ProjectCategory | "All"> = [
 export default function ProjectsGalleryClient({ projects }: ProjectsGalleryClientProps) {
   const [activeCategory, setActiveCategory] = useState<ProjectCategory | "All">("All");
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
+
+  // Derived from the projects rather than hardcoded: the client can now add
+  // categories from the admin, and a tab that would show nothing (Commercial,
+  // until there is a commercial project) should not appear at all.
+  const present = new Set(projects.map((project) => project.category));
+  const CATEGORIES: Array<ProjectCategory | "All"> = [
+    "All",
+    ...CATEGORY_ORDER.filter((category) => present.has(category)),
+  ];
 
   const filtered =
     activeCategory === "All" ? projects : projects.filter((project) => project.category === activeCategory);
