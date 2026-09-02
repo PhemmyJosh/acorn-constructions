@@ -1,6 +1,6 @@
 "use server";
 
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import {
   ADMIN_COOKIE,
@@ -9,11 +9,24 @@ import {
   sessionCookie,
   verifyPassword,
 } from "@/lib/admin-auth";
+import { clientIp } from "@/lib/client-ip";
+import {
+  LOGIN_RULE,
+  checkRateLimit,
+  clearRateLimit,
+  recordRateLimitHit,
+  retryAfterPhrase,
+} from "@/lib/rate-limit";
 import { execute } from "@/lib/db";
 import { TABLE_NAMES, toTab } from "@/lib/admin-data";
 
 export type LoginState = { error?: string };
 
+/**
+ * Rate limiting applies to this action only, never to the authenticated
+ * actions further down: browsing tabs and marking rows read must stay
+ * unmetered no matter how fast the client works.
+ */
 export async function login(
   _previous: LoginState,
   formData: FormData
@@ -22,10 +35,34 @@ export async function login(
     return { error: "ADMIN_PASSWORD is not set on the server." };
   }
 
+  const key = `login:${clientIp(await headers())}`;
+
+  // Checked BEFORE the password is verified, and this is the whole point of the
+  // ordering: once blocked, the response is byte-identical whether the
+  // submitted password was right or wrong. Verifying first and reporting "too
+  // many attempts" afterwards would turn the block into an oracle, letting an
+  // attacker who is already rate limited keep testing guesses and read the
+  // answer off which message came back.
+  const blocked = checkRateLimit(key, LOGIN_RULE);
+  if (!blocked.allowed) {
+    return {
+      error: `Too many attempts. Please try again in ${retryAfterPhrase(
+        blocked.retryAfterSeconds
+      )}.`,
+    };
+  }
+
   const submitted = formData.get("password");
   if (typeof submitted !== "string" || !verifyPassword(submitted)) {
+    // Only failures cost budget, so signing in and out repeatedly during
+    // normal work never walks into the limit.
+    recordRateLimitHit(key, LOGIN_RULE);
     return { error: "Incorrect password." };
   }
+
+  // A real sign-in clears the record, so earlier fat-fingered attempts do not
+  // linger and cut a legitimate session short later in the window.
+  clearRateLimit(key);
 
   const { name, value, options } = sessionCookie();
   (await cookies()).set(name, value, options);

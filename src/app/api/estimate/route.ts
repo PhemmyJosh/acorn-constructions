@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { insert } from "@/lib/db";
+import { formRateLimitResponse } from "@/lib/form-rate-limit";
 import { sendNotification } from "@/lib/mailer";
 import {
   HONEYPOT_FIELD,
@@ -15,6 +16,10 @@ import {
 } from "@/lib/validation";
 
 export async function POST(request: Request) {
+  // Before the body is even parsed, so a flood costs as little as possible.
+  const limited = formRateLimitResponse(request, "/api/estimate");
+  if (limited) return limited;
+
   let payload: unknown;
   try {
     payload = await request.json();

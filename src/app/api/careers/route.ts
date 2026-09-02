@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { insert } from "@/lib/db";
+import { formRateLimitResponse } from "@/lib/form-rate-limit";
 import { sendNotification } from "@/lib/mailer";
 import {
   HONEYPOT_FIELD,
@@ -13,6 +14,10 @@ const RESUME_MAX_BYTES = 2.4 * 1024 * 1024;
 const ALLOWED_RESUME_EXTENSIONS = [".pdf", ".doc", ".docx"];
 
 export async function POST(request: Request) {
+  // Before the body is even parsed, so a flood costs as little as possible.
+  const limited = formRateLimitResponse(request, "/api/careers");
+  if (limited) return limited;
+
   let form: FormData;
   try {
     form = await request.formData();

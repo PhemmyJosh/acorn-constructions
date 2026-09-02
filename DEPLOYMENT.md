@@ -126,6 +126,7 @@ throwaway Ethereal test inbox instead of real email.
 | `R2_BUCKET_NAME` | the bucket holding project photos |
 | `R2_PUBLIC_URL` | the bucket's public URL, e.g. `https://pub-xxxx.r2.dev`. **Also needed at build time** — next.config.ts reads it to allow the hostname through next/image |
 | `APP_URL` | the live site's base URL, e.g. `https://acornconstruction.ca` — notification emails build their "View in Dashboard" link from this, so leaving it unset makes those links point at localhost |
+| `TRUSTED_PROXY_COUNT` | number of proxies in front of the app. **Defaults to 1, which is correct for a standard Hostinger Node app — usually leave it unset.** Only raise it if you add another hop (e.g. Cloudflare in front of Hostinger). See the rate-limiting note below before changing it |
 | `DB_HOST` | from step 3 (usually `localhost`) |
 | `DB_PORT` | `3306` unless Hostinger states otherwise |
 | `DB_USER` | prefixed username from step 3 |
@@ -310,6 +311,50 @@ Consequences worth knowing:
 - `public/uploads/projects/` is kept only so any pre-migration row still tidies
   up after itself. Once `scripts/cleanup-orphaned-projects.sql` has run, it can
   be deleted.
+
+## Rate limiting and the client IP
+
+Two limits are enforced, both in the app's own memory:
+
+| What | Limit | Counted |
+| --- | --- | --- |
+| Admin login | 5 per 15 minutes per IP | **failed** attempts only; a successful sign-in clears the record |
+| Each public form | 5 per hour per IP | every submission attempt, per form |
+
+Authenticated admin work — browsing tabs, marking read, editing content — is
+**not** limited. Only the sign-in attempt itself is.
+
+Counters live in process memory, not Redis, which is the right call at this
+traffic scale but has one consequence worth knowing: **a restart or a deploy
+clears them**, handing an attacker a fresh budget. Acceptable for slowing down
+password guessing; not a substitute for a strong `ADMIN_PASSWORD`.
+
+### Confirm the real client IP is reaching the app
+
+Both limits key on the visitor's IP, taken from `X-Forwarded-For`. Because the
+app sits behind Hostinger's proxy, the socket address alone would be the
+proxy's, identical for every visitor. If forwarding is misconfigured, one of
+two things goes wrong and neither is obvious:
+
+- the app sees one IP for everybody → the first attacker's five failed logins
+  **lock out the real admin**
+- a visitor can forge the header → the limits never trigger
+
+The header is therefore read from the **right-hand** end, which is the part a
+client cannot forge, stepping left one entry per `TRUSTED_PROXY_COUNT` hop.
+
+After deploying, check the app's logs for:
+
+```
+[client-ip] No X-Forwarded-For or X-Real-IP header on an incoming request.
+```
+
+That warning appears **once per process** if the proxy is not forwarding at
+all, and means every visitor is sharing one bucket — fix the proxy config
+before relying on the limits. Seeing it locally against `localhost` is normal
+and expected.
+
+---
 
 ## Notes for later
 
