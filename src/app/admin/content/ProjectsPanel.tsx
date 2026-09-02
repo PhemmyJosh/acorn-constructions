@@ -100,18 +100,17 @@ export default async function ProjectsPanel() {
                   <td className={tdClasses}>
                     <div className="max-w-xs truncate">{row.caption || "—"}</div>
                   </td>
+                  {/* The arrows are the whole interface here. display_order is
+                      an internal number — it counts in tens so a swap has room
+                      to move — and showing it invited the admin to read meaning
+                      into values that have none. */}
                   <td className={`${tdClasses} whitespace-nowrap`}>
-                    <div className="flex items-center gap-2">
-                      <span className="tabular-nums text-acorn-charcoal/50">
-                        {row.display_order}
-                      </span>
-                      <ReorderButtons
-                        table="projects"
-                        id={row.id}
-                        isFirst={index === 0}
-                        isLast={index === rows.length - 1}
-                      />
-                    </div>
+                    <ReorderButtons
+                      table="projects"
+                      id={row.id}
+                      isFirst={index === 0}
+                      isLast={index === rows.length - 1}
+                    />
                   </td>
                   <td className={`${tdClasses} whitespace-nowrap`}>
                     <div className="flex items-center gap-1">
