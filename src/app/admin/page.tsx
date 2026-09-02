@@ -136,7 +136,7 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
                 {contentError}
               </p>
             ) : contentTab === "projects" ? (
-              <ProjectsPanel editId={editing} />
+              <ProjectsPanel />
             ) : contentTab === "testimonials" ? (
               <TestimonialsPanel editId={editing} />
             ) : (

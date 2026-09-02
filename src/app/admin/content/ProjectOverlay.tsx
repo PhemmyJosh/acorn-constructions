@@ -2,11 +2,12 @@
 
 import { useActionState, useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { AlertCircle, ImagePlus, Loader2, X } from "lucide-react";
+import { AlertCircle, ImagePlus, Loader2, Save, X } from "lucide-react";
 import { motion, useReducedMotion } from "framer-motion";
 import ProjectFields from "./ProjectFields";
-import { createProject } from "./project-create-action";
-import { createProjectInitialState } from "./project-create-state";
+import { saveProjectFromOverlay } from "./project-save-action";
+import { projectSaveInitialState } from "./project-save-state";
+import { type ProjectRow } from "@/lib/content-constants";
 import { primaryButton, secondaryButton } from "./styles";
 
 /** Everything inside the panel that can take focus. */
@@ -14,30 +15,34 @@ const FOCUSABLE =
   'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
 
 /**
- * Slide-in panel for creating a project, replacing the old "scroll to the
- * bottom of the page to find the form" arrangement.
+ * Slide-in panel for creating *or* editing a project.
+ *
+ * One component for both, because two patterns for the same job is what this
+ * replaced: creating used to mean scrolling past the whole table to an empty
+ * form, and editing used to jump to that same form at the bottom of the page.
+ * The only differences now are the heading, the button label, and whether a
+ * photo is required.
  *
  * A right-hand panel rather than the full-screen treatment used by the
  * submission detail view: that view exists to lay out fifteen read-only
  * fields, whereas this is five inputs and benefits from the list staying
  * visible behind it. Full width below `sm`, where a panel would be the whole
  * screen anyway.
- *
- * Keyboard behaviour matches the rest of the admin — Escape closes, focus is
- * trapped, the page behind does not scroll — and closing with typed-in work
- * asks first rather than discarding silently.
  */
-export default function ProjectCreateOverlay({
+export default function ProjectOverlay({
+  project,
   onClose,
-  onCreated,
+  onSaved,
 }: {
+  /** Omitted when creating; the row being edited otherwise. */
+  project?: ProjectRow;
   onClose: () => void;
-  /** Called with the new project's title once the server confirms it. */
-  onCreated: (title: string) => void;
+  onSaved: (title: string, mode: "created" | "updated") => void;
 }) {
+  const isEdit = project !== undefined;
   const [state, formAction, isPending] = useActionState(
-    createProject,
-    createProjectInitialState
+    saveProjectFromOverlay,
+    projectSaveInitialState
   );
   const panelRef = useRef<HTMLDivElement>(null);
   const prefersReducedMotion = useReducedMotion();
@@ -49,9 +54,13 @@ export default function ProjectCreateOverlay({
   /**
    * Close, or ask first when there is work to lose. Held in a ref as well so
    * the mount-only key handler below never closes over a stale copy.
+   *
+   * `dirty` only becomes true on real input, so an edit panel that was opened
+   * and read but not changed closes without a prompt, exactly like a pristine
+   * create panel.
    */
   const requestClose = useCallback(() => {
-    if (isPending) return; // A submission is in flight; let it finish.
+    if (isPending) return; // A save is in flight; let it finish.
     if (dirty) {
       setConfirmingDiscard(true);
       return;
@@ -78,7 +87,10 @@ export default function ProjectCreateOverlay({
         if (!panel) return;
         const focusable = Array.from(
           panel.querySelectorAll<HTMLElement>(FOCUSABLE)
-        ).filter((element) => element.offsetParent !== null && !element.hasAttribute("disabled"));
+        ).filter(
+          (element) =>
+            element.offsetParent !== null && !element.hasAttribute("disabled")
+        );
         if (focusable.length === 0) {
           event.preventDefault();
           return;
@@ -121,16 +133,18 @@ export default function ProjectCreateOverlay({
   // Success is reported by the action's return value, so the close happens
   // here rather than inside the action, which cannot touch the client.
   useEffect(() => {
-    if (state.status === "success" && state.createdTitle) {
-      onCreated(state.createdTitle);
+    if (state.status === "success" && state.savedTitle) {
+      onSaved(state.savedTitle, state.mode ?? "created");
     }
-  }, [state, onCreated]);
+  }, [state, onSaved]);
 
   if (typeof document === "undefined") return null;
 
   const transition = prefersReducedMotion
     ? { duration: 0 }
     : { duration: 0.25, ease: "easeOut" as const };
+
+  const heading = isEdit ? "Edit project" : "Create new project";
 
   return createPortal(
     <div className="fixed inset-0 z-[90]">
@@ -149,20 +163,25 @@ export default function ProjectCreateOverlay({
         ref={panelRef}
         role="dialog"
         aria-modal="true"
-        aria-label="Create new project"
+        aria-label={heading}
         initial={prefersReducedMotion ? { opacity: 0 } : { x: "100%" }}
         animate={prefersReducedMotion ? { opacity: 1 } : { x: 0 }}
         transition={transition}
         className="absolute inset-y-0 right-0 flex w-full max-w-xl flex-col overflow-y-auto overscroll-contain bg-acorn-cream shadow-2xl"
       >
         <header className="flex items-start justify-between gap-4 border-b border-acorn-bronze/25 bg-white px-6 py-5">
-          <div>
+          <div className="min-w-0">
             <p className="font-heading text-xs uppercase tracking-[0.2em] text-acorn-bronze">
               Projects
             </p>
             <h2 className="mt-1 font-heading text-xl uppercase tracking-wide text-acorn-charcoal">
-              Create new project
+              {heading}
             </h2>
+            {isEdit && (
+              <p className="mt-1 truncate text-sm text-acorn-charcoal/70">
+                {project.title}
+              </p>
+            )}
           </div>
           <button
             type="button"
@@ -180,6 +199,8 @@ export default function ProjectCreateOverlay({
           onInput={() => setDirty(true)}
           className="flex flex-1 flex-col px-6 py-6"
         >
+          {isEdit && <input type="hidden" name="id" value={project.id} />}
+
           {state.error && (
             <p
               role="alert"
@@ -191,7 +212,8 @@ export default function ProjectCreateOverlay({
           )}
 
           <ProjectFields
-            idPrefix="new-project"
+            project={project}
+            idPrefix={isEdit ? `edit-project-${project.id}` : "new-project"}
             fieldErrors={state.fieldErrors}
             onLocalErrorChange={setLocalError}
           />
@@ -212,7 +234,12 @@ export default function ProjectCreateOverlay({
                     aria-hidden="true"
                     className="animate-spin motion-reduce:animate-none"
                   />
-                  Creating...
+                  {isEdit ? "Saving..." : "Creating..."}
+                </>
+              ) : isEdit ? (
+                <>
+                  <Save size={14} aria-hidden="true" />
+                  Save changes
                 </>
               ) : (
                 <>
@@ -239,7 +266,7 @@ export default function ProjectCreateOverlay({
         <div
           role="dialog"
           aria-modal="true"
-          aria-label="Discard this project?"
+          aria-label="Discard your changes?"
           className="absolute inset-0 z-10 flex items-center justify-center px-4"
         >
           <button
@@ -250,11 +277,12 @@ export default function ProjectCreateOverlay({
           />
           <div className="relative w-full max-w-md rounded-sm border border-acorn-rust/40 bg-white p-6 shadow-xl">
             <h3 className="font-heading text-lg uppercase tracking-wide text-acorn-charcoal">
-              Discard this project?
+              Discard your changes?
             </h3>
             <p className="mt-2 text-sm leading-relaxed text-acorn-charcoal/80">
-              You have filled in some details. Closing now throws them away and
-              nothing is saved.
+              {isEdit
+                ? "You have changed some details. Closing now throws those changes away and the project stays as it was."
+                : "You have filled in some details. Closing now throws them away and nothing is saved."}
             </p>
             <div className="mt-6 flex flex-wrap justify-end gap-3">
               <button

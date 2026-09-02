@@ -3,9 +3,8 @@
 import { redirect } from "next/navigation";
 import { isAuthenticated } from "@/lib/admin-auth";
 import { execute, query } from "@/lib/db";
-import { toCategoryKey, type ProjectRow, type TestimonialRow } from "@/lib/content-data";
-import { deleteProjectImage, saveProjectImage } from "@/lib/content-upload";
-import { IMAGE_MAX_BYTES, IMAGE_MAX_MB } from "@/lib/content-constants";
+import { type ProjectRow, type TestimonialRow } from "@/lib/content-data";
+import { deleteProjectImage } from "@/lib/content-upload";
 
 /**
  * Content CRUD for the admin's Projects / Testimonials / Services tabs.
@@ -80,85 +79,6 @@ async function nextOrder(table: "projects" | "testimonials"): Promise<number> {
 /* -------------------------------------------------------------------------- */
 /* Projects                                                                    */
 /* -------------------------------------------------------------------------- */
-
-export async function saveProject(formData: FormData): Promise<void> {
-  await requireAdmin();
-
-  const error = await guard("saveProject", () => saveProjectWork(formData));
-  if (error) back("projects", error);
-  redirect("/admin?tab=projects");
-}
-
-/** The work itself. Returns a message to show, or null when it succeeded. */
-async function saveProjectWork(formData: FormData): Promise<string | null> {
-  const id = toId(formData.get("id"));
-  const title = text(formData.get("title"), 255);
-  const category = toCategoryKey(formData.get("category"));
-  const caption = nullable(formData.get("caption"), 500);
-  const description = nullable(formData.get("description"), 5000);
-
-  if (!title) return "A project needs a title.";
-
-  const upload = formData.get("image");
-  // The stored value is the object's full public URL, so every consumer —
-  // next/image, the admin thumbnail, the public gallery — treats R2 photos and
-  // the seeded stock URLs through exactly one code path.
-  let newImageUrl: string | null = null;
-
-  if (upload instanceof File && upload.size > 0) {
-    // Checked before saveProjectImage so an oversized file is refused with a
-    // specific message naming its size, rather than the generic one.
-    if (upload.size > IMAGE_MAX_BYTES) {
-      return `That photo is ${(upload.size / 1024 / 1024).toFixed(
-        1
-      )}MB. Choose one under ${IMAGE_MAX_MB}MB.`;
-    }
-    const result = await saveProjectImage(upload);
-    if (result.error) return result.error;
-    newImageUrl = result.url ?? null;
-  }
-
-  if (id === null) {
-    // New projects must have an image, otherwise the gallery renders a gap.
-    if (!newImageUrl) return "Choose an image for the new project.";
-
-    const order = await nextOrder("projects");
-    await execute(
-      `INSERT INTO projects
-         (title, category, image_filename, caption, description, display_order)
-       VALUES (?, ?, ?, ?, ?, ?)`,
-      [title, category, newImageUrl, caption, description, order]
-    );
-    console.log(`[content] Created project "${title}"`);
-    return null;
-  }
-
-  const existing = await query<ProjectRow>(
-    "SELECT * FROM projects WHERE id = ?",
-    [id]
-  );
-  const current = existing[0];
-  if (!current) return "That project no longer exists.";
-
-  await execute(
-    `UPDATE projects
-        SET title = ?, category = ?, caption = ?, description = ?
-            ${newImageUrl ? ", image_filename = ?" : ""}
-      WHERE id = ?`,
-    newImageUrl
-      ? [title, category, caption, description, newImageUrl, id]
-      : [title, category, caption, description, id]
-  );
-
-  // Only once the row points at the new file, so a failed update never leaves
-  // the row referencing something already deleted.
-  if (newImageUrl) {
-    await deleteProjectImage(current.image_filename);
-  }
-
-  console.log(`[content] Updated project ${id}`);
-  return null;
-}
 
 export async function deleteProject(formData: FormData): Promise<void> {
   await requireAdmin();

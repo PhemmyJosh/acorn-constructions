@@ -1,14 +1,15 @@
 import Image from "next/image";
-import Link from "next/link";
-import { Pencil } from "lucide-react";
 import {
   categoryLabel,
   getProjectRows,
   projectImageSrc,
 } from "@/lib/content-data";
 import { isManagedUpload } from "@/lib/content-upload";
-import ProjectForm from "./ProjectForm";
-import ProjectCreateButton from "./ProjectCreateButton";
+import ProjectOverlayProvider, {
+  ProjectCreateTrigger,
+  ProjectEditTrigger,
+  ProjectSaveAlert,
+} from "./ProjectOverlayProvider";
 import { ContentDeleteButton, ReorderButtons } from "./ContentControls";
 import {
   tableClasses,
@@ -21,24 +22,26 @@ import {
 /**
  * Projects tab: the gallery in display order.
  *
- * Creating goes through the overlay opened by ProjectCreateButton; editing is
- * still driven by ?edit=<id> so that path stays server-rendered, matching how
- * the submission detail view works.
+ * Both creating and editing open the same slide-in overlay — there is no
+ * inline form and no ?edit= URL state any more. Two patterns for one job was
+ * the problem: creating meant scrolling past the whole table to an empty form,
+ * and editing jumped to that same form underneath it.
  */
-export default async function ProjectsPanel({ editId }: { editId: number | null }) {
+export default async function ProjectsPanel() {
   const rows = await getProjectRows();
-  const editing = editId ? rows.find((row) => row.id === editId) : undefined;
 
   return (
-    <>
+    <ProjectOverlayProvider>
       {/* Top of the tab and right-aligned, so it reads as the primary action
           for this section rather than something buried under the table. */}
       <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
         <p className="font-heading text-[11px] uppercase tracking-[0.15em] text-acorn-charcoal/60">
           {rows.length} {rows.length === 1 ? "project" : "projects"}
         </p>
-        <ProjectCreateButton />
+        <ProjectCreateTrigger />
       </div>
+
+      <ProjectSaveAlert />
 
       <div className={tableWrapper}>
         <table className={tableClasses}>
@@ -112,14 +115,7 @@ export default async function ProjectsPanel({ editId }: { editId: number | null 
                   </td>
                   <td className={`${tdClasses} whitespace-nowrap`}>
                     <div className="flex items-center gap-1">
-                      <Link
-                        href={`/admin?tab=projects&edit=${row.id}`}
-                        aria-label={`Edit ${row.title}`}
-                        title="Edit"
-                        className="rounded-sm p-1.5 text-acorn-charcoal/60 transition-colors hover:bg-acorn-stone hover:text-acorn-charcoal"
-                      >
-                        <Pencil size={16} aria-hidden="true" />
-                      </Link>
+                      <ProjectEditTrigger project={row} />
                       <ContentDeleteButton
                         kind="project"
                         id={row.id}
@@ -134,12 +130,6 @@ export default async function ProjectsPanel({ editId }: { editId: number | null 
           </tbody>
         </table>
       </div>
-
-      {editing && (
-        <div className="mt-8">
-          <ProjectForm key={editing.id} project={editing} />
-        </div>
-      )}
-    </>
+    </ProjectOverlayProvider>
   );
 }
