@@ -4,6 +4,13 @@ import { services } from "@/data/services";
 export const company = {
   name: "Acorn Construction",
   legalName: "Acorn Construction Ltd.",
+  // Canonical production origin, no trailing slash. Single-sourced because
+  // three places need it to agree: `metadataBase` in app/layout.tsx, the
+  // absolute <loc> URLs in app/sitemap.ts (metadataBase does not apply to
+  // sitemap entries — they must be absolute already), and the Sitemap line in
+  // app/robots.txt. A crawler treats a sitemap on a different origin from the
+  // URLs inside it as untrusted, so drift here is not cosmetic.
+  siteUrl: "https://acornconstruction.ca",
   founded: 2011,
   tagline: "Live the values, build the company.",
   headquarters: "Lloydminster, Alberta, Canada",

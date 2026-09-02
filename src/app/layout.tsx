@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, Oswald } from "next/font/google";
+import { company } from "@/data/company";
 import "./globals.css";
 
 const inter = Inter({
@@ -13,15 +14,11 @@ const oswald = Oswald({
   weight: ["400", "500", "600", "700"],
 });
 
-// TODO: PRE-LAUNCH BLOCKER - set to real production domain before going live,
-// currently a placeholder. Social sharing previews are broken until this is
-// fixed.
-//
-// Without metadataBase, Next.js resolves the relative OG/Twitter image paths
-// below against http://localhost:3000, so every shared link points at an
-// unreachable image. Add `metadataBase: new URL("https://<domain>")` here once
-// the domain is decided. See DEPLOYMENT.md.
+// metadataBase is what the relative OG/Twitter image paths below resolve
+// against. Without it Next.js falls back to http://localhost:3000 and every
+// shared link points at an unreachable preview image.
 export const metadata: Metadata = {
+  metadataBase: new URL(company.siteUrl),
   title: "Acorn Construction | Residential, Commercial & Post Frame Builders",
   description:
     "Acorn Construction Ltd. is a Lloydminster, Alberta-based builder delivering residential, light commercial, and post frame construction since 2011.",

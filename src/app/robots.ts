@@ -1,4 +1,5 @@
 import type { MetadataRoute } from "next";
+import { company } from "@/data/company";
 
 /**
  * Serves /robots.txt.
@@ -20,8 +21,9 @@ import type { MetadataRoute } from "next";
  * are needed, because a well-behaved crawler that never fetches /admin can
  * still list the URL if it finds a link to it elsewhere.
  *
- * No `sitemap` entry: this site does not generate a sitemap.xml, and pointing
- * at one that 404s is worse than omitting the line.
+ * The `Sitemap` line must be an absolute URL on the same origin as the URLs
+ * inside it, so it is built from the same `company.siteUrl` that app/sitemap.ts
+ * uses rather than written out again here.
  */
 export default function robots(): MetadataRoute.Robots {
   return {
@@ -30,5 +32,6 @@ export default function robots(): MetadataRoute.Robots {
       allow: "/",
       disallow: ["/admin", "/admin/", "/api/admin/"],
     },
+    sitemap: `${company.siteUrl}/sitemap.xml`,
   };
 }

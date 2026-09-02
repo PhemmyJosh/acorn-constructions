@@ -158,23 +158,25 @@ design, because the session cookie is an HMAC derived from it.
 
 ---
 
-## 6. Set `metadataBase` to the real domain
+## 6. Confirm the production domain — done, verify only
 
-Once the domain is finalised, edit [`src/app/layout.tsx`](src/app/layout.tsx)
-and add `metadataBase` to the `metadata` export, replacing the
-`PRE-LAUNCH BLOCKER` comment:
+This was a pre-launch blocker and is now set. The domain lives in **one**
+place, `siteUrl` in [`src/data/company.ts`](src/data/company.ts), currently
+`https://acornconstruction.ca`. Three things read it and must agree:
 
-```ts
-export const metadata: Metadata = {
-  metadataBase: new URL("https://acornconstruction.ca"),
-  title: "Acorn Construction | Residential, Commercial & Post Frame Builders",
-  // ...
-};
-```
+| Reads `company.siteUrl` | Why it matters |
+| --- | --- |
+| `metadataBase` in [`src/app/layout.tsx`](src/app/layout.tsx) | relative Open Graph / Twitter image paths resolve against it; unset, they resolve against `http://localhost:3000` and every shared link has a broken preview image |
+| `<loc>` URLs in [`src/app/sitemap.ts`](src/app/sitemap.ts) | sitemap entries must be absolute — `metadataBase` does **not** apply to them |
+| the `Sitemap:` line in [`src/app/robots.ts`](src/app/robots.ts) | a crawler distrusts a sitemap served from a different origin than the URLs it lists |
 
-Until this is done, Next.js resolves the relative Open Graph and Twitter image
-paths against `http://localhost:3000`, so **every shared link has a broken
-preview image**. Commit and redeploy after changing it.
+**If the domain ever changes, edit `siteUrl` only** — do not hardcode a domain
+in those three files. After changing it, redeploy and re-check
+`/robots.txt` and `/sitemap.xml`.
+
+Note this is separate from the `APP_URL` environment variable (§ [5. Set production environment variables](#5-set-production-environment-variables)),
+which is a runtime value used for dashboard links in notification emails.
+`siteUrl` is baked in at build time because the sitemap is generated statically.
 
 While you are there, consider replacing the remaining `PLACEHOLDER` markers.
 Search the repo for `PLACEHOLDER` and `NEEDED FROM CLIENT`:
@@ -240,6 +242,13 @@ Do all of this against the live domain, not localhost.
       holds the uploaded photos after the next deploy (see the warning below).
 - [ ] **Social preview** — paste the homepage URL into a link-preview debugger
       and confirm the image resolves (this fails if step 6 was skipped).
+- [ ] **robots.txt** — open `/robots.txt` and confirm it disallows `/admin` and
+      ends with a `Sitemap:` line pointing at the live domain.
+- [ ] **sitemap.xml** — open `/sitemap.xml` and confirm it parses as XML and
+      lists all eleven public pages on the live domain, with **no** `/admin` or
+      `/api/` entry.
+- [ ] **noindex on /admin** — view source on `/admin` and confirm
+      `<meta name="robots" content="noindex, nofollow"/>` is in the `<head>`.
 
 ---
 
