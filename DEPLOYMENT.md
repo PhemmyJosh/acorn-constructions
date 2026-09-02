@@ -356,6 +356,61 @@ and expected.
 
 ---
 
+## Do not upgrade Next.js past 16.2.12 (yet)
+
+`next` is pinned to an **exact** `16.2.12` in `package.json`, deliberately, with
+no `^`. Anything in 16.3.x fails to build on Hostinger:
+
+```
+⚠ Attempted to load @next/swc-linux-x64-gnu, but an error occurred:
+  /lib64/libm.so.6: version `GLIBC_2.29' not found
+Error: Cannot find module '.../next.config'
+ERROR: Failed to build the application
+```
+
+Next 16.3's prebuilt SWC binary needs **GLIBC 2.29 or newer**, and the build
+image on this plan is older. The build fails, and — this is the part that cost
+real time — **the deploy fails silently**: production keeps serving the last
+successful build, so the site looks fine while every new commit quietly never
+ships. If a change is pushed and does not appear live, check the build log
+before suspecting caching or the code.
+
+**`npm audit fix --force` will re-break this.** It bumps `next` to the latest
+release to clear the advisories below, which is exactly the change that breaks
+the build. This already happened once, in commit `79a3284`, and was reverted in
+the commit that added this section.
+
+### The vulnerabilities this pin leaves open
+
+`npm audit` reports 4 high-severity advisories at 16.2.12, all in Next's own
+dependency tree. Honest read of the exposure:
+
+| Package | Real exposure here |
+| --- | --- |
+| `sharp` < 0.35.0 (libvips CVEs) | **The one that matters.** `next/image` runs it at request time on remote and client-uploaded photos. Uploads are admin-authenticated and remote hosts are allowlisted in `next.config.ts`, so it is not open to anonymous input — but it is a genuine runtime path |
+| `postcss` ≤ 8.5.22 (sourceMappingURL traversal, stringify XSS) | Build-time only, and only our own `globals.css` passes through it. No untrusted CSS is ever processed |
+| `nanoid` < 3.3.18 (infinite loop on size 0) | Not reachable from app code. Fixable on its own with plain `npm audit fix` — no `--force`, no `next` bump — if you want 4 highs down to 3 |
+
+### Options for fixing it properly
+
+Roughly in order of least disruption:
+
+1. **Check whether a newer Node version in hPanel maps to a newer base image.**
+   GLIBC 2.29 is roughly Ubuntu 19.04 / Debian 11 / CentOS 8 and up; CentOS 7,
+   still common on older shared plans, ships 2.17.
+2. **Build somewhere else and deploy the output.** Run `npm run build` in CI
+   (e.g. GitHub Actions) and deploy the `.next` directory, so SWC never has to
+   run on Hostinger at all. This sidesteps the GLIBC constraint entirely rather
+   than working around it.
+3. **Ask Hostinger support** whether a newer build image is available on the
+   plan.
+4. **Move the app to a host with a current base image.**
+
+There is no middle version to hop to: **16.2.12 is the last 16.2.x release**, so
+there is no patch with the fixes backported.
+
+---
+
 ## Notes for later
 
 - **Backups.** Nothing backs up the database yet. Résumés are stored as BLOBs
@@ -363,9 +418,10 @@ and expected.
   Enable Hostinger's automatic backups, or schedule a `mysqldump`.
 - **Résumé storage growth.** Every application adds up to 2.4MB to the database.
   If volume grows, move files to object storage and keep only a reference.
-- **No rate limiting.** The honeypot stops naive bots, but nothing throttles a
-  determined submitter. If spam gets through, add per-IP rate limiting or a
-  CAPTCHA on the three API routes.
+- **Spam beyond rate limiting.** The honeypot plus the per-IP limits above stop
+  naive bots and floods from one address. A distributed submitter using many IPs
+  would still get through; if that happens, add a CAPTCHA to the three API
+  routes.
 - **Single shared admin password.** There are no individual accounts and no
   audit trail of who viewed what. Fine for one or two people; revisit if more
   staff need access.
