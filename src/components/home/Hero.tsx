@@ -109,7 +109,7 @@ export default function Hero() {
           transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.6, ease: "easeOut", delay: 0.1 }}
           className="max-w-3xl text-4xl font-bold leading-tight sm:text-5xl lg:text-6xl"
         >
-          We Bring the Same Quality to Every Single Project We Build.
+          We Bring Exceptional Quality to Every Single Project We Build.
         </motion.h1>
         <motion.p
           {...loadIn}
