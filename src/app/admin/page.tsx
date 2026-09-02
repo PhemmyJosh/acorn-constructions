@@ -44,7 +44,6 @@ interface AdminPageProps {
     dir?: string;
     read?: string;
     id?: string;
-    edit?: string;
     error?: string;
   }>;
 }
@@ -86,8 +85,6 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
   // submission view.
   if (isContentTab(params.tab)) {
     const contentTab = params.tab;
-    const editId = Number(params.edit);
-    const editing = Number.isInteger(editId) && editId > 0 ? editId : null;
 
     let contentStats: DashboardStats | null = null;
     let contentError: string | null = null;
@@ -138,7 +135,7 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
             ) : contentTab === "projects" ? (
               <ProjectsPanel />
             ) : contentTab === "testimonials" ? (
-              <TestimonialsPanel editId={editing} />
+              <TestimonialsPanel />
             ) : (
               <ServicesPanel />
             )}

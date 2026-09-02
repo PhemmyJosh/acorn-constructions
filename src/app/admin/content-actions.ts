@@ -23,11 +23,6 @@ function text(value: FormDataEntryValue | null, maxLength: number): string {
   return typeof value === "string" ? value.trim().slice(0, maxLength) : "";
 }
 
-function nullable(value: FormDataEntryValue | null, maxLength: number): string | null {
-  const trimmed = text(value, maxLength);
-  return trimmed === "" ? null : trimmed;
-}
-
 function toId(value: FormDataEntryValue | null): number | null {
   const parsed = Number(value);
   return Number.isInteger(parsed) && parsed > 0 ? parsed : null;
@@ -68,14 +63,6 @@ async function guard(
   }
 }
 
-/** Puts a new row at the end of the list. */
-async function nextOrder(table: "projects" | "testimonials"): Promise<number> {
-  const rows = await query<{ next: number | null }>(
-    `SELECT MAX(display_order) AS next FROM ${table}`
-  );
-  return Number(rows[0]?.next ?? 0) + 10;
-}
-
 /* -------------------------------------------------------------------------- */
 /* Projects                                                                    */
 /* -------------------------------------------------------------------------- */
@@ -108,48 +95,6 @@ export async function deleteProject(formData: FormData): Promise<void> {
 /* -------------------------------------------------------------------------- */
 /* Testimonials                                                                */
 /* -------------------------------------------------------------------------- */
-
-export async function saveTestimonial(formData: FormData): Promise<void> {
-  await requireAdmin();
-
-  const error = await guard("saveTestimonial", () => saveTestimonialWork(formData));
-  if (error) back("testimonials", error);
-  redirect("/admin?tab=testimonials");
-}
-
-async function saveTestimonialWork(formData: FormData): Promise<string | null> {
-  const id = toId(formData.get("id"));
-  const name = text(formData.get("client_name"), 255);
-  const role = nullable(formData.get("client_role"), 255);
-  const location = nullable(formData.get("client_location"), 255);
-  const quote = text(formData.get("quote"), 5000);
-  const isPublished = formData.get("is_published") === "on" ? 1 : 0;
-
-  if (!name) return "A testimonial needs a client name.";
-  if (!quote) return "A testimonial needs a quote.";
-
-  if (id === null) {
-    const order = await nextOrder("testimonials");
-    await execute(
-      `INSERT INTO testimonials
-         (client_name, client_role, client_location, quote, is_published, display_order)
-       VALUES (?, ?, ?, ?, ?, ?)`,
-      [name, role, location, quote, isPublished, order]
-    );
-    console.log(`[content] Created testimonial for ${name}`);
-  } else {
-    await execute(
-      `UPDATE testimonials
-          SET client_name = ?, client_role = ?, client_location = ?,
-              quote = ?, is_published = ?
-        WHERE id = ?`,
-      [name, role, location, quote, isPublished, id]
-    );
-    console.log(`[content] Updated testimonial ${id}`);
-  }
-
-  return null;
-}
 
 export async function deleteTestimonial(formData: FormData): Promise<void> {
   await requireAdmin();

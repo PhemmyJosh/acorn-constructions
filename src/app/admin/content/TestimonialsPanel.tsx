@@ -1,8 +1,11 @@
-import Link from "next/link";
-import { Eye, EyeOff, Pencil } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
 import { getTestimonialRows } from "@/lib/content-data";
 import { toggleTestimonialPublished } from "../content-actions";
-import TestimonialForm from "./TestimonialForm";
+import TestimonialOverlayProvider, {
+  TestimonialCreateTrigger,
+  TestimonialEditTrigger,
+  TestimonialSaveAlert,
+} from "./TestimonialOverlayProvider";
 import { ContentDeleteButton, ReorderButtons } from "./ContentControls";
 import {
   tableClasses,
@@ -15,17 +18,26 @@ import {
 /**
  * Testimonials tab. Unpublished rows stay listed but are visibly muted, so a
  * draft is obviously not live without having to open it.
+ *
+ * Both creating and editing open the same slide-in overlay — no inline form
+ * and no ?edit= URL state — matching the Projects tab exactly.
  */
-export default async function TestimonialsPanel({
-  editId,
-}: {
-  editId: number | null;
-}) {
+export default async function TestimonialsPanel() {
   const rows = await getTestimonialRows();
-  const editing = editId ? rows.find((row) => row.id === editId) : undefined;
 
   return (
-    <>
+    <TestimonialOverlayProvider>
+      {/* Top of the tab and right-aligned, so it reads as the primary action
+          for this section rather than something buried under the table. */}
+      <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
+        <p className="font-heading text-[11px] uppercase tracking-[0.15em] text-acorn-charcoal/60">
+          {rows.length} {rows.length === 1 ? "testimonial" : "testimonials"}
+        </p>
+        <TestimonialCreateTrigger />
+      </div>
+
+      <TestimonialSaveAlert />
+
       <div className={tableWrapper}>
         <table className={tableClasses}>
           <thead className={theadClasses}>
@@ -109,29 +121,21 @@ export default async function TestimonialsPanel({
                         : row.quote}
                     </div>
                   </td>
+                  {/* The arrows are the whole interface here. display_order is
+                      an internal number — it counts in tens so a swap has room
+                      to move — and showing it invited the admin to read meaning
+                      into values that have none. */}
                   <td className={`${tdClasses} whitespace-nowrap`}>
-                    <div className="flex items-center gap-2">
-                      <span className="tabular-nums text-acorn-charcoal/50">
-                        {row.display_order}
-                      </span>
-                      <ReorderButtons
-                        table="testimonials"
-                        id={row.id}
-                        isFirst={index === 0}
-                        isLast={index === rows.length - 1}
-                      />
-                    </div>
+                    <ReorderButtons
+                      table="testimonials"
+                      id={row.id}
+                      isFirst={index === 0}
+                      isLast={index === rows.length - 1}
+                    />
                   </td>
                   <td className={`${tdClasses} whitespace-nowrap`}>
                     <div className="flex items-center gap-1">
-                      <Link
-                        href={`/admin?tab=testimonials&edit=${row.id}`}
-                        aria-label={`Edit testimonial from ${row.client_name}`}
-                        title="Edit"
-                        className="rounded-sm p-1.5 text-acorn-charcoal/60 transition-colors hover:bg-acorn-stone hover:text-acorn-charcoal"
-                      >
-                        <Pencil size={16} aria-hidden="true" />
-                      </Link>
+                      <TestimonialEditTrigger testimonial={row} />
                       <ContentDeleteButton
                         kind="testimonial"
                         id={row.id}
@@ -145,10 +149,6 @@ export default async function TestimonialsPanel({
           </tbody>
         </table>
       </div>
-
-      <div className="mt-8">
-        <TestimonialForm key={editing?.id ?? "new"} testimonial={editing} />
-      </div>
-    </>
+    </TestimonialOverlayProvider>
   );
 }
