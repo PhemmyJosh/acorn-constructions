@@ -8,6 +8,7 @@ import {
 } from "@/lib/content-data";
 import { isManagedUpload } from "@/lib/content-upload";
 import ProjectForm from "./ProjectForm";
+import ProjectCreateButton from "./ProjectCreateButton";
 import { ContentDeleteButton, ReorderButtons } from "./ContentControls";
 import {
   tableClasses,
@@ -18,9 +19,11 @@ import {
 } from "./styles";
 
 /**
- * Projects tab: the gallery in display order, with an add/edit form beneath.
- * Editing is driven by ?edit=<id> so the whole panel stays server-rendered,
- * matching how the submission detail view works.
+ * Projects tab: the gallery in display order.
+ *
+ * Creating goes through the overlay opened by ProjectCreateButton; editing is
+ * still driven by ?edit=<id> so that path stays server-rendered, matching how
+ * the submission detail view works.
  */
 export default async function ProjectsPanel({ editId }: { editId: number | null }) {
   const rows = await getProjectRows();
@@ -28,6 +31,15 @@ export default async function ProjectsPanel({ editId }: { editId: number | null 
 
   return (
     <>
+      {/* Top of the tab and right-aligned, so it reads as the primary action
+          for this section rather than something buried under the table. */}
+      <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
+        <p className="font-heading text-[11px] uppercase tracking-[0.15em] text-acorn-charcoal/60">
+          {rows.length} {rows.length === 1 ? "project" : "projects"}
+        </p>
+        <ProjectCreateButton />
+      </div>
+
       <div className={tableWrapper}>
         <table className={tableClasses}>
           <thead className={theadClasses}>
@@ -123,9 +135,11 @@ export default async function ProjectsPanel({ editId }: { editId: number | null 
         </table>
       </div>
 
-      <div className="mt-8">
-        <ProjectForm key={editing?.id ?? "new"} project={editing} />
-      </div>
+      {editing && (
+        <div className="mt-8">
+          <ProjectForm key={editing.id} project={editing} />
+        </div>
+      )}
     </>
   );
 }

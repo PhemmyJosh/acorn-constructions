@@ -31,6 +31,28 @@ function r2RemotePattern() {
 }
 
 const nextConfig: NextConfig = {
+  experimental: {
+    serverActions: {
+      /**
+       * Server Actions cap their request body at 1MB by default, a limit
+       * entirely separate from our own IMAGE_MAX_MB validation. A 2MB photo
+       * therefore passed every check we wrote and was then rejected by the
+       * framework while the body was still being parsed — before any of our
+       * code ran, which is why it surfaced as a page crash rather than a form
+       * error, and why no try/catch inside the action could ever have caught
+       * it.
+       *
+       * 6mb, not 5mb: the limit applies to the raw HTTP body, so multipart
+       * boundaries, part headers and the other form fields all count on top of
+       * the file's own bytes. The headroom means anything our 5MB validation
+       * accepts is comfortably inside the framework's limit, leaving our
+       * message — not Next's error page — as the thing a client sees.
+       *
+       * Still `experimental` in Next 16.2; there is no stable equivalent yet.
+       */
+      bodySizeLimit: "6mb",
+    },
+  },
   images: {
     remotePatterns: [
       {
