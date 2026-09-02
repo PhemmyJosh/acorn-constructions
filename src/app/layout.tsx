@@ -22,11 +22,6 @@ export const metadata: Metadata = {
   title: "Acorn Construction | Residential, Commercial & Post Frame Builders",
   description:
     "Acorn Construction Ltd. is a Lloydminster, Alberta-based builder delivering residential, light commercial, and post frame construction since 2011.",
-  icons: {
-    icon: "/acorn-logo.png",
-    shortcut: "/acorn-logo.png",
-    apple: "/acorn-logo.png",
-  },
   openGraph: {
     title: "Acorn Construction | Residential, Commercial & Post Frame Builders",
     description:
