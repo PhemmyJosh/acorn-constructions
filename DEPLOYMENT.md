@@ -382,14 +382,19 @@ the commit that added this section.
 
 ### The vulnerabilities this pin leaves open
 
-`npm audit` reports 4 high-severity advisories at 16.2.12, all in Next's own
-dependency tree. Honest read of the exposure:
+`npm audit` reports **3** high-severity advisories at 16.2.12, all in Next's own
+dependency tree. `nanoid` was a fourth, cleared with plain `npm audit fix` — no
+`--force`, so `next` never moved. The rest cannot be fixed without bumping
+`next`, which is the thing that breaks the build. Honest read of what remains:
 
 | Package | Real exposure here |
 | --- | --- |
 | `sharp` < 0.35.0 (libvips CVEs) | **The one that matters.** `next/image` runs it at request time on remote and client-uploaded photos. Uploads are admin-authenticated and remote hosts are allowlisted in `next.config.ts`, so it is not open to anonymous input — but it is a genuine runtime path |
 | `postcss` ≤ 8.5.22 (sourceMappingURL traversal, stringify XSS) | Build-time only, and only our own `globals.css` passes through it. No untrusted CSS is ever processed |
-| `nanoid` < 3.3.18 (infinite loop on size 0) | Not reachable from app code. Fixable on its own with plain `npm audit fix` — no `--force`, no `next` bump — if you want 4 highs down to 3 |
+| `next` itself | Flagged only for depending on the two above, not for a defect of its own. So the real root causes are `sharp` and `postcss` |
+
+Plain `npm audit fix` is safe to run again in future — it only takes in-range
+upgrades. It is `npm audit fix --force` that must be avoided.
 
 ### Options for fixing it properly
 
