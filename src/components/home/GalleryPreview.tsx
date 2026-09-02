@@ -1,7 +1,7 @@
 import Section from "@/components/ui/Section";
 import SectionHeading from "@/components/ui/SectionHeading";
 import Button from "@/components/ui/Button";
-import MasonryGrid from "@/components/projects/MasonryGrid";
+import LightboxGallery from "@/components/projects/LightboxGallery";
 import Reveal from "@/components/motion/Reveal";
 import { getGalleryProjects } from "@/lib/content-data";
 
@@ -13,8 +13,12 @@ import { getGalleryProjects } from "@/lib/content-data";
  * are keyed by numeric id). The preview is now simply the first N in the
  * client's chosen display order, so reordering in the admin's Projects tab
  * also changes what the home page features.
+ *
+ * Six rather than seven: the grid is three columns at lg and two at sm, and
+ * six divides evenly into both. Seven leaves one column carrying an extra tile
+ * at every breakpoint.
  */
-const PREVIEW_COUNT = 9;
+const PREVIEW_COUNT = 6;
 
 export default async function GalleryPreview() {
   const projects = await getGalleryProjects();
@@ -34,10 +38,15 @@ export default async function GalleryPreview() {
           className="mx-auto"
         />
       </Reveal>
-      {/* The masonry grid uses CSS columns, so it reveals as one unit rather
-          than per-tile to avoid fighting the column flow. */}
+      {/* The masonry grid deals tiles into balanced columns, so it reveals as
+          one unit rather than per-tile to avoid fighting the column flow.
+
+          Tiles open the lightbox in place rather than linking to /projects: a
+          visitor who clicks a specific photo wants that photo, not a different
+          page they then have to find it on again. Arrow keys stay inside these
+          six, which is the set actually on screen. */}
       <Reveal className="mt-14">
-        <MasonryGrid projects={featured} />
+        <LightboxGallery projects={featured} />
       </Reveal>
       <Reveal className="mt-4 flex justify-center">
         <Button href="/projects" variant="secondary">

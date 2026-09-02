@@ -2,7 +2,6 @@
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import Image from "next/image";
-import Link from "next/link";
 import { Project } from "@/types";
 import { balanceColumns } from "./balanceColumns";
 
@@ -54,15 +53,13 @@ const useIsomorphicLayoutEffect =
 interface MasonryGridProps {
   projects: Project[];
   /** Receives the tile element too, so focus can be returned to it later. */
-  onSelect?: (index: number, trigger: HTMLElement) => void;
-  linkHref?: string;
+  onSelect: (index: number, trigger: HTMLElement) => void;
   className?: string;
 }
 
 export default function MasonryGrid({
   projects,
   onSelect,
-  linkHref,
   className = "",
 }: MasonryGridProps) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -149,27 +146,15 @@ export default function MasonryGrid({
               </div>
             );
 
-            if (onSelect) {
-              return (
-                <button
-                  key={project.id}
-                  type="button"
-                  onClick={(event) => onSelect(index, event.currentTarget)}
-                  className="group block w-full text-left"
-                >
-                  {content}
-                </button>
-              );
-            }
-
             return (
-              <Link
+              <button
                 key={project.id}
-                href={linkHref ?? "/projects"}
-                className="group block w-full"
+                type="button"
+                onClick={(event) => onSelect(index, event.currentTarget)}
+                className="group block w-full text-left"
               >
                 {content}
-              </Link>
+              </button>
             );
           })}
         </div>
