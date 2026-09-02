@@ -1,6 +1,23 @@
 import { NavLink } from "@/types";
 import { services } from "@/data/services";
 
+/**
+ * Broken into parts because schema.org's PostalAddress wants locality, region
+ * and postal code as separate fields. The one-line `cityStateZip` the footer
+ * and contact page render is derived from these rather than stored alongside
+ * them, so the displayed address and the structured data cannot disagree.
+ */
+const address = {
+  line1: "146C Miller St",
+  locality: "Blackfoot",
+  region: "Alberta",
+  /** ISO 3166-2 subdivision code, which is what schema.org expects. */
+  regionCode: "AB",
+  postalCode: "T9V 0Y4",
+  country: "Canada",
+  countryCode: "CA",
+};
+
 export const company = {
   name: "Acorn Construction",
   legalName: "Acorn Construction Ltd.",
@@ -20,8 +37,9 @@ export const company = {
   phoneHref: "tel:+17802056361",
   email: "mark@acornconstruction.ca",
   address: {
-    line1: "146C Miller St",
-    cityStateZip: "Blackfoot, Alberta, T9V 0Y4",
+    ...address,
+    /** One-line form used in the footer and on the contact page. */
+    cityStateZip: `${address.locality}, ${address.region}, ${address.postalCode}`,
   },
   social: {
     facebook: "https://www.facebook.com/Acornconstructionltd/",

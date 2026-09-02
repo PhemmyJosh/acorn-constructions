@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Oswald } from "next/font/google";
 import { company } from "@/data/company";
+import { localBusinessJsonLd } from "@/lib/structured-data";
 import "./globals.css";
 
 const inter = Inter({
@@ -54,7 +55,19 @@ export default function RootLayout({
       lang="en"
       className={`${inter.variable} ${oswald.variable} h-full antialiased`}
     >
-      <body className="flex min-h-full flex-col">{children}</body>
+      <body className="flex min-h-full flex-col">
+        {/* LocalBusiness structured data, in the root layout so it is on every
+            page. One organisation node for the whole site: repeating it per
+            page would describe the same business several times over rather
+            than once authoritatively. */}
+        <script
+          type="application/ld+json"
+          // The payload is built from our own data files and its "<" is
+          // escaped in localBusinessJsonLd, so there is no untrusted input here.
+          dangerouslySetInnerHTML={{ __html: localBusinessJsonLd() }}
+        />
+        {children}
+      </body>
     </html>
   );
 }

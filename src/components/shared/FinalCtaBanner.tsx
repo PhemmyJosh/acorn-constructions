@@ -21,7 +21,7 @@ export default function FinalCtaBanner({
     <section className="relative flex min-h-[60vh] items-center overflow-hidden bg-acorn-charcoal text-acorn-cream">
       <Image
         src={photos.residentialFraming}
-        alt="Acorn Construction framing project"
+        alt="Newly framed house structure on an Acorn Construction site"
         fill
         className="object-cover opacity-45"
       />

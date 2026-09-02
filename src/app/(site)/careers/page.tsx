@@ -1,4 +1,3 @@
-import type { Metadata } from "next";
 import PageHero from "@/components/ui/PageHero";
 import Section from "@/components/ui/Section";
 import SectionHeading from "@/components/ui/SectionHeading";
@@ -6,12 +5,14 @@ import Reveal, { REVEAL_STAGGER } from "@/components/motion/Reveal";
 import ApplicationForm from "@/components/careers/ApplicationForm";
 import { whyWorkWithUs } from "@/data/careers";
 import { photos } from "@/data/photos";
+import { pageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "Careers | Acorn Construction",
+export const metadata = pageMetadata({
+  title: "Construction Jobs in Lloydminster, Alberta",
   description:
-    "Join the Acorn Construction crew. We're hiring skilled, safety-first tradespeople for residential, light commercial, and post frame projects.",
-};
+    "Acorn Construction is hiring framers, carpenters and labourers in Lloydminster, Alberta. Safety-first crews, year-round work and a place to build a trade.",
+  path: "/careers",
+});
 
 export default function CareersPage() {
   return (

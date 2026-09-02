@@ -9,6 +9,16 @@ export interface Service {
   description: string[];
   icon: LucideIcon;
   heroImage: string;
+  /** Describes what the hero photo actually shows, for screen readers. */
+  heroImageAlt: string;
+  /**
+   * Search-result title, without the company name. Separate from `title`
+   * because the full service names run past the ~60 characters Google shows,
+   * and because a title tag wants the words someone would search for.
+   */
+  seoTitle: string;
+  /** Search-result description. `shortDescription` is page copy, not a meta tag. */
+  seoDescription: string;
   benefits: string[];
   relatedCtaText: string;
 }

@@ -1,15 +1,16 @@
-import type { Metadata } from "next";
 import PageHero from "@/components/ui/PageHero";
 import Section from "@/components/ui/Section";
 import Reveal from "@/components/motion/Reveal";
 import EstimateForm from "@/components/estimate/EstimateForm";
 import { photos } from "@/data/photos";
+import { pageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "Get a Free Estimate | Acorn Construction",
+export const metadata = pageMetadata({
+  title: "Free Construction Estimate",
   description:
-    "Tell us about your residential, commercial, or post frame project and Acorn Construction will get back to you with a free, no-obligation estimate.",
-};
+    "Tell Acorn Construction about your framing, foundation or post frame build in Alberta or Saskatchewan and get a free, no-obligation estimate back from the crew.",
+  path: "/estimate",
+});
 
 export default function EstimatePage() {
   return (

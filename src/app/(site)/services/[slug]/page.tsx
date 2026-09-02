@@ -7,6 +7,8 @@ import Section from "@/components/ui/Section";
 import Container from "@/components/ui/Container";
 import FinalCtaBanner from "@/components/shared/FinalCtaBanner";
 import { services, getServiceBySlug } from "@/data/services";
+import { company } from "@/data/company";
+import { pageMetadata } from "@/lib/seo";
 import { getServiceOverview } from "@/lib/content-data";
 
 interface ServicePageProps {
@@ -25,13 +27,17 @@ export async function generateMetadata({ params }: ServicePageProps): Promise<Me
   const service = getServiceBySlug(slug);
 
   if (!service) {
-    return { title: "Service Not Found | Acorn Construction" };
+    return { title: `Service Not Found | ${company.name}` };
   }
 
-  return {
-    title: `${service.title} | Acorn Construction`,
-    description: service.shortDescription,
-  };
+  // seoTitle/seoDescription rather than title/shortDescription: the full
+  // service names run past what a search result shows, and page copy is
+  // written to be read on the page, not scanned in a result list.
+  return pageMetadata({
+    title: service.seoTitle,
+    description: service.seoDescription,
+    path: `/services/${service.slug}`,
+  });
 }
 
 export default async function ServiceDetailPage({ params }: ServicePageProps) {
@@ -53,7 +59,7 @@ export default async function ServiceDetailPage({ params }: ServicePageProps) {
       <section className="relative flex min-h-[50vh] items-end overflow-hidden bg-acorn-charcoal text-acorn-cream">
         <Image
           src={service.heroImage}
-          alt={service.title}
+          alt={service.heroImageAlt}
           fill
           priority
           className="object-cover opacity-45"

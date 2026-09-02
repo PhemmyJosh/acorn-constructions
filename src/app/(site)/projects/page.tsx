@@ -1,15 +1,16 @@
-import type { Metadata } from "next";
 import PageHero from "@/components/ui/PageHero";
 import Section from "@/components/ui/Section";
 import ProjectsGalleryClient from "@/components/projects/ProjectsGalleryClient";
 import FinalCtaBanner from "@/components/shared/FinalCtaBanner";
 import { getGalleryProjects } from "@/lib/content-data";
+import { pageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "Projects | Acorn Construction",
+export const metadata = pageMetadata({
+  title: "Project Gallery — Framing & Post Frame Builds",
   description:
-    "Browse a selection of Acorn Construction's residential, foundation, and post frame projects.",
-};
+    "Photos of completed Acorn Construction work across Alberta and Saskatchewan: custom home framing, foundation pours, shops and agricultural post frame buildings.",
+  path: "/projects",
+});
 
 // Content is client-editable, so this reads the database per request rather
 // than baking rows in at build time. It also keeps the build independent of the

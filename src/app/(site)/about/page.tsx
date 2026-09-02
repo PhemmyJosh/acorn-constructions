@@ -1,18 +1,20 @@
 import Image from "next/image";
-import type { Metadata } from "next";
 import PageHero from "@/components/ui/PageHero";
 import Section from "@/components/ui/Section";
 import SectionHeading from "@/components/ui/SectionHeading";
 import CoreValues from "@/components/shared/CoreValues";
 import FinalCtaBanner from "@/components/shared/FinalCtaBanner";
 import { team } from "@/data/team";
+import { company } from "@/data/company";
 import { photos } from "@/data/photos";
+import { pageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "About Us | Acorn Construction",
+export const metadata = pageMetadata({
+  title: "About Our Lloydminster Construction Crew",
   description:
-    "The story, vision, mission, and leadership team behind Acorn Construction, a Lloydminster, Alberta builder since 2011.",
-};
+    "Meet the Lloydminster, Alberta crew behind Acorn Construction: how the company started in 2011, the values it builds by, and the people running the job sites.",
+  path: "/about",
+});
 
 export default function AboutPage() {
   const [founder] = team;
@@ -109,7 +111,7 @@ export default function AboutPage() {
           <div className="relative mx-auto aspect-[4/5] w-full max-w-sm overflow-hidden rounded-sm lg:mx-0 lg:max-w-none">
             <Image
               src={founder.image ?? ""}
-              alt={founder.name}
+              alt={`${founder.name}, ${founder.role} at ${company.legalName}`}
               fill
               sizes="(min-width: 1024px) 22rem, 100vw"
               className="object-cover object-top"

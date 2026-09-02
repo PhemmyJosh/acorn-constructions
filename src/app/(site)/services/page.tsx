@@ -1,15 +1,16 @@
-import type { Metadata } from "next";
 import PageHero from "@/components/ui/PageHero";
 import Section from "@/components/ui/Section";
 import ServiceCard from "@/components/services/ServiceCard";
 import FinalCtaBanner from "@/components/shared/FinalCtaBanner";
 import { services } from "@/data/services";
+import { pageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "Services | Acorn Construction",
+export const metadata = pageMetadata({
+  title: "Framing, Foundation & Post Frame Services",
   description:
-    "Explore Acorn Construction's residential & light commercial framing, foundations, and post frame construction services.",
-};
+    "Wood frame construction, foundations and post frame buildings from a Lloydminster, Alberta contractor serving Alberta and Saskatchewan. See how each build runs.",
+  path: "/services",
+});
 
 export default function ServicesPage() {
   return (

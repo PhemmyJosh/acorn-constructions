@@ -27,7 +27,7 @@ export default function CategoryShowcase() {
             >
             <Image
               src={service.heroImage}
-              alt={service.title}
+              alt={service.heroImageAlt}
               fill
               className="object-cover transition-transform duration-500 group-hover:scale-105"
             />

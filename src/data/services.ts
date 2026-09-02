@@ -14,6 +14,11 @@ export const services: Service[] = [
     ],
     icon: Hammer,
     heroImage: photos.residentialFraming,
+    heroImageAlt:
+      "Carpenters framing the wood structure of a new two-storey house on a clear day",
+    seoTitle: "Wood Frame Construction in Lloydminster, AB",
+    seoDescription:
+      "Precision framing for custom homes, additions, garages and light commercial buildings across Alberta and Saskatchewan, from Acorn Construction in Lloydminster.",
     benefits: [
       "Custom home framing",
       "Multi-family residential framing",
@@ -35,6 +40,11 @@ export const services: Service[] = [
     ],
     icon: Layers,
     heroImage: photos.foundations,
+    heroImageAlt:
+      "Freshly poured concrete foundation wall with formwork still in place on a build site",
+    seoTitle: "Foundations & Concrete Work in Alberta",
+    seoDescription:
+      "Excavation, footings, foundation walls and slab-on-grade work engineered for Prairie ground conditions. Serving Lloydminster, Alberta and Saskatchewan.",
     benefits: [
       "Excavation and site preparation",
       "Concrete footings",
@@ -56,6 +66,11 @@ export const services: Service[] = [
     ],
     icon: Warehouse,
     heroImage: photos.postFrame,
+    heroImageAlt:
+      "Post frame shop building with a corrugated metal roof standing on open prairie",
+    seoTitle: "Post Frame Buildings & Shops in Alberta",
+    seoDescription:
+      "Agricultural buildings, shops and storage built post frame for durability and value. Acorn Construction serves Lloydminster and across Alberta and Saskatchewan.",
     benefits: [
       "Agricultural buildings",
       "Workshops and shops",

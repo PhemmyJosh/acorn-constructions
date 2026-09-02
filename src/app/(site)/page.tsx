@@ -6,6 +6,14 @@ import HowWeWork from "@/components/home/HowWeWork";
 import GalleryPreview from "@/components/home/GalleryPreview";
 import Testimonials from "@/components/home/Testimonials";
 import FinalCtaBanner from "@/components/shared/FinalCtaBanner";
+import { pageMetadata } from "@/lib/seo";
+
+export const metadata = pageMetadata({
+  title: "Framing & Post Frame Builders in Lloydminster",
+  description:
+    "Acorn Construction Ltd. builds residential and light commercial wood frame, foundations and post frame projects across Alberta and Saskatchewan since 2011.",
+  path: "/",
+});
 
 // The gallery and testimonials sections read client-editable content from the
 // database, so this page renders per request instead of being baked in at

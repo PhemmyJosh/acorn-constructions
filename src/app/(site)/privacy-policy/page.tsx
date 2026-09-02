@@ -1,12 +1,14 @@
-import type { Metadata } from "next";
 import PageHero from "@/components/ui/PageHero";
 import Section from "@/components/ui/Section";
 import { company } from "@/data/company";
+import { pageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "Privacy Policy | Acorn Construction",
-  description: "How Acorn Construction Ltd. collects, uses, and protects information submitted through this website.",
-};
+export const metadata = pageMetadata({
+  title: "Privacy Policy",
+  description:
+    "How Acorn Construction Ltd. collects, uses and protects the information you submit through the contact, estimate and careers forms on this website.",
+  path: "/privacy-policy",
+});
 
 export default function PrivacyPolicyPage() {
   const lastUpdated = new Date().toLocaleDateString("en-US", {

@@ -1,16 +1,17 @@
-import type { Metadata } from "next";
 import { Mail, MapPin, Phone } from "lucide-react";
 import PageHero from "@/components/ui/PageHero";
 import Section from "@/components/ui/Section";
 import ContactForm from "@/components/contact/ContactForm";
 import LocationMap from "@/components/contact/LocationMap";
 import { company } from "@/data/company";
+import { pageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "Contact | Acorn Construction",
+export const metadata = pageMetadata({
+  title: "Contact Our Lloydminster, Alberta Office",
   description:
-    "Get in touch with Acorn Construction for a quote on your next residential, light commercial, or post frame construction project.",
-};
+    "Reach Acorn Construction Ltd. in Blackfoot, Alberta by phone or email, or send a message about a framing, foundation or post frame project anywhere in AB or SK.",
+  path: "/contact",
+});
 
 export default function ContactPage() {
   return (
