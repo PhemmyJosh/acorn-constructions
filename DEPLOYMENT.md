@@ -238,8 +238,14 @@ Do all of this against the live domain, not localhost.
 - [ ] **Content editing** — in the admin's Projects tab, add a project with a
       real photo and confirm it appears on /projects; edit a testimonial and a
       service's copy and confirm both pages update on refresh.
-- [ ] **Uploads survive a redeploy** — confirm `public/uploads/projects/` still
-      holds the uploaded photos after the next deploy (see the warning below).
+- [ ] **Photo persists across a redeploy** — this is the check the R2 migration
+      exists to pass, so do not skip it. Take the project added above and
+      confirm its `projects.image_filename` is a full `https://` R2 URL, not a
+      bare filename. Then trigger a redeploy and confirm the photo **still**
+      displays on `/projects` afterwards. Nothing is written to the server's
+      disk any more, so `public/uploads/projects/` staying empty is expected
+      rather than a failure — see
+      [Uploaded project photos](#uploaded-project-photos).
 - [ ] **Social preview** — paste the homepage URL into a link-preview debugger
       and confirm the image resolves (this fails if step 6 was skipped).
 - [ ] **robots.txt** — open `/robots.txt` and confirm it disallows `/admin` and
