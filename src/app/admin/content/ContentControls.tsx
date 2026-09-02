@@ -98,8 +98,8 @@ export function ContentDeleteButton({
         </p>
         {kind === "project" && hasUploadedImage && (
           <p className="rounded-sm border border-acorn-rust/30 bg-acorn-rust/5 px-3 py-2 text-acorn-rust">
-            The uploaded photo is deleted from the server as well. If it is the
-            only copy, save it somewhere else first.
+            The uploaded photo is deleted from image storage as well. If it is
+            the only copy, save it somewhere else first.
           </p>
         )}
       </ConfirmDialog>

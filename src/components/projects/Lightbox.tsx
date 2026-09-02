@@ -172,6 +172,11 @@ export default function Lightbox({
           <p className="text-lg font-semibold text-acorn-cream">
             {project.title}
           </p>
+          {project.description && (
+            <p className="mx-auto mt-3 max-w-2xl text-sm leading-relaxed text-acorn-cream/75">
+              {project.description}
+            </p>
+          )}
           {/* Announced on open and on each arrow press, so a screen-reader
               user hears which project they have moved to. */}
           <p aria-live="polite" className="sr-only">

@@ -64,24 +64,27 @@ export async function saveProject(formData: FormData): Promise<void> {
   if (!title) back("projects", "A project needs a title.");
 
   const upload = formData.get("image");
-  let newFilename: string | null = null;
+  // The stored value is the object's full public URL, so every consumer —
+  // next/image, the admin thumbnail, the public gallery — treats R2 photos and
+  // the seeded stock URLs through exactly one code path.
+  let newImageUrl: string | null = null;
 
   if (upload instanceof File && upload.size > 0) {
     const result = await saveProjectImage(upload);
     if (result.error) back("projects", result.error);
-    newFilename = result.filename ?? null;
+    newImageUrl = result.url ?? null;
   }
 
   if (id === null) {
     // New projects must have an image, otherwise the gallery renders a gap.
-    if (!newFilename) back("projects", "Choose an image for the new project.");
+    if (!newImageUrl) back("projects", "Choose an image for the new project.");
 
     const order = await nextOrder("projects");
     await execute(
       `INSERT INTO projects
          (title, category, image_filename, caption, description, display_order)
        VALUES (?, ?, ?, ?, ?, ?)`,
-      [title, category, newFilename, caption, description, order]
+      [title, category, newImageUrl, caption, description, order]
     );
     console.log(`[content] Created project "${title}"`);
     redirect("/admin?tab=projects");
@@ -97,16 +100,16 @@ export async function saveProject(formData: FormData): Promise<void> {
   await execute(
     `UPDATE projects
         SET title = ?, category = ?, caption = ?, description = ?
-            ${newFilename ? ", image_filename = ?" : ""}
+            ${newImageUrl ? ", image_filename = ?" : ""}
       WHERE id = ?`,
-    newFilename
-      ? [title, category, caption, description, newFilename, id]
+    newImageUrl
+      ? [title, category, caption, description, newImageUrl, id]
       : [title, category, caption, description, id]
   );
 
   // Only once the row points at the new file, so a failed update never leaves
   // the row referencing something already deleted.
-  if (newFilename) {
+  if (newImageUrl) {
     await deleteProjectImage(current.image_filename);
   }
 

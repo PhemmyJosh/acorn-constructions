@@ -4,9 +4,9 @@ import { Pencil } from "lucide-react";
 import {
   categoryLabel,
   getProjectRows,
-  isUploadedFile,
   projectImageSrc,
 } from "@/lib/content-data";
+import { isManagedUpload } from "@/lib/content-upload";
 import ProjectForm from "./ProjectForm";
 import { ContentDeleteButton, ReorderButtons } from "./ContentControls";
 import {
@@ -112,7 +112,7 @@ export default async function ProjectsPanel({ editId }: { editId: number | null 
                         kind="project"
                         id={row.id}
                         name={row.title}
-                        hasUploadedImage={isUploadedFile(row.image_filename)}
+                        hasUploadedImage={isManagedUpload(row.image_filename)}
                       />
                     </div>
                   </td>

@@ -120,6 +120,11 @@ throwaway Ethereal test inbox instead of real email.
 
 | Variable | Value |
 | --- | --- |
+| `R2_ACCOUNT_ID` | Cloudflare R2 — hex string in the API endpoint host |
+| `R2_ACCESS_KEY_ID` | from the R2 API token |
+| `R2_SECRET_ACCESS_KEY` | from the R2 API token, shown only once |
+| `R2_BUCKET_NAME` | the bucket holding project photos |
+| `R2_PUBLIC_URL` | the bucket's public URL, e.g. `https://pub-xxxx.r2.dev`. **Also needed at build time** — next.config.ts reads it to allow the hostname through next/image |
 | `APP_URL` | the live site's base URL, e.g. `https://acornconstruction.ca` — notification emails build their "View in Dashboard" link from this, so leaving it unset makes those links point at localhost |
 | `DB_HOST` | from step 3 (usually `localhost`) |
 | `DB_PORT` | `3306` unless Hostinger states otherwise |
@@ -265,18 +270,31 @@ Do all of this against the live domain, not localhost.
 
 ## Uploaded project photos
 
-Project photos are written to `public/uploads/projects/` on the server's disk,
-not stored in the database and not in git. Two consequences:
+Project photos go to a **Cloudflare R2 bucket**, not the server's disk, and
+`projects.image_filename` stores the object's full public URL.
 
-- **The deploy must not wipe that folder.** If Hostinger's Git deployment does a
-  clean checkout into a fresh directory each time, uploads will disappear.
-  Confirm behaviour after the first redeploy, and if it does wipe, move the
-  folder outside the deploy root and symlink it, or switch to object storage.
-- **Back it up.** These files are the only copy. A database backup does not
-  include them, unlike résumés, which are BLOBs inside MySQL.
+This is not a preference — local disk was tried and failed twice over:
 
-The folder is tracked in git via a `.gitkeep` so a fresh deploy always has
-somewhere to write; the images themselves are gitignored.
+- Hostinger builds each deploy into a fresh directory from a Git checkout, so
+  anything written at runtime is gone at the next deploy. Verified: an uploaded
+  file present in one version folder was absent from the next.
+- `next start` snapshots `public/` **at boot**, so a file written afterwards
+  was not served even while it existed — the request fell through to the 404
+  page and next/image answered *"The requested resource isn't a valid image."*
+  Restarting the process fixed it until the next deploy.
+
+Consequences worth knowing:
+
+- If the five `R2_*` variables are missing, uploads **fail with a visible
+  error** rather than falling back to disk. That is deliberate.
+- `R2_PUBLIC_URL` must be set in the **build** environment too, not just at
+  runtime, or next/image will reject the bucket's hostname.
+- Deleting a project in the admin also deletes its object from R2.
+- Résumés are unaffected — they are LONGBLOBs inside MySQL and always survived
+  deploys.
+- `public/uploads/projects/` is kept only so any pre-migration row still tidies
+  up after itself. Once `scripts/cleanup-orphaned-projects.sql` has run, it can
+  be deleted.
 
 ## Notes for later
 

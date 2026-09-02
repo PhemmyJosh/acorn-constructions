@@ -39,6 +39,8 @@ export interface Project {
   category: ProjectCategory;
   image: string;
   alt: string;
+  /** Longer copy entered in the admin. Shown in the lightbox detail view. */
+  description?: string | null;
 }
 
 export interface NavLink {
