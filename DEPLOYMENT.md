@@ -228,7 +228,7 @@ test inbox instead of real email, silently — which is the situation today (§ 
 | `SMTP_PORT` | `465` |
 | `SMTP_USER` | sending mailbox address |
 | `SMTP_PASSWORD` | mailbox password |
-| `NOTIFY_EMAIL` | where submissions are delivered, e.g. `mark@acornconstruction.ca` |
+| `NOTIFY_EMAIL` | where submissions are delivered. **Accepts several addresses separated by commas** — e.g. `mark@acornconstruction.ca,notifications@acornconstruction.ca` — and every one receives each notification. Whitespace is trimmed, duplicates ignored, and an entry with no `@` is skipped with a warning so one typo cannot make the server refuse the message for everybody. With `SMTP_USER` unset, the **first** address is also the From address |
 | `ADMIN_PASSWORD` | **generate fresh here.** Never copy the local `.env.local` value |
 | `ADMIN_SESSION_SECRET` | **generate fresh here.** Never copy the local value |
 
@@ -305,7 +305,11 @@ Do all of this against the live domain, not localhost.
 
 - [ ] **Contact form** — submit a real message. Confirm the success panel
       appears, a row lands in `contact_submissions`, and the notification email
-      arrives at `NOTIFY_EMAIL` with a working reply-to.
+      arrives at `NOTIFY_EMAIL` with a working reply-to. If `NOTIFY_EMAIL`
+      lists several addresses, check **each** inbox — the server log line
+      `[mailer] Sent "…" to N/N recipient(s): …` names exactly who the mail
+      server accepted, so a mismatch there points at the address list rather
+      than at the mailbox.
 - [ ] **Estimate form** — submit with every field filled, including a
       **proposed start date** and a building size with a comma (e.g. `6,000`).
       Confirm `proposed_start_date` is a real date and `building_size_sqft` is

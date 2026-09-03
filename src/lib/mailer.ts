@@ -71,6 +71,46 @@ export interface NotificationAttachment {
 }
 
 /**
+ * Parses NOTIFY_EMAIL into a recipient list.
+ *
+ * Accepts one address or several separated by commas, so
+ * `mark@acornconstruction.ca` and
+ * `mark@acornconstruction.ca,notifications@acornconstruction.ca` both work.
+ *
+ * Entries with no `@` are dropped rather than passed through, and deliberately:
+ * a single bad address can make an SMTP server reject the whole message, which
+ * would mean *nobody* gets notified because of one typo. Dropping it delivers
+ * to everyone else and leaves a warning naming the offending value.
+ */
+export function notifyRecipients(raw = process.env.NOTIFY_EMAIL): string[] {
+  const entries = (raw ?? "")
+    .split(",")
+    .map((entry) => entry.trim())
+    .filter((entry) => entry.length > 0);
+
+  const valid: string[] = [];
+  const seen = new Set<string>();
+
+  for (const entry of entries) {
+    if (!entry.includes("@")) {
+      console.warn(
+        `[mailer] NOTIFY_EMAIL entry ${JSON.stringify(entry)} is not an email ` +
+          "address and was skipped. Separate addresses with commas."
+      );
+      continue;
+    }
+    // Case-insensitive dedupe, so the same mailbox listed twice is not mailed
+    // twice; the original casing of the first occurrence is kept.
+    const key = entry.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    valid.push(entry);
+  }
+
+  return valid;
+}
+
+/**
  * Sends a notification. Never throws: a mail failure must not lose a
  * submission that has already been written to the database, so problems are
  * logged and reported back as a boolean.
@@ -87,9 +127,12 @@ export async function sendNotification(options: {
    */
   dashboardPath?: string;
 }): Promise<{ sent: boolean; previewUrl?: string }> {
-  const to = process.env.NOTIFY_EMAIL?.trim();
-  if (!to) {
-    console.warn("[mailer] NOTIFY_EMAIL is not set, skipping notification.");
+  const recipients = notifyRecipients();
+  if (recipients.length === 0) {
+    console.warn(
+      "[mailer] NOTIFY_EMAIL is not set (or held no usable address), " +
+        "skipping notification."
+    );
     return { sent: false };
   }
 
@@ -131,8 +174,14 @@ ${options.lines
 </table>`;
 
     const info = await transporter.sendMail({
-      from: process.env.SMTP_USER?.trim() || to,
-      to,
+      // `from` must be a single mailbox. Falling back to the whole recipient
+      // list would produce an invalid From header as soon as NOTIFY_EMAIL
+      // holds more than one address, so this falls back to the first.
+      from: process.env.SMTP_USER?.trim() || recipients[0],
+      // An array rather than the raw string: nodemailer tolerates a
+      // comma-separated string, but passing the parsed list means the
+      // trimming, dedupe and validation above actually apply.
+      to: recipients,
       replyTo: options.replyTo,
       subject: options.subject,
       text,
@@ -144,6 +193,21 @@ ${options.lines
       ? (nodemailer.getTestMessageUrl(info) as string | false) || undefined
       : undefined;
 
+    // Logged per send because "did it reach everyone?" is otherwise
+    // unanswerable after the fact: a server can accept a message for some
+    // recipients and refuse it for others, and that is not an error.
+    const accepted = (info.accepted ?? []).map(addressOf);
+    const rejected = (info.rejected ?? []).map(addressOf);
+    console.log(
+      `[mailer] Sent "${options.subject}" to ${accepted.length}/` +
+        `${recipients.length} recipient(s): ${accepted.join(", ") || "none"}`
+    );
+    if (rejected.length > 0) {
+      console.warn(
+        `[mailer] Rejected by the mail server: ${rejected.join(", ")}`
+      );
+    }
+
     if (previewUrl) {
       console.log(`[mailer] Preview this email: ${previewUrl}`);
     }
@@ -153,6 +217,18 @@ ${options.lines
     console.error("[mailer] Failed to send notification:", error);
     return { sent: false };
   }
+}
+
+/**
+ * nodemailer reports accepted/rejected entries as either a plain string or an
+ * `{ address, name }` object depending on the transport, so both are handled.
+ */
+function addressOf(entry: unknown): string {
+  if (typeof entry === "string") return entry;
+  if (entry && typeof entry === "object" && "address" in entry) {
+    return String((entry as { address: unknown }).address);
+  }
+  return String(entry);
 }
 
 function escapeHtml(value: string): string {
