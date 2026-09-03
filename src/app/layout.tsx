@@ -20,6 +20,16 @@ const oswald = Oswald({
 // shared link points at an unreachable preview image.
 export const metadata: Metadata = {
   metadataBase: new URL(company.siteUrl),
+  // Emits <meta name="google-site-verification" ...>. In the root layout, not a
+  // page, because Search Console may fetch any URL to check ownership and pages
+  // that set their own metadata do not clear fields they leave alone.
+  //
+  // Not a secret: it is served in the HTML of every page by design. Its only
+  // job is to prove control of this domain to Search Console, so it stays in
+  // the repo rather than becoming another environment variable to set.
+  verification: {
+    google: "SAOL7xTS8dMMr7mGDekqW-I4cRqjz5QzvIsClSyQtIU",
+  },
   title: "Acorn Construction | Residential, Commercial & Post Frame Builders",
   description:
     "Acorn Construction Ltd. is a Lloydminster, Alberta-based builder delivering residential, light commercial, and post frame construction since 2011.",
