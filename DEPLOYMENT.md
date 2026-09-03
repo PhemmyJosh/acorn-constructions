@@ -1,7 +1,7 @@
 # Deployment checklist
 
-Everything that has to happen once Hostinger hosting is actually purchased, in
-order. Nothing in this file can be done before the account exists.
+Deploying and operating this site on Hostinger. For running it on a development
+machine, see [LOCAL-DEV.md](LOCAL-DEV.md).
 
 The site **requires Node hosting**, not static hosting: `/admin` and the three
 `/api/*` routes are server-rendered on demand, and `next/image` uses the default
@@ -9,40 +9,97 @@ optimizing loader. A static export is not an option without removing those.
 
 ---
 
-## 1. Purchase the hosting plan
+## Read this first: a deploy that fails is silent
 
-Choose a Hostinger plan that includes **Node.js application hosting**, a
-**MySQL database**, and **business email mailboxes**. The Business plan is the
-usual fit; the cheapest shared/static tiers will not run this app.
+**If a change is pushed and does not appear on the live site, check the build
+log before suspecting caching, the CDN, or the code.**
 
-Confirm before paying:
+A failed build on Hostinger does not take the site down and does not show an
+error to visitors. The previous successful build keeps serving, so the site
+looks completely healthy while every new commit quietly never ships.
 
-- [ ] Node.js apps supported, with a version of **Node 20 or newer** available
-      (Next.js 16 requires it)
-- [ ] At least one MySQL database included
-- [ ] At least one email mailbox included on the domain
-- [ ] Free SSL / Let's Encrypt included
+This has already cost this project real time once. A `npm audit fix --force`
+bumped Next.js to a version whose prebuilt binary the build image cannot load
+(see [the version pin](#do-not-upgrade-nextjs-past-16212-yet)); four commits'
+worth of work sat unpublished, and the symptom was simply "the new feature
+isn't there". Nothing in the browser could have revealed it.
+
+So, in order:
+
+1. **hPanel → your Node app → Deployments / Build log.** Read the end of the
+   most recent build.
+2. Confirm the commit it built is the one you expected — a deploy can also
+   simply not have been triggered.
+3. Only then look at caching or the code.
 
 ---
 
-## 2. Create the Node.js web app and connect GitHub
+## Current state at a glance
 
-In hPanel:
+| | |
+| --- | --- |
+| Hosting | Hostinger Node.js hosting, account registered to **mark@acornconstruction.ca** |
+| Repository | `github.com/PhemmyJosh/acorn-constructions`, branch `master`. **Transfer to a business-owned organisation is still pending** — see the TODO in § 2 |
+| Database | MySQL on Hostinger; schema from `schema.sql`, content from `scripts/seed-content.sql` |
+| Photo storage | Cloudflare R2. Nothing is written to the server's disk |
+| Email | **Not configured yet.** Form notifications currently go nowhere real — see § 4 |
+| Next.js | pinned to exactly `16.2.12`; newer breaks the build |
+| Security headers | **None configured** — see [Security headers](#security-headers--not-yet-configured) |
 
-1. **Websites → Add website → Node.js app** (or *Advanced → Node.js* on some
-   plan layouts).
-2. Set the Node version to 20+.
-3. Connect the GitHub repository `PhemmyJosh/acorn-constructions`, branch
-   `master`, and authorise Hostinger's GitHub app.
-4. Set the build and start commands:
-   - Install: `npm ci`
-   - Build: `npm run build`
-   - Start: `npm run start`
-5. Confirm the app's listening port comes from `process.env.PORT` — `next start`
-   already honours it, so no code change is needed.
+---
 
-Do **not** deploy yet. The environment variables in step 5 must exist first, or
-the first boot will fail against a missing database.
+## 1. The hosting plan
+
+Already purchased, under **mark@acornconstruction.ca**. Recorded here for
+whoever renews or migrates it.
+
+What the app needs from the plan:
+
+- Node.js application hosting, **Node 20 or newer** (Next.js 16 requires it)
+- At least one MySQL database
+- At least one email mailbox on the domain (see § 4 — not yet set up)
+- Free SSL / Let's Encrypt
+
+The cheapest shared/static tiers will not run this app. The Business plan is the
+usual fit.
+
+---
+
+## 2. The Node.js web app and the GitHub connection
+
+In hPanel, **Websites → your site → Node.js app** (or *Advanced → Node.js* on
+some plan layouts):
+
+| Setting | Value |
+| --- | --- |
+| Node version | 20 or newer |
+| Repository | `github.com/PhemmyJosh/acorn-constructions`, branch `master` |
+| Install command | `npm ci` |
+| Build command | `npm run build` |
+| Start command | `npm run start` |
+| Port | from `process.env.PORT` — `next start` already honours it, no code change needed |
+
+`npm ci` rather than `npm install` on purpose: it installs exactly what
+`package-lock.json` pins, which is what makes
+[the Next.js version pin](#do-not-upgrade-nextjs-past-16212-yet) actually
+binding on the build server.
+
+> **TODO — repository ownership.** The repo is still under the personal
+> `PhemmyJosh` account. Moving it to a business-owned GitHub organisation is
+> outstanding. When that happens, three things need updating together, or
+> deploys stop:
+>
+> 1. GitHub: transfer the repository to the organisation.
+> 2. hPanel: reconnect the Node app to the new repository URL and
+>    re-authorise Hostinger's GitHub app against the organisation.
+> 3. This file and any other reference to the old URL.
+>
+> A transfer leaves a redirect from the old URL, so a stale integration can
+> keep appearing to work for a while and then stop — do step 2 deliberately
+> rather than assuming it carried over.
+
+If the environment variables in § 5 are not set before the first deploy, the
+first boot fails against a missing database.
 
 ---
 
@@ -79,44 +136,78 @@ the first boot will fail against a missing database.
    `projects`, `service_content`, `testimonials`.
 
 6. **Seed the editable content** so the site ships with the copy and gallery it
-   has today, rather than an empty Content tab:
+   has today, rather than an empty Content tab. Two routes to the same result:
 
-   ```bash
-   node scripts/seed-content.mjs
-   ```
+   - **phpMyAdmin → SQL tab**, paste
+     [`scripts/seed-content.sql`](scripts/seed-content.sql). This is the one to
+     use on shared hosting, since it needs nothing but a database connection.
+   - **Over SSH with Node available**, `node scripts/seed-content.mjs`, which
+     reads the same content out of `src/data/` and inserts it.
 
-   Safe to re-run — it only fills tables that are empty and never overwrites
-   anything edited through the admin. Until it runs (or if it is skipped), the
-   site falls back to the copy compiled into `src/data/`, so nothing breaks
-   either way.
+   Both are safe to re-run: they only fill tables that are empty and never
+   overwrite anything edited through the admin. Until one runs, the public site
+   falls back to the copy compiled into `src/data/`, so nothing breaks either
+   way — the Content tab in `/admin` is simply empty.
+
+### Why `DB_POOL_MAX` is deliberately small
+
+The pool defaults to **5** connections and is capped by `DB_POOL_MAX`. Shared
+hosting caps concurrent connections per database, and exhausting that cap does
+not slow the site down — it makes every query fail, including the ones behind
+`/admin`, until connections are released. Five is comfortably under any
+Hostinger tier's limit for a site with this traffic. Raise it only after
+checking the plan's actual limit in step 3, and leave headroom: phpMyAdmin and
+any cron job draw from the same allowance.
 
 ---
 
-## 4. Create the business email mailbox and get SMTP credentials
+## 4. Email — NOT CONFIGURED YET
 
-1. **hPanel → Emails → Email Accounts → Create email account**, e.g.
-   `mark@acornconstruction.ca` (this is the address already used throughout
-   `src/data/company.ts`).
-2. From the mailbox's **Configuration / Connect devices** panel, note the
-   outgoing SMTP settings. For Hostinger's Titan mail these are typically:
-   - host `smtp.hostinger.com`
-   - port `465` with SSL/TLS
-   - username: the full email address
-   - password: the mailbox password
-3. Consider a second mailbox (e.g. `noreply@`) to send from, keeping `mark@` as
-   the delivery destination. If you do, `SMTP_USER` is the noreply address and
-   `NOTIFY_EMAIL` stays `mark@`.
+**This is outstanding and the site should not be considered launched without
+it.** No SMTP credentials are set in Hostinger, and the consequence is specific:
 
-The app selects TLS automatically: port `465` connects secure, anything else
+`src/lib/mailer.ts` falls back to a **throwaway Ethereal test inbox** when
+`SMTP_HOST` is unset. Ethereal accepts the message, never delivers it, and
+prints a preview URL to the server log. So right now:
+
+- Contact, estimate and career submissions **are** saved to the database and
+  **are** visible in `/admin`.
+- The notification email announcing them **goes nowhere Mark can read.**
+
+Nothing appears broken from the outside, which is exactly why it is called out
+here rather than buried in a checklist.
+
+### To fix it
+
+1. **hPanel → Emails → Email Accounts → Create email account** on the domain,
+   e.g. `mark@acornconstruction.ca` — the address already used throughout
+   `src/data/company.ts`.
+2. From the mailbox's **Configuration / Connect devices** panel, take the
+   outgoing SMTP settings. For Hostinger's Titan mail these are typically host
+   `smtp.hostinger.com`, port `465` with SSL/TLS, username the full email
+   address, password the mailbox password.
+3. Set `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD` and
+   `NOTIFY_EMAIL` per § 5, then redeploy.
+4. Submit the contact form on the live site and confirm the email actually
+   arrives. **Check the server log for the phrase `SMTP_HOST is not set` —
+   if it is still there, the variables did not take effect.**
+
+Optionally create a second mailbox (e.g. `noreply@`) to send from, keeping
+`mark@` as the destination: then `SMTP_USER` is the noreply address and
+`NOTIFY_EMAIL` stays `mark@`.
+
+TLS is selected automatically — port `465` connects secure, anything else
 starts plain and upgrades.
 
 ---
 
 ## 5. Set production environment variables
 
-**hPanel → your Node app → Environment variables.** Set every one of these.
-Leaving `SMTP_HOST` blank in production would silently route notifications to a
-throwaway Ethereal test inbox instead of real email.
+**hPanel → your Node app → Environment variables.** This is the complete list
+the app reads; nothing else is consulted in production.
+
+Leaving `SMTP_HOST` blank routes every notification to a throwaway Ethereal
+test inbox instead of real email, silently — which is the situation today (§ 4).
 
 | Variable | Value |
 | --- | --- |
@@ -140,6 +231,12 @@ throwaway Ethereal test inbox instead of real email.
 | `NOTIFY_EMAIL` | where submissions are delivered, e.g. `mark@acornconstruction.ca` |
 | `ADMIN_PASSWORD` | **generate fresh here.** Never copy the local `.env.local` value |
 | `ADMIN_SESSION_SECRET` | **generate fresh here.** Never copy the local value |
+
+One variable exists that must **not** be set here: **`LOCAL_MYSQL_HOME`** is
+purely for the portable MySQL used in development (see
+[LOCAL-DEV.md](LOCAL-DEV.md)). Production MySQL is managed by Hostinger and the
+variable is ignored, so setting it only creates the impression that the app
+manages its own database server.
 
 Generate the two admin secrets at deploy time and store them only in a password
 manager:
@@ -308,9 +405,23 @@ Consequences worth knowing:
 - Deleting a project in the admin also deletes its object from R2.
 - Résumés are unaffected — they are LONGBLOBs inside MySQL and always survived
   deploys.
-- `public/uploads/projects/` is kept only so any pre-migration row still tidies
-  up after itself. Once `scripts/cleanup-orphaned-projects.sql` has run, it can
-  be deleted.
+
+**No code path writes an uploaded photo to the server's disk any more.** The
+upload helper only ever calls R2, and if R2 is unconfigured it returns an error
+instead of choosing a fallback. `public/uploads/projects/` still exists as an
+empty directory on some machines, left from before the migration; it holds
+nothing, git does not track it because it is empty, and it can be deleted. If
+you see it, it is a leftover and not evidence that disk storage is still in use.
+
+### Outstanding: orphaned pre-migration rows
+
+Rows created before the migration store a bare filename rather than a URL, and
+that file no longer exists, so they render as broken images.
+[`scripts/cleanup-orphaned-projects.sql`](scripts/cleanup-orphaned-projects.sql)
+selects them for review and then deletes them. **Run it once against the
+production database via phpMyAdmin.** It is safe on a clean database — it
+matches only rows whose `image_filename` is not an absolute URL, and there are
+none of those after the migration.
 
 ## Rate limiting and the client IP
 
@@ -413,6 +524,82 @@ Roughly in order of least disruption:
 
 There is no middle version to hop to: **16.2.12 is the last 16.2.x release**, so
 there is no patch with the fixes backported.
+
+---
+
+## Security headers — NOT yet configured
+
+**There are no security response headers on this site.** `next.config.ts` has
+no `headers()` function and `poweredByHeader` is left at its default, so
+responses carry `X-Powered-By: Next.js` and none of the usual protections.
+
+Recorded honestly rather than assumed, because it is easy to believe this was
+handled: HTTPS is enforced, `/admin` is password-protected and rate limited,
+the forms validate and escape their input, and the JSON-LD payload is escaped.
+None of that sets a response header.
+
+What is missing, roughly in order of value here:
+
+| Header | Why it matters for this site |
+| --- | --- |
+| `Strict-Transport-Security` | forces HTTPS on repeat visits, so an admin signing in over a hostile network cannot be downgraded to HTTP |
+| `X-Content-Type-Options: nosniff` | stops a browser from reinterpreting an uploaded file as something executable |
+| `Referrer-Policy` | keeps full admin URLs out of the `Referer` sent to third parties |
+| `X-Frame-Options` / `frame-ancestors` | prevents the admin being framed for clickjacking |
+| `Content-Security-Policy` | the most valuable and the most work: the site loads images from Pexels, Unsplash and R2, and fonts from Google, so a policy has to allow those without becoming permissive enough to be pointless |
+| `poweredByHeader: false` | removes a free hint about the stack |
+
+None of this is difficult — it is a `headers()` block in `next.config.ts` plus
+verification that nothing breaks — but it is a real change with real failure
+modes (a wrong CSP silently blanks pages), so it is listed as work rather than
+quietly claimed as done.
+
+---
+
+## SEO setup
+
+All of this is in place and verified against a production build.
+
+| Piece | Where | Notes |
+| --- | --- | --- |
+| `robots.txt` | [`src/app/robots.ts`](src/app/robots.ts) | disallows `/admin`, `/admin/` and `/api/admin/`; ends with the `Sitemap:` line |
+| `sitemap.xml` | [`src/app/sitemap.ts`](src/app/sitemap.ts) | the eleven public pages, absolute URLs. An allowlist, so `/admin` cannot leak in |
+| `/admin` noindex | [`src/app/admin/layout.tsx`](src/app/admin/layout.tsx) | `robots: { index: false, follow: false }`, belt-and-braces with robots.txt |
+| Per-page titles / descriptions | [`src/lib/seo.ts`](src/lib/seo.ts) + each page | unique per page, with canonical and Open Graph tags assembled centrally |
+| LocalBusiness structured data | [`src/lib/structured-data.ts`](src/lib/structured-data.ts) | `GeneralContractor` JSON-LD in the root layout, so one node per page. Sourced from `company.ts` |
+| Icons and manifest | `src/app/icon.png`, `apple-icon.png`, [`src/app/manifest.ts`](src/app/manifest.ts) | file conventions; the manifest references the 192/512 PNGs |
+| Search Console | `verification.google` in [`src/app/layout.tsx`](src/app/layout.tsx) | meta tag on every page |
+
+The domain lives in exactly one place — `siteUrl` in
+[`src/data/company.ts`](src/data/company.ts) — and `metadataBase`, the sitemap's
+absolute URLs, the `Sitemap:` line in robots.txt and the JSON-LD all read it.
+**If the domain changes, edit that one value.**
+
+After a deploy, worth doing once:
+
+- [ ] Submit `https://acornconstruction.ca/sitemap.xml` in Search Console →
+      **Sitemaps**
+- [ ] Check **Page indexing** reports `/admin` as excluded by robots.txt
+- [ ] Run the live URL through Google's Rich Results Test to confirm the
+      LocalBusiness data is read as intended (it needs a public URL, so this
+      cannot be done before deploying)
+
+---
+
+## Outstanding before this counts as launched
+
+Collected from the sections above, in the order they matter:
+
+1. **Email is not configured** (§ 4). Form notifications reach nobody. Everything
+   else about the forms works, which is what makes this easy to miss.
+2. **No security headers** ([above](#security-headers--not-yet-configured)).
+3. **Repository still on a personal GitHub account** (§ 2).
+4. **`scripts/cleanup-orphaned-projects.sql` has not been run** against
+   production, so any pre-migration project row still renders as a broken image.
+5. **The Next.js pin blocks three known high-severity advisories**
+   ([the pin](#do-not-upgrade-nextjs-past-16212-yet)). `sharp` is the one with a
+   real runtime path.
+6. **No database backups** (below).
 
 ---
 
