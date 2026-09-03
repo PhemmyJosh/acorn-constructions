@@ -44,7 +44,7 @@ So, in order:
 | Photo storage | Cloudflare R2. Nothing is written to the server's disk |
 | Email | **Not configured yet.** Form notifications currently go nowhere real — see § 4 |
 | Next.js | pinned to exactly `16.2.12`; newer breaks the build |
-| Security headers | **None configured** — see [Security headers](#security-headers--not-yet-configured) |
+| Security headers | HSTS, CSP, `X-Frame-Options`, `nosniff`, `Referrer-Policy`; `X-Powered-By` removed — see [Security headers](#security-headers) |
 
 ---
 
@@ -351,6 +351,13 @@ Do all of this against the live domain, not localhost.
 - [ ] **sitemap.xml** — open `/sitemap.xml` and confirm it parses as XML and
       lists all eleven public pages on the live domain, with **no** `/admin` or
       `/api/` entry.
+- [ ] **Security headers** — run the live domain through
+      [securityheaders.com](https://securityheaders.com) or check the Network
+      tab. Expect `Strict-Transport-Security`, `Content-Security-Policy`,
+      `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`, and **no**
+      `X-Powered-By`. Then walk the CSP re-test list in the
+      [Security headers](#security-headers) section — a wrong CSP does not show
+      as an error page, it just stops one feature working.
 - [ ] **noindex on /admin** — view source on `/admin` and confirm
       `<meta name="robots" content="noindex, nofollow"/>` is in the `<head>`.
 
@@ -527,32 +534,89 @@ there is no patch with the fixes backported.
 
 ---
 
-## Security headers — NOT yet configured
+## Security headers
 
-**There are no security response headers on this site.** `next.config.ts` has
-no `headers()` function and `poweredByHeader` is left at its default, so
-responses carry `X-Powered-By: Next.js` and none of the usual protections.
+All configured in [`next.config.ts`](next.config.ts) — a `headers()` block
+matching `/:path*`, so they apply to pages, API routes, static assets under
+`/_next/`, and the generated `robots.txt`, `sitemap.xml` and icon routes alike.
+Verified present on all of those.
 
-Recorded honestly rather than assumed, because it is easy to believe this was
-handled: HTTPS is enforced, `/admin` is password-protected and rate limited,
-the forms validate and escape their input, and the JSON-LD payload is escaped.
-None of that sets a response header.
+| Header | Value | Why |
+| --- | --- | --- |
+| `Strict-Transport-Security` | `max-age=31536000; includeSubDomains` | forces HTTPS for a year, so an admin signing in on a hostile network cannot be downgraded to plain HTTP |
+| `X-Frame-Options` | `DENY` | no page on this site is meant to be embedded; blocks clickjacking of `/admin` |
+| `X-Content-Type-Options` | `nosniff` | matters most for the résumé download, where a browser guessing a type other than the declared one is the risk |
+| `Referrer-Policy` | `strict-origin-when-cross-origin` | full URL to same-origin destinations, origin only cross-origin, so an `/admin` URL never leaks in a `Referer` |
+| `Content-Security-Policy` | see below | constrains where content may be loaded from |
+| `X-Powered-By` | **removed** via `poweredByHeader: false` | stops advertising the framework |
 
-What is missing, roughly in order of value here:
+**No `preload` on HSTS**, deliberately: that submits the domain to a list baked
+into browsers and is far harder to undo than a header. Note `includeSubDomains`
+does commit every present and future subdomain to HTTPS for a year — a
+subdomain served over plain HTTP becomes unreachable to anyone who has seen the
+header.
 
-| Header | Why it matters for this site |
-| --- | --- |
-| `Strict-Transport-Security` | forces HTTPS on repeat visits, so an admin signing in over a hostile network cannot be downgraded to HTTP |
-| `X-Content-Type-Options: nosniff` | stops a browser from reinterpreting an uploaded file as something executable |
-| `Referrer-Policy` | keeps full admin URLs out of the `Referer` sent to third parties |
-| `X-Frame-Options` / `frame-ancestors` | prevents the admin being framed for clickjacking |
-| `Content-Security-Policy` | the most valuable and the most work: the site loads images from Pexels, Unsplash and R2, and fonts from Google, so a policy has to allow those without becoming permissive enough to be pointless |
-| `poweredByHeader: false` | removes a free hint about the stack |
+### The CSP, directive by directive
 
-None of this is difficult — it is a `headers()` block in `next.config.ts` plus
-verification that nothing breaks — but it is a real change with real failure
-modes (a wrong CSP silently blanks pages), so it is listed as work rather than
-quietly claimed as done.
+```
+default-src 'self'; base-uri 'self'; object-src 'none';
+frame-ancestors 'none'; form-action 'self';
+script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline';
+img-src 'self' data: blob:; font-src 'self'; connect-src 'self';
+manifest-src 'self'; frame-src https://www.google.com
+```
+
+It was written against what the site was **measured** to load, not from a
+template. Three of those measurements are worth knowing, because they are the
+ones people usually get wrong:
+
+- **Google Fonts are not in the policy, and must not be.** `next/font/google`
+  downloads Inter and Oswald at build time and serves them from
+  `/_next/static/media`. Reading the `@font-face` URLs out of the live
+  stylesheet shows same-origin only, so `font-src 'self'` is complete. Adding
+  `fonts.googleapis.com` would permit a source nothing uses.
+- **Pexels, Unsplash and the R2 bucket are not in `img-src`, and must not be.**
+  Every remote image is proxied through `/_next/image`, so the browser only
+  fetches it from this origin. **Adding an image host means editing
+  `images.remotePatterns`, not the CSP.**
+- **`maps.googleapis.com` and `maps.gstatic.com` are not in `script-src`, and
+  must not be.** The contact page's Maps embed loads those *inside the iframe*,
+  which is a separate document governed by Google's own CSP. Only `frame-src`
+  is this policy's business. Confirmed by the map rendering with zero
+  violations.
+
+Two directives carry `'unsafe-inline'` because the framework requires it:
+
+- `script-src` — Next's App Router streams the RSC payload through inline
+  `<script>` tags (28 of the 42 scripts on the home page), and the JSON-LD
+  block is inline. They change every build, so hashes are impractical, and a
+  nonce must be per-request, which would force the six currently static pages
+  to render dynamically.
+- `style-src` — framer-motion animates through inline `style` attributes, 61 of
+  them on the home page.
+
+**Read the limitation plainly:** with `'unsafe-inline'` on `script-src`, this
+CSP is a strong control on *where* content may come from and a weak one against
+inline injection. Upgrading means nonces via middleware and giving up static
+rendering on the marketing pages. That tradeoff has not been taken.
+
+### If you change the CSP, re-test these
+
+A wrong CSP fails silently — the page renders, one feature stops. The things
+that actually exercise each directive:
+
+- [ ] Hero carousel advances through slides (`style-src`, inline styles)
+- [ ] Headings render in Oswald, not a fallback (`font-src`)
+- [ ] `/projects` shows all photos unbroken (`img-src` via the optimizer)
+- [ ] The map appears on `/contact` (`frame-src`)
+- [ ] All three forms submit successfully (`form-action`, `connect-src`)
+- [ ] `/admin` signs in and the six tabs load (server actions over `connect-src`)
+- [ ] The project overlay's upload preview appears after choosing a file
+      (`img-src blob:` — the easiest one to miss, since it only shows up mid-upload)
+
+Chrome fires a `securitypolicyviolation` event and logs `Refused to …` for each
+breach; a run with zero of both across every page and both admin flows is what
+"tested" means here.
 
 ---
 
@@ -592,14 +656,13 @@ Collected from the sections above, in the order they matter:
 
 1. **Email is not configured** (§ 4). Form notifications reach nobody. Everything
    else about the forms works, which is what makes this easy to miss.
-2. **No security headers** ([above](#security-headers--not-yet-configured)).
-3. **Repository still on a personal GitHub account** (§ 2).
-4. **`scripts/cleanup-orphaned-projects.sql` has not been run** against
+2. **Repository still on a personal GitHub account** (§ 2).
+3. **`scripts/cleanup-orphaned-projects.sql` has not been run** against
    production, so any pre-migration project row still renders as a broken image.
-5. **The Next.js pin blocks three known high-severity advisories**
+4. **The Next.js pin blocks three known high-severity advisories**
    ([the pin](#do-not-upgrade-nextjs-past-16212-yet)). `sharp` is the one with a
    real runtime path.
-6. **No database backups** (below).
+5. **No database backups** (below).
 
 ---
 
