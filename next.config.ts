@@ -30,7 +30,60 @@ function r2RemotePattern() {
   }
 }
 
+/**
+ * Security response headers — phase 1 of two.
+ *
+ * Every value here is a constant string. Nothing is computed per request, no
+ * code runs to produce them, and none of them can influence the lifetime of
+ * the Node process. That property is the entire reason they ship separately:
+ * an earlier commit added these together with a Content-Security-Policy and
+ * was reverted during an incident, and isolating the five that cannot
+ * plausibly be involved lets the remaining question be answered on its own.
+ *
+ * Content-Security-Policy is deliberately NOT here. It arrives as phase 2,
+ * after this has been observed stable in production for a meaningful period.
+ */
+const SECURITY_HEADERS = [
+  {
+    // One year, and includeSubDomains as agreed. This commits every present
+    // and future subdomain to HTTPS for that year: a subdomain served over
+    // plain HTTP becomes unreachable to anyone who has seen this header.
+    //
+    // No `preload` — that submits the domain to a list compiled into browsers
+    // and is far harder to undo than a header.
+    key: "Strict-Transport-Security",
+    value: "max-age=31536000; includeSubDomains",
+  },
+  {
+    // DENY rather than SAMEORIGIN: no page on this site is meant to be framed.
+    // The Google Maps embed on /contact is this site framing Google, which
+    // this header does not affect.
+    key: "X-Frame-Options",
+    value: "DENY",
+  },
+  {
+    // Matters most for the admin résumé download, where a browser guessing a
+    // type other than the one declared is exactly the risk.
+    key: "X-Content-Type-Options",
+    value: "nosniff",
+  },
+  {
+    // Full URL to same-origin destinations, origin only cross-origin, so an
+    // /admin URL never leaks in a Referer to a third party.
+    key: "Referrer-Policy",
+    value: "strict-origin-when-cross-origin",
+  },
+];
+
 const nextConfig: NextConfig = {
+  // Removes `X-Powered-By: Next.js`, which tells an attacker what to target
+  // and tells a visitor nothing.
+  poweredByHeader: false,
+
+  async headers() {
+    return [{ source: "/:path*", headers: SECURITY_HEADERS }];
+  },
+
   experimental: {
     serverActions: {
       /**

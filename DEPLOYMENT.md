@@ -44,7 +44,7 @@ So, in order:
 | Photo storage | Cloudflare R2. Nothing is written to the server's disk |
 | Email | **Not configured yet.** Form notifications currently go nowhere real — see § 4 |
 | Next.js | pinned to exactly `16.2.12`; newer breaks the build |
-| Security headers | **None configured** — see [Security headers](#security-headers--not-yet-configured) |
+| Security headers | HSTS, `X-Frame-Options`, `nosniff`, `Referrer-Policy` in place; `X-Powered-By` removed. **CSP still pending** — see [Security headers](#security-headers--phase-1-in-place-csp-still-pending) |
 
 ---
 
@@ -527,32 +527,62 @@ there is no patch with the fixes backported.
 
 ---
 
-## Security headers — NOT yet configured
+## Security headers — phase 1 in place, CSP still pending
 
-**There are no security response headers on this site.** `next.config.ts` has
-no `headers()` function and `poweredByHeader` is left at its default, so
-responses carry `X-Powered-By: Next.js` and none of the usual protections.
+Configured in [`next.config.ts`](next.config.ts) as a `headers()` block
+matching `/:path*`, so they apply to pages, API routes, static assets under
+`/_next/`, and the generated `robots.txt`, `sitemap.xml`, manifest and icon
+routes.
 
-Recorded honestly rather than assumed, because it is easy to believe this was
-handled: HTTPS is enforced, `/admin` is password-protected and rate limited,
-the forms validate and escape their input, and the JSON-LD payload is escaped.
-None of that sets a response header.
+| Header | Value | Why |
+| --- | --- | --- |
+| `Strict-Transport-Security` | `max-age=31536000; includeSubDomains` | forces HTTPS for a year, so an admin signing in on a hostile network cannot be downgraded to plain HTTP |
+| `X-Frame-Options` | `DENY` | no page here is meant to be framed. The Maps embed on `/contact` is this site framing Google, which this header does not affect |
+| `X-Content-Type-Options` | `nosniff` | matters most for the résumé download, where a browser guessing a type other than the one declared is the risk |
+| `Referrer-Policy` | `strict-origin-when-cross-origin` | full URL same-origin, origin only cross-origin, so an `/admin` URL never leaks in a `Referer` |
+| `X-Powered-By` | **removed** via `poweredByHeader: false` | stops advertising the framework |
 
-What is missing, roughly in order of value here:
+**No `preload` on HSTS**, deliberately: that submits the domain to a list
+compiled into browsers and is far harder to undo than a header. Note
+`includeSubDomains` does commit every present and future subdomain to HTTPS for
+a year — one served over plain HTTP becomes unreachable to anyone who has seen
+the header.
 
-| Header | Why it matters for this site |
-| --- | --- |
-| `Strict-Transport-Security` | forces HTTPS on repeat visits, so an admin signing in over a hostile network cannot be downgraded to HTTP |
-| `X-Content-Type-Options: nosniff` | stops a browser from reinterpreting an uploaded file as something executable |
-| `Referrer-Policy` | keeps full admin URLs out of the `Referer` sent to third parties |
-| `X-Frame-Options` / `frame-ancestors` | prevents the admin being framed for clickjacking |
-| `Content-Security-Policy` | the most valuable and the most work: the site loads images from Pexels, Unsplash and R2, and fonts from Google, so a policy has to allow those without becoming permissive enough to be pointless |
-| `poweredByHeader: false` | removes a free hint about the stack |
+### Why these five ship on their own
 
-None of this is difficult — it is a `headers()` block in `next.config.ts` plus
-verification that nothing breaks — but it is a real change with real failure
-modes (a wrong CSP silently blanks pages), so it is listed as work rather than
-quietly claimed as done.
+An earlier commit added these together with a Content-Security-Policy and was
+reverted during an incident in which the app appeared to be in a
+crash-restart loop. Every value above is a constant string: nothing is computed
+per request, no code runs to produce them, and none can influence the lifetime
+of the Node process. Isolating them lets the CSP question be answered by
+itself rather than confounded with five headers that cannot plausibly be
+involved.
+
+### Content-Security-Policy — phase 2, not yet applied
+
+Still outstanding. When it is attempted again, the audit from the first attempt
+holds and is worth not repeating:
+
+- **Google Fonts must not be listed.** `next/font/google` downloads Inter and
+  Oswald at build time; the `@font-face` URLs in the live stylesheet are
+  same-origin, so `font-src 'self'` is complete.
+- **Pexels, Unsplash and R2 must not be in `img-src`.** Every remote image is
+  proxied through `/_next/image`, so the browser only fetches from this origin.
+  Adding an image host means editing `images.remotePatterns`.
+- **`maps.googleapis.com` must not be in `script-src`.** The contact page's
+  embed loads that inside the iframe, a separate document under Google's own
+  policy. Only `frame-src https://www.google.com` is this site's business.
+- `img-src` needs `blob:` — the admin upload preview is a `createObjectURL` of
+  the chosen file, and it only appears mid-upload, so it is easy to miss.
+- `script-src` and `style-src` need `'unsafe-inline'`: Next streams the RSC
+  payload through inline scripts and framer-motion animates through inline
+  `style` attributes.
+
+A wrong CSP does not produce an error page — it silently stops one feature. The
+things that exercise each directive: the hero carousel (inline styles), heading
+font (`font-src`), `/projects` photos (`img-src`), the map (`frame-src`), all
+three forms (`form-action`, `connect-src`), admin sign-in and tabs (server
+actions), and the upload preview (`img-src blob:`).
 
 ---
 
@@ -592,7 +622,7 @@ Collected from the sections above, in the order they matter:
 
 1. **Email is not configured** (§ 4). Form notifications reach nobody. Everything
    else about the forms works, which is what makes this easy to miss.
-2. **No security headers** ([above](#security-headers--not-yet-configured)).
+2. **No Content-Security-Policy yet** ([above](#security-headers--phase-1-in-place-csp-still-pending)). The other five headers are in place.
 3. **Repository still on a personal GitHub account** (§ 2).
 4. **`scripts/cleanup-orphaned-projects.sql` has not been run** against
    production, so any pre-migration project row still renders as a broken image.
