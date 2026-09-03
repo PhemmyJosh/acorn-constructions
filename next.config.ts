@@ -43,7 +43,47 @@ function r2RemotePattern() {
  * Content-Security-Policy is deliberately NOT here. It arrives as phase 2,
  * after this has been observed stable in production for a meaningful period.
  */
+/**
+ * Content-Security-Policy — phase 2.
+ *
+ * Built from the audit recorded in DEPLOYMENT.md, which measured every request
+ * origin the site actually produces rather than guessing from a template. The
+ * three deliberate absences matter as much as what is present:
+ *
+ * - no `fonts.googleapis.com` / `fonts.gstatic.com`: next/font/google
+ *   downloads Inter and Oswald at build time and serves them from
+ *   /_next/static/media, so `font-src 'self'` is complete.
+ * - no Pexels / Unsplash / R2 hosts in `img-src`: every remote image is
+ *   proxied through /_next/image, so the browser only fetches from this
+ *   origin. A new image host means editing `images.remotePatterns` below.
+ * - no `maps.googleapis.com` in `script-src`: the contact page's embed loads
+ *   that inside the iframe, a separate document governed by Google's own
+ *   policy. Only `frame-src` is this policy's business.
+ */
+const CSP_DIRECTIVES = [
+  "default-src 'self'",
+  // 'unsafe-inline' is required, not preferred: Next's App Router streams the
+  // RSC payload through inline <script> tags and the JSON-LD block is inline
+  // too. They change every build, so hashes are impractical, and a nonce must
+  // be generated per request, which would force the currently static marketing
+  // pages to render dynamically.
+  "script-src 'self' 'unsafe-inline'",
+  // Also required rather than preferred: framer-motion animates through inline
+  // `style` attributes, dozens of them per page.
+  "style-src 'self' 'unsafe-inline'",
+  // blob: is not optional — the admin's project upload preview is a
+  // createObjectURL of the chosen file. It only appears mid-upload, which is
+  // what makes it easy to leave out and not notice.
+  "img-src 'self' blob:",
+  "font-src 'self'",
+  "frame-src https://www.google.com",
+];
+
 const SECURITY_HEADERS = [
+  {
+    key: "Content-Security-Policy",
+    value: CSP_DIRECTIVES.join("; "),
+  },
   {
     // One year, and includeSubDomains as agreed. This commits every present
     // and future subdomain to HTTPS for that year: a subdomain served over

@@ -44,7 +44,7 @@ So, in order:
 | Photo storage | Cloudflare R2. Nothing is written to the server's disk |
 | Email | **Not configured yet.** Form notifications currently go nowhere real — see § 4 |
 | Next.js | pinned to exactly `16.2.12`; newer breaks the build |
-| Security headers | HSTS, `X-Frame-Options`, `nosniff`, `Referrer-Policy` in place; `X-Powered-By` removed. **CSP still pending** — see [Security headers](#security-headers--phase-1-in-place-csp-still-pending) |
+| Security headers | HSTS, CSP, `X-Frame-Options`, `nosniff`, `Referrer-Policy`; `X-Powered-By` removed — see [Security headers](#security-headers--both-phases-in-place) |
 
 ---
 
@@ -527,15 +527,23 @@ there is no patch with the fixes backported.
 
 ---
 
-## Security headers — phase 1 in place, CSP still pending
+## Security headers — both phases in place
 
 Configured in [`next.config.ts`](next.config.ts) as a `headers()` block
 matching `/:path*`, so they apply to pages, API routes, static assets under
 `/_next/`, and the generated `robots.txt`, `sitemap.xml`, manifest and icon
 routes.
 
+They shipped as two separate commits on purpose. The five static headers went
+first, because none of them can influence process lifetime; the CSP followed
+only once the first set had been observed stable in production. An earlier
+attempt shipped all six together and was reverted during an incident, and
+splitting them means the next such question can be answered against one
+variable instead of six.
+
 | Header | Value | Why |
 | --- | --- | --- |
+| `Content-Security-Policy` | see below | constrains where content may load from |
 | `Strict-Transport-Security` | `max-age=31536000; includeSubDomains` | forces HTTPS for a year, so an admin signing in on a hostile network cannot be downgraded to plain HTTP |
 | `X-Frame-Options` | `DENY` | no page here is meant to be framed. The Maps embed on `/contact` is this site framing Google, which this header does not affect |
 | `X-Content-Type-Options` | `nosniff` | matters most for the résumé download, where a browser guessing a type other than the one declared is the risk |
@@ -548,41 +556,81 @@ compiled into browsers and is far harder to undo than a header. Note
 a year — one served over plain HTTP becomes unreachable to anyone who has seen
 the header.
 
-### Why these five ship on their own
+### The Content-Security-Policy
 
-An earlier commit added these together with a Content-Security-Policy and was
-reverted during an incident in which the app appeared to be in a
-crash-restart loop. Every value above is a constant string: nothing is computed
-per request, no code runs to produce them, and none can influence the lifetime
-of the Node process. Isolating them lets the CSP question be answered by
-itself rather than confounded with five headers that cannot plausibly be
-involved.
+```
+default-src 'self';
+script-src 'self' 'unsafe-inline';
+style-src 'self' 'unsafe-inline';
+img-src 'self' blob:;
+font-src 'self';
+frame-src https://www.google.com
+```
 
-### Content-Security-Policy — phase 2, not yet applied
+Written against what the site was **measured** to load — every request origin
+by resource type, across all eleven public pages, all six admin tabs and an
+upload — not from a template. Four of those measurements are worth keeping,
+because they are what a template gets wrong:
 
-Still outstanding. When it is attempted again, the audit from the first attempt
-holds and is worth not repeating:
+- **Google Fonts is not listed, and must not be.** `next/font/google`
+  downloads Inter and Oswald at build time and serves them from
+  `/_next/static/media`. The `@font-face` URLs in the live stylesheet are
+  same-origin, so `font-src 'self'` is complete. Adding
+  `fonts.googleapis.com` would permit a source nothing uses.
+- **Pexels, Unsplash and R2 are not in `img-src`, and must not be.** Every
+  remote image is proxied through `/_next/image` — all sixteen admin
+  thumbnails were confirmed to load via that route. **A new image host means
+  editing `images.remotePatterns`, not this policy.**
+- **`maps.googleapis.com` is not in `script-src`, and must not be.** The
+  contact page's embed loads it *inside* the iframe, a separate document under
+  Google's own policy. Only `frame-src` is this policy's business, confirmed by
+  the map rendering with zero violations.
+- **`data:` is not in `img-src`, and is not needed.** Checked directly: zero
+  `data:` URI images and zero `url(data:)` backgrounds anywhere on the site.
+  An earlier draft allowed it; that was over-permissive.
 
-- **Google Fonts must not be listed.** `next/font/google` downloads Inter and
-  Oswald at build time; the `@font-face` URLs in the live stylesheet are
-  same-origin, so `font-src 'self'` is complete.
-- **Pexels, Unsplash and R2 must not be in `img-src`.** Every remote image is
-  proxied through `/_next/image`, so the browser only fetches from this origin.
-  Adding an image host means editing `images.remotePatterns`.
-- **`maps.googleapis.com` must not be in `script-src`.** The contact page's
-  embed loads that inside the iframe, a separate document under Google's own
-  policy. Only `frame-src https://www.google.com` is this site's business.
-- `img-src` needs `blob:` — the admin upload preview is a `createObjectURL` of
-  the chosen file, and it only appears mid-upload, so it is easy to miss.
-- `script-src` and `style-src` need `'unsafe-inline'`: Next streams the RSC
-  payload through inline scripts and framer-motion animates through inline
-  `style` attributes.
+`blob:` in `img-src` **is** required. The admin's project upload preview is a
+`createObjectURL` of the chosen file; it renders only mid-upload, which is what
+makes it easy to omit and not notice.
+
+Two directives carry `'unsafe-inline'` because the framework requires it:
+
+- `script-src` — Next's App Router streams the RSC payload through inline
+  `<script>` tags, and the JSON-LD block is inline. They change every build, so
+  hashes are impractical, and a nonce must be generated per request, which
+  would force the currently static marketing pages to render dynamically.
+- `style-src` — framer-motion animates through inline `style` attributes, 61 of
+  them on the home page alone.
+
+**Read the limitation plainly:** with `'unsafe-inline'` on `script-src`, this
+CSP is a strong control on *where content may come from* and a weak one against
+inline injection. Upgrading means nonces via middleware and giving up static
+rendering on the marketing pages. That tradeoff has not been taken.
+
+Directives deliberately not set, for the record: `form-action`,
+`frame-ancestors`, `base-uri` and `object-src`. `object-src` falls back to
+`default-src 'self'`; `frame-ancestors` is already covered by
+`X-Frame-Options: DENY`. `form-action` and `base-uri` do **not** fall back to
+`default-src`, so they remain available hardening if wanted later — all static
+strings, no runtime behaviour.
+
+### If you change the CSP, re-test these
 
 A wrong CSP does not produce an error page — it silently stops one feature. The
-things that exercise each directive: the hero carousel (inline styles), heading
-font (`font-src`), `/projects` photos (`img-src`), the map (`frame-src`), all
-three forms (`form-action`, `connect-src`), admin sign-in and tabs (server
-actions), and the upload preview (`img-src blob:`).
+things that actually exercise each directive:
+
+- [ ] Hero carousel advances through slides (`style-src`, inline attributes)
+- [ ] Headings render in Oswald, not a fallback (`font-src`)
+- [ ] `/projects` shows all photos unbroken (`img-src` via the optimizer)
+- [ ] The map appears on `/contact` (`frame-src`)
+- [ ] All three forms submit successfully (`default-src` covers the fetches)
+- [ ] `/admin` signs in and the six tabs load (server actions)
+- [ ] The project overlay's upload preview appears after choosing a file
+      (`img-src blob:` — the easiest to miss, since it only shows mid-upload)
+
+Chrome fires a `securitypolicyviolation` event and logs `Refused to …` for each
+breach. A run with zero of both, across every page and both admin flows, is
+what "tested" means here.
 
 ---
 
@@ -622,14 +670,13 @@ Collected from the sections above, in the order they matter:
 
 1. **Email is not configured** (§ 4). Form notifications reach nobody. Everything
    else about the forms works, which is what makes this easy to miss.
-2. **No Content-Security-Policy yet** ([above](#security-headers--phase-1-in-place-csp-still-pending)). The other five headers are in place.
-3. **Repository still on a personal GitHub account** (§ 2).
-4. **`scripts/cleanup-orphaned-projects.sql` has not been run** against
+2. **Repository still on a personal GitHub account** (§ 2).
+3. **`scripts/cleanup-orphaned-projects.sql` has not been run** against
    production, so any pre-migration project row still renders as a broken image.
-5. **The Next.js pin blocks three known high-severity advisories**
+4. **The Next.js pin blocks three known high-severity advisories**
    ([the pin](#do-not-upgrade-nextjs-past-16212-yet)). `sharp` is the one with a
    real runtime path.
-6. **No database backups** (below).
+5. **No database backups** (below).
 
 ---
 
