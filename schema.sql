@@ -68,6 +68,14 @@ CREATE TABLE IF NOT EXISTS career_applications (
   years_experience VARCHAR(60)      NULL,
   start_date       VARCHAR(120)     NULL,
   expected_wage    VARCHAR(120)     NULL,
+  -- Shown to the applicant and in the admin as "Areas of Expertise". The column
+  -- name predates that rename and is deliberately left alone, so no migration
+  -- is needed. Two formats live here side by side: rows submitted since the
+  -- rename hold the three category names ("Framing", "Foundations",
+  -- "Post Frame"), while older rows hold the granular sub-skills the form used
+  -- to offer ("Wall Building", "Concrete Forming", ...). Nothing transforms the
+  -- old rows -- anything reading this column must tolerate either.
+  --
   -- Stored as a JSON array of strings. Declared LONGTEXT rather than the JSON
   -- type so the file also works on MySQL 5.6/MariaDB builds still found on
   -- some shared hosts; reads go through JSON.parse either way.

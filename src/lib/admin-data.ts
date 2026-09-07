@@ -116,7 +116,10 @@ export const LIST_COLUMNS: Record<TabKey, ColumnDef[]> = {
     // Ahead of the free-text columns: a long comment must never be what pushes
     // the download link off the right edge of the table.
     { label: "Resume", key: "resume_filename", format: "resume" },
-    { label: "Proficient In", key: "proficiencies", wrap: true, format: "json" },
+    // Key stays `proficiencies` — the database column is deliberately not
+    // renamed. Only the label changed. `format: "json"` joins whatever array is
+    // stored, so pre-rename rows holding granular sub-skills still read fine.
+    { label: "Areas of Expertise", key: "proficiencies", wrap: true, format: "json" },
     { label: "Comments", key: "comments", wrap: true },
   ],
 };
@@ -155,7 +158,7 @@ export const DETAIL_FIELDS: Record<TabKey, ColumnDef[]> = {
     { label: "Years of experience", key: "years_experience" },
     { label: "Available to start", key: "start_date" },
     { label: "Expected wage", key: "expected_wage" },
-    { label: "Proficient in", key: "proficiencies", wrap: true, format: "json" },
+    { label: "Areas of expertise", key: "proficiencies", wrap: true, format: "json" },
     { label: "Comments", key: "comments", wrap: true },
     { label: "Resume", key: "resume_filename", format: "resume" },
   ],
@@ -184,6 +187,9 @@ export const CARD_FIELDS: Record<TabKey, ColumnDef[]> = {
   ],
   careers: [
     { label: "Received", key: "created_at", format: "datetime" },
+    // Worth the room on a phone now that this is three short category names;
+    // the previous dozen-plus sub-skills would have swamped the card.
+    { label: "Areas of Expertise", key: "proficiencies", format: "json" },
     { label: "Comments", key: "comments", wrap: true },
     { label: "Resume", key: "resume_filename", format: "resume" },
   ],

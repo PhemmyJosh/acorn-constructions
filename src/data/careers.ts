@@ -42,33 +42,9 @@ export const whyWorkWithUs: ValueProp[] = [
   },
 ];
 
-export interface ProficiencyGroup {
-  label: string;
-  options: string[];
-}
-
-export const proficiencyGroups: ProficiencyGroup[] = [
-  {
-    label: "Framing",
-    options: [
-      "Wall Building",
-      "Layout & Joisting",
-      "Roof Cuts",
-      "Floor Sheeting",
-      "Roof Sheeting",
-      "Roof Building",
-      "Back Framing",
-    ],
-  },
-  {
-    label: "Foundations",
-    options: ["Concrete Forming", "Foundation Layout", "Footings"],
-  },
-  {
-    label: "Post Frame",
-    options: ["Post Setting", "Trussing", "Post Frame Sheeting"],
-  },
-];
+// The form's "Areas of Expertise" options live in `src/lib/careers-constants.ts`
+// rather than here, so the API route can validate against the same list without
+// importing this module's lucide icons.
 
 /** Resume upload limit, matching the helper text shown next to the field. */
 export const RESUME_MAX_MB = 2.4;

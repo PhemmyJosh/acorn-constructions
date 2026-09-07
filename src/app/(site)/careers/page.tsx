@@ -70,7 +70,7 @@ export default function CareersPage() {
           <SectionHeading
             eyebrow="Join The Crew"
             title="Apply Now"
-            description="Tell us about your experience and what you're proficient in. We'll get back to you if there's a fit on one of our crews."
+            description="Tell us about your experience and your areas of expertise. We'll get back to you if there's a fit on one of our crews."
             align="center"
             className="mx-auto"
           />

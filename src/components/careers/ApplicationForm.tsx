@@ -12,11 +12,11 @@ import {
 import { postFormData } from "@/lib/submit-form";
 import { HONEYPOT_FIELD } from "@/lib/spam";
 import {
-  proficiencyGroups,
   RESUME_ACCEPT,
   RESUME_MAX_BYTES,
   RESUME_MAX_MB,
 } from "@/data/careers";
+import { EXPERTISE_AREAS, type ExpertiseArea } from "@/lib/careers-constants";
 
 interface ApplicationFormData {
   name: string;
@@ -49,7 +49,7 @@ function toId(value: string) {
 
 export default function ApplicationForm() {
   const [formData, setFormData] = useState<ApplicationFormData>(initialFormData);
-  const [proficiencies, setProficiencies] = useState<string[]>([]);
+  const [expertise, setExpertise] = useState<ExpertiseArea[]>([]);
   const [resume, setResume] = useState<File | null>(null);
   const [resumeError, setResumeError] = useState<string | null>(null);
   // Remembered at submit time so the confirmation can name the file that was
@@ -74,11 +74,11 @@ export default function ApplicationForm() {
     setFormData((current) => ({ ...current, [field]: value }));
   }
 
-  function toggleProficiency(option: string) {
-    setProficiencies((current) =>
-      current.includes(option)
-        ? current.filter((item) => item !== option)
-        : [...current, option]
+  function toggleArea(area: ExpertiseArea) {
+    setExpertise((current) =>
+      current.includes(area)
+        ? current.filter((item) => item !== area)
+        : [...current, area]
     );
   }
 
@@ -100,7 +100,7 @@ export default function ApplicationForm() {
 
   function resetForm() {
     setFormData(initialFormData);
-    setProficiencies([]);
+    setExpertise([]);
     setResume(null);
     setResumeError(null);
     if (fileInputRef.current) fileInputRef.current.value = "";
@@ -123,8 +123,10 @@ export default function ApplicationForm() {
     const honeypot = new FormData(event.currentTarget).get(HONEYPOT_FIELD);
     payload.append(HONEYPOT_FIELD, typeof honeypot === "string" ? honeypot : "");
 
-    for (const option of proficiencies) {
-      payload.append("proficiencies", option);
+    // The field name stays "proficiencies" to match the database column, which
+    // is deliberately not renamed — only the label the applicant reads changed.
+    for (const area of expertise) {
+      payload.append("proficiencies", area);
     }
     if (resume) {
       payload.append("resume", resume, resume.name);
@@ -273,41 +275,39 @@ export default function ApplicationForm() {
             </div>
           </div>
 
-          <fieldset className="flex flex-col gap-4 rounded-sm border border-acorn-bronze/30 bg-white p-5 sm:p-6">
+          <fieldset className="flex flex-col gap-3 rounded-sm border border-acorn-bronze/30 bg-white p-5 sm:p-6">
             <legend className="px-1 text-sm font-semibold text-acorn-charcoal">
-              Proficient In
+              Areas of Expertise
             </legend>
-            {proficiencyGroups.map((group) => (
-              <div key={group.label} className="flex flex-col gap-3">
-                <p className="text-xs font-semibold uppercase tracking-wider text-acorn-gold">
-                  {group.label}
-                </p>
-                <div className="grid gap-x-6 gap-y-3 sm:grid-cols-2 lg:grid-cols-3">
-                  {group.options.map((option) => {
-                    const id = `proficiency-${toId(option)}`;
-                    return (
-                      // The label fills the row and is tied to the input, so the
-                      // whole 44px-tall row is a tap target, not just the 20px box.
-                      <div key={option} className="flex min-h-11 items-center gap-3">
-                        <input
-                          id={id}
-                          type="checkbox"
-                          checked={proficiencies.includes(option)}
-                          onChange={() => toggleProficiency(option)}
-                          className="h-5 w-5 shrink-0 cursor-pointer accent-acorn-gold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-acorn-gold"
-                        />
-                        <label
-                          htmlFor={id}
-                          className="flex-1 cursor-pointer py-3 text-sm text-acorn-charcoal/80"
-                        >
-                          {option}
-                        </label>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            ))}
+            <p className="text-sm text-acorn-charcoal/60">
+              Tick every area you have experience in.
+            </p>
+            {/* Checkboxes, not radios: an applicant can be proficient in more
+                than one area, and most experienced hands are. */}
+            <div className="grid gap-x-6 gap-y-1 sm:grid-cols-3">
+              {EXPERTISE_AREAS.map((area) => {
+                const id = `expertise-${toId(area)}`;
+                return (
+                  // The label fills the row and is tied to the input, so the
+                  // whole 44px-tall row is a tap target, not just the 20px box.
+                  <div key={area} className="flex min-h-11 items-center gap-3">
+                    <input
+                      id={id}
+                      type="checkbox"
+                      checked={expertise.includes(area)}
+                      onChange={() => toggleArea(area)}
+                      className="h-5 w-5 shrink-0 cursor-pointer accent-acorn-gold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-acorn-gold"
+                    />
+                    <label
+                      htmlFor={id}
+                      className="flex-1 cursor-pointer py-3 text-sm text-acorn-charcoal/80"
+                    >
+                      {area}
+                    </label>
+                  </div>
+                );
+              })}
+            </div>
           </fieldset>
 
           <div className="flex flex-col gap-2">

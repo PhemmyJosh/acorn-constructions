@@ -8,6 +8,7 @@ import {
   noteHoneypotHit,
 } from "@/lib/spam";
 import { nullableText, text, validateCommon } from "@/lib/validation";
+import { isExpertiseArea } from "@/lib/careers-constants";
 
 /** Mirrors the limit shown on the form and enforced client-side. */
 const RESUME_MAX_BYTES = 2.4 * 1024 * 1024;
@@ -44,11 +45,18 @@ export async function POST(request: Request) {
   const expectedWage = nullableText(form.get("expectedWage"), 120);
   const comments = nullableText(form.get("comments"), 5000);
 
-  // Sent as repeated fields so the order the applicant ticked them is kept.
+  // Areas of Expertise. Sent as repeated fields so the order the applicant
+  // ticked them is kept, and stored in the `proficiencies` column, whose name
+  // predates the rename and is deliberately left alone.
+  //
+  // Filtered against the three known areas: the form only offers those, so
+  // anything else came from a stale or tampered client and is not worth
+  // storing. Note this constrains *inbound* data only — applications submitted
+  // before the change hold granular sub-skills and are read back as they are.
   const proficiencies = form
     .getAll("proficiencies")
     .map((value) => text(value, 120))
-    .filter(Boolean);
+    .filter((value) => value.length > 0 && isExpertiseArea(value));
 
   const errors = validateCommon({ name, email, phone, requirePhone: true });
 
@@ -120,7 +128,7 @@ export async function POST(request: Request) {
       ["Years of experience", yearsExperience ?? ""],
       ["Available to start", startDate ?? ""],
       ["Expected wage", expectedWage ?? ""],
-      ["Proficient in", proficiencies.join(", ")],
+      ["Areas of expertise", proficiencies.join(", ")],
       ["Comments", comments ?? ""],
       ["Resume", resumeFilename ?? "Not attached"],
     ],
