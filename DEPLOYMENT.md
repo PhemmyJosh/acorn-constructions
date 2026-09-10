@@ -497,37 +497,130 @@ the commit that added this section.
 
 ### The vulnerabilities this pin leaves open
 
-`npm audit` reports **3** high-severity advisories at 16.2.12, all in Next's own
-dependency tree. `nanoid` was a fourth, cleared with plain `npm audit fix` — no
-`--force`, so `next` never moved. The rest cannot be fixed without bumping
-`next`, which is the thing that breaks the build. Honest read of what remains:
+`npm audit` now reports **4 high and 1 critical** at 16.2.12. This is worse than
+when this section was first written, in a way that matters: `next` then had no
+defect of its own and was flagged only for its dependencies. **That is no longer
+true** — it now carries two *critical* advisories in its own code, and the fix
+version for both is `16.3.4`, the exact version this pin exists to avoid.
+
+Plain `npm audit fix` is still safe — it only takes in-range upgrades. It is
+`npm audit fix --force` that must be avoided.
 
 | Package | Real exposure here |
 | --- | --- |
-| `sharp` < 0.35.0 (libvips CVEs) | **The one that matters.** `next/image` runs it at request time on remote and client-uploaded photos. Uploads are admin-authenticated and remote hosts are allowlisted in `next.config.ts`, so it is not open to anonymous input — but it is a genuine runtime path |
+| `next` — GHSA-2xp9-vwfh-vxw4 (**critical**, unauthenticated RCE in the Image Optimization API when AVIF files are used) | **The one that matters.** Reviewed in detail below; the AVIF config change is hardening, not a fix |
+| `next` — GHSA-p293-qw3h-jr36 (**critical**, unauthenticated RCE on windows-hosted servers) | **Not applicable.** Reviewed below |
+| `sharp` ≤ 0.35.4-rc.0 (libvips CVE-2026-33327/33328/35590/35591; libheif GHSA-g89c-p67h-r497, GHSA-2jg2-4ch7-h545) | Genuine runtime path. `next/image` runs sharp per request on remote and client-uploaded photos. The libheif entries are the same decoder the AVIF advisory above turns on |
 | `postcss` ≤ 8.5.22 (sourceMappingURL traversal, stringify XSS) | Build-time only, and only our own `globals.css` passes through it. No untrusted CSS is ever processed |
-| `next` itself | Flagged only for depending on the two above, not for a defect of its own. So the real root causes are `sharp` and `postcss` |
+| `js-yaml` 4.0.0–4.3.1 (CPU exhaustion via empty merge sources) | Build-time tooling only. No YAML from an untrusted source is parsed anywhere in this project |
 
-Plain `npm audit fix` is safe to run again in future — it only takes in-range
-upgrades. It is `npm audit fix --force` that must be avoided.
+#### GHSA-p293-qw3h-jr36 (Windows RCE) — reviewed, not applicable
+
+Recorded here rather than left silently unactioned, since a scanner will keep
+reporting it.
+
+The advisory's own title scopes it: *"Unauthenticated Remote Code Execution on
+**windows-hosted servers**"*, and it is a path-traversal class issue (CWE-22)
+that depends on Windows filesystem path semantics — drive letters, backslash
+separators, ADS (`file.txt:stream`), and the reserved device names (`CON`,
+`NUL`, `COM1`). None of those exist on Linux.
+
+This app runs on **Hostinger Linux Node.js hosting** — the same environment
+whose GLIBC version is the subject of this whole section, which is itself proof
+the runtime is Linux and not Windows. The build image is Linux, `next start`
+runs on Linux, and there is no Windows in the serving path at any point.
+
+Note the one place Windows *does* appear: local development happens on Windows
+(see [LOCAL-DEV.md](LOCAL-DEV.md)). A developer running `next dev` or
+`next start` on a Windows machine **is** on the affected platform. The exposure
+there is a dev server bound to localhost rather than a public site, so the
+practical risk is low, but it is not literally zero and is worth knowing before
+anyone exposes a local dev server on a shared network.
+
+#### GHSA-2xp9-vwfh-vxw4 (AVIF RCE) — mitigation applied, and its real limits
+
+`images.formats` in `next.config.ts` is now explicitly `["image/webp"]`. Be
+clear about what that does and does not buy, because it is easy to over-read:
+
+1. **It changes no behaviour today.** `formats` was previously unset and the
+   16.2.12 default is already `['image/webp']` (`imageConfigDefault` in
+   `next/dist/shared/lib/image-config.js`). AVIF was never enabled as an output
+   format on this site, so nothing was switched off. The value is that it is now
+   explicit and commented, so a future edit cannot quietly enable it.
+2. **It does not close the vulnerable path.** `formats` governs only the format
+   the optimizer *encodes to*. It places no constraint on the input. An upstream
+   image whose bytes are AVIF is detected by magic number, is **not** in the
+   optimizer's `BYPASS_TYPES` (`[SVG, ICO, ICNS, BMP, JXL, HEIC]` — which
+   bypasses HEIC but not AVIF, though both decode via libheif), and is therefore
+   handed to sharp to decode and re-encode as JPEG. That decode is the
+   vulnerable operation, and it is still reachable.
+
+So the honest status is **partially mitigated, not resolved.** What actually
+constrains it is which images the optimizer can be asked to fetch:
+
+- **Uploads** are admin-authenticated, and the server-side check in
+  `src/lib/content-upload.ts` allows only `.jpg/.jpeg/.png/.webp`. But that
+  check is **extension-based**, corroborated only by the browser-supplied
+  `file.type`; nothing inspects magic bytes. An authenticated admin could rename
+  an AVIF to `.jpg` and it would pass, be stored in R2 as `image/jpeg`, and then
+  be decoded as AVIF by the optimizer, which sniffs the real bytes. Adding a
+  magic-byte check would close this.
+- **Remote images** must match `images.remotePatterns`. This is the
+  unauthenticated surface and the one worth shrinking: the list currently allows
+  `placehold.co`, `images.pexels.com`, `images.unsplash.com` and the R2 bucket,
+  but **only `images.pexels.com` is actually used** (all 16 project rows plus
+  `src/data/photos.ts`). `placehold.co` and `images.unsplash.com` are referenced
+  nowhere in `src/` or the database. Dropping those two removes real attack
+  surface at no functional cost — the only reason it has not been done here is
+  that the schema permits a client to paste an absolute image URL, so it is a
+  behaviour change that should be a deliberate decision rather than folded into
+  a security commit.
 
 ### Options for fixing it properly
 
-Roughly in order of least disruption:
+**This has stopped being housekeeping.** When the pin went in, what it held back
+was a set of dependency advisories with no clear path to this app. It now holds
+back the fix for two *critical* unauthenticated-RCE advisories against `next`
+itself, one of which is reachable in principle through a request-time code path
+this site actually uses. The gap only widens: every future Next release lands on
+the far side of a build image this plan cannot run, so the count of unpatchable
+advisories against 16.2.12 rises monotonically from here.
 
-1. **Check whether a newer Node version in hPanel maps to a newer base image.**
-   GLIBC 2.29 is roughly Ubuntu 19.04 / Debian 11 / CentOS 8 and up; CentOS 7,
-   still common on older shared plans, ships 2.17.
-2. **Build somewhere else and deploy the output.** Run `npm run build` in CI
-   (e.g. GitHub Actions) and deploy the `.next` directory, so SWC never has to
-   run on Hostinger at all. This sidesteps the GLIBC constraint entirely rather
-   than working around it.
+There is also no incremental escape. **16.2.12 is the last 16.2.x release**, so
+there is no patch with the fixes backported, and `npm audit` names the fix
+version as `16.3.4` — the exact release whose SWC binary the build image cannot
+load. The security fix and the deploy blocker are the same version. That is the
+whole problem in one sentence, and it cannot be resolved by choosing a different
+version number.
+
+Ordered by what is actually worth doing, not by least disruption:
+
+1. **Build in CI and deploy only the output. This is the recommended fix.** Run
+   `npm run build` in GitHub Actions on a current Linux image, then deploy the
+   resulting `.next` directory (plus `package.json`, `public/` and production
+   `node_modules`) to Hostinger, so `next start` is all the server ever runs.
+   SWC is a **build-time** compiler — its native binary is needed to compile,
+   never to serve. Hostinger's GLIBC therefore stops being a constraint on which
+   Next version this project can use, and the pin can be lifted. It also removes
+   the silent-failure mode that has already cost this project real time: a broken
+   build fails visibly in Actions instead of quietly leaving the previous deploy
+   serving. Changing hPanel's build command to a no-op and pushing the built
+   output is the main work; the Node version on the server is untouched.
+2. **Check whether a newer Node version in hPanel maps to a newer base image.**
+   Cheapest thing to try first, and worth five minutes before committing to (1),
+   but it is a lottery rather than a fix — GLIBC 2.29 is roughly Ubuntu 19.04 /
+   Debian 11 / CentOS 8 and up, and CentOS 7, still common on older shared plans,
+   ships 2.17. If the plan is on CentOS 7 no Node version selector will help.
 3. **Ask Hostinger support** whether a newer build image is available on the
-   plan.
-4. **Move the app to a host with a current base image.**
+   plan. Free to ask, and settles (2) definitively.
+4. **Move the app to a host with a current base image.** The real answer if
+   Hostinger cannot offer a newer build image, and the point at which (1) stops
+   being a workaround and starts being a reason to leave.
 
-There is no middle version to hop to: **16.2.12 is the last 16.2.x release**, so
-there is no patch with the fixes backported.
+Until one of those lands, the residual risk is bounded by what is written under
+GHSA-2xp9-vwfh-vxw4 above — in particular, trimming `images.remotePatterns` to
+just the one host in use is the single cheapest reduction available and needs no
+version change.
 
 ---
 
@@ -716,9 +809,14 @@ Collected from the sections above, in the order they matter:
 2. **Repository still on a personal GitHub account** (§ 2).
 3. **`scripts/cleanup-orphaned-projects.sql` has not been run** against
    production, so any pre-migration project row still renders as a broken image.
-4. **The Next.js pin blocks three known high-severity advisories**
-   ([the pin](#do-not-upgrade-nextjs-past-16212-yet)). `sharp` is the one with a
-   real runtime path.
+4. **The Next.js pin now blocks two *critical* advisories against `next`
+   itself**, plus four high ones in its dependencies
+   ([the pin](#do-not-upgrade-nextjs-past-16212-yet)). One critical is not
+   applicable (Windows-only); the other, AVIF image-optimizer RCE, is only
+   partially mitigated and has a real request-time path. `npm audit` names the
+   fix as `16.3.4`, which is the version the build image cannot load — so
+   **building in CI is now the highest-value item on this list**, since it is
+   what unblocks every future security patch.
 5. **No database backups** (below).
 
 ---

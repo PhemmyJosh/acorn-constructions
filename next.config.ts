@@ -147,6 +147,34 @@ const nextConfig: NextConfig = {
     },
   },
   images: {
+    /**
+     * Pinned to WebP only, so AVIF can never become an output format here.
+     *
+     * Read this before trusting it as a fix for GHSA-2xp9-vwfh-vxw4 (critical,
+     * unauthenticated RCE in the Image Optimization API "when AVIF files are
+     * used"): **it is hardening, not a mitigation.** Two honest caveats.
+     *
+     * First, it changes nothing today. `formats` was previously unset, and the
+     * default in 16.2.12 is already `['image/webp']` — see
+     * `imageConfigDefault` in next/dist/shared/lib/image-config.js. AVIF was
+     * never an output format on this site. Writing it out makes that explicit
+     * so a future edit cannot enable it without reading this.
+     *
+     * Second, and this is the part that matters: `formats` only governs the
+     * *output* the optimizer encodes to, negotiated against the Accept header
+     * (image-optimizer.js calls `getSupportedMimeType(formats, accept)`). It
+     * places no constraint on the *input*. An upstream image whose bytes are
+     * AVIF is detected by magic number, is not in the optimizer's BYPASS_TYPES
+     * list — `[SVG, ICO, ICNS, BMP, JXL, HEIC]`, which notably bypasses HEIC
+     * but not AVIF, though both decode through libheif — and so is handed to
+     * sharp to be decoded and re-encoded as JPEG. That decode is the
+     * vulnerable path, and it is still reachable with this set.
+     *
+     * The only real fix is `next@16.3.4`, which is precisely the version whose
+     * SWC binary the Hostinger build image cannot load. See "Do not upgrade
+     * Next.js past 16.2.12 (yet)" in DEPLOYMENT.md.
+     */
+    formats: ["image/webp"],
     remotePatterns: [
       {
         protocol: "https",
