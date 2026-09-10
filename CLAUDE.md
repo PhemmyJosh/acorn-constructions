@@ -98,9 +98,13 @@ equivalents when a table is empty or unreachable**, so the public site never ren
 - `projects.ts`, `testimonials.ts` — the static fallbacks described above.
 
 Any new external image host must be added to `images.remotePatterns` in `next.config.ts`
-(currently `placehold.co`, `images.pexels.com`, `images.unsplash.com`, plus the R2 bucket hostname
-derived at build time from `R2_PUBLIC_URL`). It does **not** need adding to the CSP: every remote
-image is proxied through `/_next/image`, so the browser only ever fetches it from this origin.
+(currently just `images.pexels.com`, plus the R2 bucket hostname derived at build time from
+`R2_PUBLIC_URL`). Treat adding one as a security decision rather than a formality: that list is the
+entire unauthenticated surface of the image optimizer, since anyone can request
+`/_next/image?url=<host>` for any host on it. `placehold.co` and `images.unsplash.com` were removed
+for exactly that reason once they turned out to be referenced nowhere. It does **not** need adding
+to the CSP: every remote image is proxied through `/_next/image`, so the browser only ever fetches
+it from this origin.
 
 ### Component layers
 

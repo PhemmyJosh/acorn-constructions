@@ -175,18 +175,27 @@ const nextConfig: NextConfig = {
      * Next.js past 16.2.12 (yet)" in DEPLOYMENT.md.
      */
     formats: ["image/webp"],
+    /**
+     * Kept to the two hosts actually in use, because this list is the whole of
+     * the *unauthenticated* attack surface on the image optimizer: anyone can
+     * request /_next/image?url=<host>, with no session, for any host named
+     * here. Every entry is therefore a host whose content we implicitly trust
+     * to be fed to sharp — which matters while the libheif/libvips advisories
+     * behind GHSA-2xp9-vwfh-vxw4 are unpatchable at this pinned version.
+     *
+     * `placehold.co` and `images.unsplash.com` were removed for that reason.
+     * Neither was referenced anywhere: not in `src/`, not in the `projects`
+     * table, not in `src/data/photos.ts`. They were surface with no function.
+     *
+     * Adding a host back is a real decision, not a formality. If the client
+     * ever pastes an absolute image URL into the admin — which the schema
+     * permits — its host has to be listed here or `next/image` will reject it.
+     * Prefer uploading the photo, which puts it in R2 and needs no new entry.
+     */
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "placehold.co",
-      },
-      {
-        protocol: "https",
         hostname: "images.pexels.com",
-      },
-      {
-        protocol: "https",
-        hostname: "images.unsplash.com",
       },
       ...r2RemotePattern(),
     ],

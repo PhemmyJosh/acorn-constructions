@@ -279,7 +279,11 @@ which is a runtime value used for dashboard links in notification emails.
 While you are there, consider replacing the remaining `PLACEHOLDER` markers.
 Search the repo for `PLACEHOLDER` and `NEEDED FROM CLIENT`:
 
-- [ ] team headshots in `src/data/team.ts` are still `placehold.co` images
+- [x] ~~team headshots in `src/data/team.ts` are still `placehold.co` images~~ —
+      no longer true. `team.ts` has one entry, Mark Acorn, using the real local
+      headshot `/mark-acorn.jpg`. Nothing in the project references
+      `placehold.co` any more, which is why that host was removed from
+      `images.remotePatterns`
 - [ ] confirm the street address and phone in `src/data/company.ts` are current
 
 ---
@@ -565,16 +569,17 @@ constrains it is which images the optimizer can be asked to fetch:
   an AVIF to `.jpg` and it would pass, be stored in R2 as `image/jpeg`, and then
   be decoded as AVIF by the optimizer, which sniffs the real bytes. Adding a
   magic-byte check would close this.
-- **Remote images** must match `images.remotePatterns`. This is the
-  unauthenticated surface and the one worth shrinking: the list currently allows
-  `placehold.co`, `images.pexels.com`, `images.unsplash.com` and the R2 bucket,
-  but **only `images.pexels.com` is actually used** (all 16 project rows plus
-  `src/data/photos.ts`). `placehold.co` and `images.unsplash.com` are referenced
-  nowhere in `src/` or the database. Dropping those two removes real attack
-  surface at no functional cost — the only reason it has not been done here is
-  that the schema permits a client to paste an absolute image URL, so it is a
-  behaviour change that should be a deliberate decision rather than folded into
-  a security commit.
+- **Remote images** must match `images.remotePatterns`, and this is the
+  unauthenticated surface: anyone can request `/_next/image?url=<host>` with no
+  session for any host on that list, so each entry is a host whose bytes we
+  implicitly trust sharp to decode. **This has now been trimmed** to just
+  `images.pexels.com` and the R2 bucket. `placehold.co` and
+  `images.unsplash.com` were removed after confirming they appeared nowhere in
+  `src/`, the `projects` table or `src/data/photos.ts` — surface with no
+  function. Note the one live constraint this creates: the schema permits a
+  client to paste an absolute image URL into the admin, and any such URL's host
+  must be listed here or `next/image` rejects it. Uploading the photo instead
+  puts it in R2 and needs no new entry, which is the preferred route.
 
 ### Options for fixing it properly
 
@@ -618,9 +623,10 @@ Ordered by what is actually worth doing, not by least disruption:
    being a workaround and starts being a reason to leave.
 
 Until one of those lands, the residual risk is bounded by what is written under
-GHSA-2xp9-vwfh-vxw4 above — in particular, trimming `images.remotePatterns` to
-just the one host in use is the single cheapest reduction available and needs no
-version change.
+GHSA-2xp9-vwfh-vxw4 above. The two reductions available without a version change
+are trimming `images.remotePatterns` — **done**, it is now just the one host in
+use plus R2 — and adding a magic-byte check to the upload validation, which is
+still outstanding and is what would close the renamed-file path.
 
 ---
 
