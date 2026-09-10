@@ -501,11 +501,17 @@ the commit that added this section.
 
 ### The vulnerabilities this pin leaves open
 
-`npm audit` now reports **4 high and 1 critical** at 16.2.12. This is worse than
-when this section was first written, in a way that matters: `next` then had no
-defect of its own and was flagged only for its dependencies. **That is no longer
-true** — it now carries two *critical* advisories in its own code, and the fix
-version for both is `16.3.4`, the exact version this pin exists to avoid.
+`npm audit` reports **2 high and 1 critical** at 16.2.12, down from 4 high and 1
+critical. Everything fixable without moving `next` has been taken: plain
+`npm audit fix` cleared `nodemailer` (9.0.5 → 9.1.1) and `js-yaml` (4.3.1 →
+4.3.2), neither of which required a `next` bump or changed any other package —
+the lockfile diff was those two entries and nothing else.
+
+What remains is worse than when this section was first written, in a way that
+matters: `next` then had no defect of its own and was flagged only for its
+dependencies. **That is no longer true** — it now carries two *critical*
+advisories in its own code, and the fix version for both is `16.3.4`, the exact
+version this pin exists to avoid.
 
 Plain `npm audit fix` is still safe — it only takes in-range upgrades. It is
 `npm audit fix --force` that must be avoided.
@@ -515,8 +521,27 @@ Plain `npm audit fix` is still safe — it only takes in-range upgrades. It is
 | `next` — GHSA-2xp9-vwfh-vxw4 (**critical**, unauthenticated RCE in the Image Optimization API when AVIF files are used) | **The one that matters.** Reviewed in detail below; the AVIF config change is hardening, not a fix |
 | `next` — GHSA-p293-qw3h-jr36 (**critical**, unauthenticated RCE on windows-hosted servers) | **Not applicable.** Reviewed below |
 | `sharp` ≤ 0.35.4-rc.0 (libvips CVE-2026-33327/33328/35590/35591; libheif GHSA-g89c-p67h-r497, GHSA-2jg2-4ch7-h545) | Genuine runtime path. `next/image` runs sharp per request on remote and client-uploaded photos. The libheif entries are the same decoder the AVIF advisory above turns on |
-| `postcss` ≤ 8.5.22 (sourceMappingURL traversal, stringify XSS) | Build-time only, and only our own `globals.css` passes through it. No untrusted CSS is ever processed |
-| `js-yaml` 4.0.0–4.3.1 (CPU exhaustion via empty merge sources) | Build-time tooling only. No YAML from an untrusted source is parsed anywhere in this project |
+| `postcss` ≤ 8.5.22 (sourceMappingURL traversal, stringify XSS) | Build-time only, and only our own `globals.css` passes through it. No untrusted CSS is ever processed. Note the flagged copy is **nested at `node_modules/next/node_modules/postcss`**, not the top-level 8.5.25 — which is why it cannot be cleared without moving `next` |
+
+All three remaining entries therefore resolve to the same root cause: they are
+`next`'s own code or `next`'s bundled dependencies, and every one of them names
+`16.3.4` as the fix.
+
+### A trap when applying `npm audit fix` on Windows
+
+Worth knowing before trusting an audit count. When the nodemailer/js-yaml fix
+was applied here, `npm audit fix` rewrote `package-lock.json` **and** npm's
+`node_modules/.package-lock.json` to the new versions, and the audit count duly
+dropped from 5 to 3 — but the files in `node_modules` were never replaced. The
+installed `nodemailer/package.json` still read 9.0.5. A following `npm install`
+did not correct it either, because npm's hidden lockfile already claimed the
+work was done.
+
+`npm audit` reads the lockfile, not the installed files, so the count alone was
+a false all-clear. **`npm ci` is what actually reconciled them**, which is also
+what the deploy runs — so production gets the right versions regardless. When
+verifying a dependency fix locally, check the version inside
+`node_modules/<pkg>/package.json` rather than believing the audit number.
 
 #### GHSA-p293-qw3h-jr36 (Windows RCE) — reviewed, not applicable
 
@@ -562,13 +587,32 @@ clear about what that does and does not buy, because it is easy to over-read:
 So the honest status is **partially mitigated, not resolved.** What actually
 constrains it is which images the optimizer can be asked to fetch:
 
-- **Uploads** are admin-authenticated, and the server-side check in
-  `src/lib/content-upload.ts` allows only `.jpg/.jpeg/.png/.webp`. But that
-  check is **extension-based**, corroborated only by the browser-supplied
-  `file.type`; nothing inspects magic bytes. An authenticated admin could rename
-  an AVIF to `.jpg` and it would pass, be stored in R2 as `image/jpeg`, and then
-  be decoded as AVIF by the optimizer, which sniffs the real bytes. Adding a
-  magic-byte check would close this.
+- **Uploads** are admin-authenticated, and `src/lib/content-upload.ts` now runs
+  **three** layered checks — **this path is closed.** It previously validated
+  only the extension plus the browser-supplied `file.type`, so an AVIF renamed
+  to `.jpg` satisfied both, was stored in R2 as `image/jpeg`, and was then
+  decoded as AVIF by the optimizer, which sniffs the real bytes. The third layer
+  is a file-signature check on the leading bytes:
+
+  | Format | Signature required |
+  | --- | --- |
+  | JPEG | `FF D8 FF` |
+  | PNG | `89 50 4E 47 0D 0A 1A 0A` |
+  | WEBP | `RIFF` at bytes 0-3 and `WEBP` at bytes 8-11 |
+
+  Anything else is rejected before the file is stored. The signature must also
+  *agree with the extension*, because the extension is what the object's stored
+  `Content-Type` is derived from — so a real PNG named `.jpg` is refused too,
+  rather than being served mislabelled. Where the real format is recognisable
+  the error names it ("That looks like an AVIF file, not a JPG, PNG or WEBP"),
+  since an admin with a genuine AVIF photo would otherwise be told a valid image
+  is invalid with no hint that converting it fixes things. Rejections are logged
+  server-side with the filename and detected format.
+
+  The three layers are deliberately kept together rather than the byte check
+  replacing the others: the extension governs the stored `Content-Type`,
+  `file.type` is a cheap corroboration, and only the signature reflects contents
+  the uploader cannot choose. All three are verified to fire independently.
 - **Remote images** must match `images.remotePatterns`, and this is the
   unauthenticated surface: anyone can request `/_next/image?url=<host>` with no
   session for any host on that list, so each entry is a host whose bytes we
@@ -623,10 +667,12 @@ Ordered by what is actually worth doing, not by least disruption:
    being a workaround and starts being a reason to leave.
 
 Until one of those lands, the residual risk is bounded by what is written under
-GHSA-2xp9-vwfh-vxw4 above. The two reductions available without a version change
-are trimming `images.remotePatterns` — **done**, it is now just the one host in
-use plus R2 — and adding a magic-byte check to the upload validation, which is
-still outstanding and is what would close the renamed-file path.
+GHSA-2xp9-vwfh-vxw4 above. Both reductions available without a version change
+have now been applied: `images.remotePatterns` is trimmed to the one host in use
+plus R2, and upload validation checks file signatures. What that leaves is the
+one thing no application-level change can reach — sharp's own libheif/libvips
+code, reached through any image the optimizer is legitimately asked to handle.
+Only a version bump fixes that, which is why (1) above matters.
 
 ---
 
@@ -816,11 +862,13 @@ Collected from the sections above, in the order they matter:
 3. **`scripts/cleanup-orphaned-projects.sql` has not been run** against
    production, so any pre-migration project row still renders as a broken image.
 4. **The Next.js pin now blocks two *critical* advisories against `next`
-   itself**, plus four high ones in its dependencies
-   ([the pin](#do-not-upgrade-nextjs-past-16212-yet)). One critical is not
-   applicable (Windows-only); the other, AVIF image-optimizer RCE, is only
-   partially mitigated and has a real request-time path. `npm audit` names the
-   fix as `16.3.4`, which is the version the build image cannot load — so
+   itself**, plus two high ones in its bundled dependencies
+   ([the pin](#do-not-upgrade-nextjs-past-16212-yet)). Everything fixable
+   without moving `next` has been taken, so all three remaining entries share
+   one root cause. One critical is not applicable (Windows-only); the other,
+   AVIF image-optimizer RCE, has both application-level mitigations applied but
+   still has a real request-time path through sharp. `npm audit` names the fix
+   as `16.3.4`, which is the version the build image cannot load — so
    **building in CI is now the highest-value item on this list**, since it is
    what unblocks every future security patch.
 5. **No database backups** (below).

@@ -24,12 +24,93 @@ import { isR2Url, r2Client, r2Config, r2KeyFromUrl } from "@/lib/r2";
  * Server-only.
  */
 
+type ImageFormat = "jpeg" | "png" | "webp";
+
 /** Extension and MIME must agree, so a renamed file cannot slip through. */
-const ALLOWED_IMAGES: { extensions: string[]; mimes: string[] }[] = [
-  { extensions: [".jpg", ".jpeg"], mimes: ["image/jpeg"] },
-  { extensions: [".png"], mimes: ["image/png"] },
-  { extensions: [".webp"], mimes: ["image/webp"] },
+const ALLOWED_IMAGES: {
+  format: ImageFormat;
+  extensions: string[];
+  mimes: string[];
+}[] = [
+  { format: "jpeg", extensions: [".jpg", ".jpeg"], mimes: ["image/jpeg"] },
+  { format: "png", extensions: [".png"], mimes: ["image/png"] },
+  { format: "webp", extensions: [".webp"], mimes: ["image/webp"] },
 ];
+
+/** Longest signature we inspect is WEBP's, which needs bytes 0-11. */
+const SIGNATURE_BYTES = 12;
+
+/**
+ * Identifies an image by its leading bytes, ignoring the filename entirely.
+ *
+ * This exists because neither of the other two checks looks at the file's
+ * contents: the extension is chosen by whoever uploads, and `file.type` is
+ * supplied by the client. A file renamed from `.avif` to `.jpg` satisfies both.
+ * It would then be stored in R2 with `Content-Type: image/jpeg` from its
+ * extension, and next/image would later sniff the *real* bytes, recognise AVIF
+ * and hand it to sharp to decode through libheif — the path GHSA-2xp9-vwfh-vxw4
+ * describes, which `images.formats` cannot close because that setting governs
+ * output encoding only. See the review in DEPLOYMENT.md.
+ *
+ * Returns null for anything that is not one of the three formats we accept.
+ */
+function detectImageFormat(bytes: Buffer): ImageFormat | null {
+  if (bytes.length < SIGNATURE_BYTES) return null;
+
+  // FF D8 FF — SOI marker followed by the first segment's marker.
+  if (bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff) return "jpeg";
+
+  // 89 "PNG" CR LF SUB LF. The trailing bytes are the deliberate check for
+  // transmission that mangles line endings, so all eight are worth matching.
+  if (
+    bytes
+      .subarray(0, 8)
+      .equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]))
+  ) {
+    return "png";
+  }
+
+  // A RIFF container whose form type is WEBP. Bytes 4-7 are the chunk length
+  // and vary, so they are skipped rather than matched.
+  if (
+    bytes.subarray(0, 4).toString("latin1") === "RIFF" &&
+    bytes.subarray(8, 12).toString("latin1") === "WEBP"
+  ) {
+    return "webp";
+  }
+
+  return null;
+}
+
+/**
+ * Names a rejected file's real format where we can recognise it, so the error
+ * can say what was wrong rather than just that something was.
+ *
+ * Worth the extra code for one case in particular: an admin with a genuine
+ * AVIF photo would otherwise be told their valid image is invalid, with no clue
+ * that converting it would fix things.
+ */
+function describeForeignFormat(bytes: Buffer): string | null {
+  if (bytes.length < SIGNATURE_BYTES) return null;
+
+  // ISO base media container: "ftyp" at byte 4, brand at byte 8.
+  if (bytes.subarray(4, 8).toString("latin1") === "ftyp") {
+    const brand = bytes.subarray(8, 12).toString("latin1");
+    if (brand === "avif" || brand === "avis") return "an AVIF";
+    if (["heic", "heix", "hevc", "hevx", "mif1", "msf1"].includes(brand)) {
+      return "a HEIC";
+    }
+    return "a HEIF-family";
+  }
+
+  const head = bytes.subarray(0, 6).toString("latin1");
+  if (head.startsWith("GIF87a") || head.startsWith("GIF89a")) return "a GIF";
+  if (head.startsWith("BM")) return "a BMP";
+  if (head.startsWith("%PDF")) return "a PDF";
+  if (head.startsWith("II*\0") || head.startsWith("MM\0*")) return "a TIFF";
+
+  return null;
+}
 
 const CONTENT_TYPE_BY_EXTENSION: Record<string, string> = {
   ".jpg": "image/jpeg",
@@ -66,8 +147,18 @@ export interface UploadResult {
 /**
  * Validates one uploaded image and puts it in the bucket.
  *
- * Validation order mirrors the resume upload: type allowlist, then size, then
- * the write itself.
+ * Three independent checks, deliberately layered rather than one replacing
+ * another — each catches something the others cannot:
+ *
+ *   1. the extension, which is what the object's stored Content-Type is
+ *      derived from, so it has to be one we accept;
+ *   2. `file.type`, the client's own claim, which corroborates the extension
+ *      when present;
+ *   3. the leading bytes, the only check that looks at the actual contents and
+ *      so the only one an attacker cannot simply choose.
+ *
+ * Ordered cheapest-first, and the byte check comes after the size limit so an
+ * oversized file is rejected before anything reads it into memory.
  */
 export async function saveProjectImage(file: File): Promise<UploadResult> {
   const lowerName = file.name.toLowerCase();
@@ -88,6 +179,43 @@ export async function saveProjectImage(file: File): Promise<UploadResult> {
   }
   if (file.size === 0) {
     return { error: "That image appears to be empty." };
+  }
+
+  // Read once and reuse for the upload below, so a 5MB photo is not pulled
+  // into memory twice just to inspect its first twelve bytes.
+  let bytes: Buffer;
+  try {
+    bytes = Buffer.from(await file.arrayBuffer());
+  } catch (error) {
+    console.error("[content] Could not read the uploaded image:", error);
+    return { error: "Could not read that image. Please try again." };
+  }
+
+  const actualFormat = detectImageFormat(bytes);
+  if (!actualFormat) {
+    const foreign = describeForeignFormat(bytes);
+    console.warn(
+      `[content] Rejected upload "${file.name}": signature is not JPEG/PNG/WEBP` +
+        `${foreign ? ` (looks like ${foreign} file)` : ""}`
+    );
+    return {
+      error: foreign
+        ? `That looks like ${foreign} file, not a JPG, PNG or WEBP. Convert it and try again.`
+        : "This file doesn't appear to be a valid JPG, PNG, or WEBP image.",
+    };
+  }
+  if (actualFormat !== match.format) {
+    // Both formats are ones we accept, but the extension decides the stored
+    // Content-Type, so letting this through would serve the object mislabelled.
+    console.warn(
+      `[content] Rejected upload "${file.name}": ${actualFormat} bytes with a ` +
+        `${match.format} extension`
+    );
+    return {
+      error: `That file's contents are ${actualFormat.toUpperCase()}, which doesn't match its ${path
+        .extname(lowerName)
+        .toUpperCase()} extension. Rename or convert it and try again.`,
+    };
   }
 
   const config = r2Config();
@@ -112,9 +240,10 @@ export async function saveProjectImage(file: File): Promise<UploadResult> {
       new PutObjectCommand({
         Bucket: config.bucket,
         Key: key,
-        Body: Buffer.from(await file.arrayBuffer()),
+        Body: bytes,
         // Derived from the validated extension rather than the browser's
-        // claim, so the object is always served with a correct type.
+        // claim, and now corroborated against the file's real signature above,
+        // so the object is always served with a correct type.
         ContentType: CONTENT_TYPE_BY_EXTENSION[extension] ?? "image/jpeg",
         CacheControl: "public, max-age=31536000, immutable",
       })
