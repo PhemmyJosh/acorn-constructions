@@ -649,13 +649,52 @@ All of this is in place and verified against a production build.
 | `/admin` noindex | [`src/app/admin/layout.tsx`](src/app/admin/layout.tsx) | `robots: { index: false, follow: false }`, belt-and-braces with robots.txt |
 | Per-page titles / descriptions | [`src/lib/seo.ts`](src/lib/seo.ts) + each page | unique per page, with canonical and Open Graph tags assembled centrally |
 | LocalBusiness structured data | [`src/lib/structured-data.ts`](src/lib/structured-data.ts) | `GeneralContractor` JSON-LD in the root layout, so one node per page. Sourced from `company.ts` |
-| Icons and manifest | `src/app/icon.png`, `apple-icon.png`, [`src/app/manifest.ts`](src/app/manifest.ts) | file conventions; the manifest references the 192/512 PNGs |
+| Icons and manifest | `src/app/icon.png` (192×192), `src/app/icon1.png` (32×32), `apple-icon.png`, [`src/app/manifest.ts`](src/app/manifest.ts) | file conventions; **two icon sizes on purpose — see below**. The manifest references the 192/512 PNGs |
 | Search Console | `verification.google` in [`src/app/layout.tsx`](src/app/layout.tsx) | meta tag on every page |
 
 The domain lives in exactly one place — `siteUrl` in
 [`src/data/company.ts`](src/data/company.ts) — and `metadataBase`, the sitemap's
 absolute URLs, the `Sitemap:` line in robots.txt and the JSON-LD all read it.
 **If the domain changes, edit that one value.**
+
+### There are two favicon files, and they are not interchangeable
+
+| File | Size | Serves |
+| --- | --- | --- |
+| `src/app/icon.png` | **192×192** | Google Search results |
+| `src/app/icon1.png` | **32×32** | the browser tab |
+
+**Before editing "the favicon", check which one you mean.** The names do not
+say, because Next's file convention only allows `icon`, `icon1`, `icon2`… — the
+number is an ordering suffix, not a size.
+
+Both are the same circular acorn artwork, and both are declared in the `<head>`
+with a `sizes` attribute that Next generates by reading the file itself. Each
+consumer then picks what it wants: Chrome fetches the 32 for a 32px tab slot,
+and Google takes the 192.
+
+The split exists because the two consumers have incompatible requirements:
+
+- **Google Search needs at least 48×48**, ideally a multiple of 48. It fell back
+  to its default icon for as long as the only icon was 32×32 — while the icon
+  rendered correctly in the browser tab the whole time, which is what made the
+  problem easy to miss.
+- **A tab is better served by an exact-size file than a downscale.** Keeping the
+  hand-sized 32 means Chrome matches it directly instead of resampling the 192,
+  which costs 8KB and is the conventional setup.
+
+`icon.png` is declared first in the `<head>` deliberately: `icon.png` sorts
+before `icon1.png`, so the Google-eligible size leads. If you ever replace the
+artwork, **replace both files**, keep them square, and keep them PNG — Google
+does not support SVG for this purpose, and it expects a square image.
+
+`/favicon.ico` is a 404 here, which is fine: it is the fallback for sites that
+declare no `<link rel="icon">`, and this one declares two valid icons.
+
+One thing to expect: **Search results do not update quickly.** Google refreshes
+a favicon on its own schedule after re-crawling the home page — weeks, not days.
+Requesting re-indexing of `/` in Search Console is the only way to nudge it, so
+the old icon persisting for a while is not evidence that something is broken.
 
 After a deploy, worth doing once:
 
